@@ -184,7 +184,7 @@ export default function WeeklySummary({ history }) {
       <div className="fun-card rounded-2xl border overflow-hidden"
         style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm" style={{ minWidth: '480px' }}>
+          <table className="w-full text-sm">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
                 <th className="text-left px-3 py-2.5 text-xs font-semibold uppercase tracking-wider sticky left-0"
