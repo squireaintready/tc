@@ -3,6 +3,8 @@ import { useTheme } from '../ThemeContext'
 import { BUSBOYS, PAOLA, MARIA } from '../staff'
 import { db } from '../firebase'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const TARGET_EMPLOYEES = [
@@ -127,16 +129,65 @@ export default function WeeklySummary({ history }) {
   const grid = useMemo(() => buildWeeklyGrid(history, start, end), [history, start, end])
 
   const handleShare = async () => {
-    const text = formatGridAsText(grid, weekLabel)
-    if (navigator.share) {
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' })
+
+    pdf.setFontSize(16)
+    pdf.setFont('helvetica', 'bold')
+    pdf.text(`Weekly Tips: ${weekLabel}`, 40, 40)
+
+    const head = [['Name', ...DAYS, 'Total']]
+    const body = TARGET_EMPLOYEES.map(emp => {
+      const row = grid[emp.id]
+      return [
+        row.name,
+        ...row.days.map(v => v != null ? `$${v}` : '-'),
+        row.total > 0 ? `$${row.total}` : '-',
+      ]
+    })
+
+    // Totals row
+    const dayTotals = DAYS.map((_, di) => {
+      const t = TARGET_EMPLOYEES.reduce((s, e) => s + (grid[e.id].days[di] || 0), 0)
+      return t > 0 ? `$${t}` : '-'
+    })
+    const grandTotal = TARGET_EMPLOYEES.reduce((s, e) => s + grid[e.id].total, 0)
+    const foot = [['Total', ...dayTotals, grandTotal > 0 ? `$${grandTotal}` : '-']]
+
+    autoTable(pdf, {
+      startY: 55,
+      head,
+      body,
+      foot,
+      theme: 'grid',
+      styles: { fontSize: 11, cellPadding: 6, halign: 'center', font: 'helvetica' },
+      headStyles: { fillColor: [108, 92, 231], textColor: 255, fontStyle: 'bold' },
+      footStyles: { fillColor: [240, 240, 240], textColor: [30, 30, 30], fontStyle: 'bold' },
+      columnStyles: { 0: { halign: 'left', fontStyle: 'bold' } },
+      alternateRowStyles: { fillColor: [248, 249, 250] },
+    })
+
+    const blob = pdf.output('blob')
+    const filename = `tips-${weekLabel.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`
+
+    if (navigator.share && navigator.canShare?.({ files: [new File([blob], filename, { type: 'application/pdf' })] })) {
       try {
-        await navigator.share({ title: `Tips: ${weekLabel}`, text })
+        await navigator.share({
+          title: `Tips: ${weekLabel}`,
+          files: [new File([blob], filename, { type: 'application/pdf' })],
+        })
+        return
       } catch {}
-    } else {
-      await navigator.clipboard?.writeText(text)
-      setShared(true)
-      setTimeout(() => setShared(false), 2000)
     }
+
+    // Fallback: download
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(url)
+    setShared(true)
+    setTimeout(() => setShared(false), 2000)
   }
 
   const isValidEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
