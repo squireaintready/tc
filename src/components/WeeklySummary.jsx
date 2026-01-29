@@ -186,10 +186,12 @@ export default function WeeklySummary({ history }) {
         </button>
         <div className="text-center">
           <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{weekLabel}</div>
-          {weekOffset !== 0 && (
+          {weekOffset === 0 ? (
+            <span className="text-xs mt-0.5" style={{ color: 'var(--green)' }}>This week</span>
+          ) : (
             <button onClick={() => setWeekOffset(0)} className="text-xs mt-0.5"
               style={{ color: 'var(--accent-light)' }}>
-              This week
+              Go to this week
             </button>
           )}
         </div>
