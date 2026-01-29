@@ -1,6 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useTheme } from '../ThemeContext'
 import { BUSBOYS, PAOLA, MARIA } from '../staff'
+import { db } from '../firebase'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const TARGET_EMPLOYEES = [
@@ -96,13 +98,24 @@ export default function WeeklySummary({ history }) {
   const { theme } = useTheme()
   const isFun = theme === 'fun'
   const [weekOffset, setWeekOffset] = useState(0)
-  const [email, setEmail] = useState(() => {
-    try { return localStorage.getItem('tc-weekly-email') || '' } catch { return '' }
-  })
+  const [email, setEmail] = useState('')
+  const [emailLoaded, setEmailLoaded] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [shared, setShared] = useState(false)
   const [emailSaved, setEmailSaved] = useState(false)
   const [emailError, setEmailError] = useState('')
+
+  // Load email from Firestore on mount
+  useEffect(() => {
+    getDoc(doc(db, 'settings', 'weekly-email'))
+      .then(snap => {
+        if (snap.exists()) setEmail(snap.data().email || '')
+      })
+      .catch(() => {
+        try { setEmail(localStorage.getItem('tc-weekly-email') || '') } catch {}
+      })
+      .finally(() => setEmailLoaded(true))
+  }, [])
 
   const { start, end } = useMemo(() => {
     const now = new Date()
@@ -135,11 +148,20 @@ export default function WeeklySummary({ history }) {
     if (val && !isValidEmail(val)) {
       setEmailError('Invalid email address')
     } else if (val) {
-      try { localStorage.setItem('tc-weekly-email', val) } catch {}
-      setEmailSaved(true)
-      setTimeout(() => setEmailSaved(false), 3000)
+      setDoc(doc(db, 'settings', 'weekly-email'), { email: val })
+        .then(() => {
+          setEmailSaved(true)
+          setTimeout(() => setEmailSaved(false), 3000)
+        })
+        .catch(() => {
+          try { localStorage.setItem('tc-weekly-email', val) } catch {}
+          setEmailSaved(true)
+          setTimeout(() => setEmailSaved(false), 3000)
+        })
     } else {
-      try { localStorage.removeItem('tc-weekly-email') } catch {}
+      setDoc(doc(db, 'settings', 'weekly-email'), { email: '' }).catch(() => {
+        try { localStorage.removeItem('tc-weekly-email') } catch {}
+      })
     }
   }
 

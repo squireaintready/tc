@@ -169,9 +169,20 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'EmailJS not configured. Set EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY env vars.' })
     }
 
-    const recipientEmail = RECIPIENT_EMAIL || req.query?.email
+    // Try env var first, then Firestore settings doc
+    let recipientEmail = RECIPIENT_EMAIL || req.query?.email
     if (!recipientEmail) {
-      return res.status(400).json({ error: 'No recipient email. Set WEEKLY_RECIPIENT_EMAIL env var or pass ?email=...' })
+      try {
+        const settingsUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/settings/weekly-email`
+        const settingsRes = await fetch(settingsUrl)
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json()
+          recipientEmail = settingsData.fields?.email?.stringValue
+        }
+      } catch {}
+    }
+    if (!recipientEmail) {
+      return res.status(400).json({ error: 'No recipient email. Set it in the app or WEEKLY_RECIPIENT_EMAIL env var.' })
     }
 
     const { start, end } = getWeekRange()
