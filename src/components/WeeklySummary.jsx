@@ -9,15 +9,12 @@ const TARGET_EMPLOYEES = [
   { id: 'paola', name: 'Paola' },
 ]
 
-function getWeekRange(date) {
-  const d = new Date(date)
+function getWeekRange(refDate) {
+  // Use midnight local time to avoid timezone drift
+  const d = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate())
   const day = d.getDay() // 0=Sun
-  const sun = new Date(d)
-  sun.setDate(d.getDate() - day)
-  sun.setHours(0, 0, 0, 0)
-  const sat = new Date(sun)
-  sat.setDate(sun.getDate() + 6)
-  sat.setHours(23, 59, 59, 999)
+  const sun = new Date(d.getFullYear(), d.getMonth(), d.getDate() - day, 0, 0, 0, 0)
+  const sat = new Date(sun.getFullYear(), sun.getMonth(), sun.getDate() + 6, 23, 59, 59, 999)
   return { start: sun, end: sat }
 }
 
@@ -85,6 +82,13 @@ export function formatGridAsText(grid, weekLabel) {
     const cells = row.days.map(d => pad(d != null ? `$${d}` : '-', 5))
     lines.push([row.name.padEnd(8), ...cells, pad(`$${row.total}`, 6)].join(' '))
   }
+  lines.push('-'.repeat(header.length))
+  const dayTotals = DAYS.map((_, di) => {
+    const t = TARGET_EMPLOYEES.reduce((s, e) => s + (grid[e.id].days[di] || 0), 0)
+    return pad(t > 0 ? `$${t}` : '-', 5)
+  })
+  const grandTotal = TARGET_EMPLOYEES.reduce((s, e) => s + grid[e.id].total, 0)
+  lines.push(['Total   ', ...dayTotals, pad(`$${grandTotal}`, 6)].join(' '))
   return lines.join('\n')
 }
 
@@ -204,7 +208,7 @@ export default function WeeklySummary({ history }) {
                 const row = grid[emp.id]
                 return (
                   <tr key={emp.id}
-                    style={{ borderBottom: i < TARGET_EMPLOYEES.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                    style={{ borderBottom: '1px solid var(--border)' }}>
                     <td className="px-3 py-2.5 font-medium whitespace-nowrap sticky left-0"
                       style={{ color: 'var(--text-primary)', background: 'var(--surface-flat, var(--surface))' }}>
                       {row.name}
@@ -223,6 +227,32 @@ export default function WeeklySummary({ history }) {
                 )
               })}
             </tbody>
+            <tfoot>
+              <tr style={{ borderTop: '2px solid var(--accent)' }}>
+                <td className="px-3 py-2.5 font-bold text-xs uppercase tracking-wider sticky left-0"
+                  style={{ color: 'var(--accent-light)', background: 'var(--surface-flat, var(--surface))' }}>
+                  Total
+                </td>
+                {DAYS.map((_, di) => {
+                  const dayTotal = TARGET_EMPLOYEES.reduce((sum, emp) => sum + (grid[emp.id].days[di] || 0), 0)
+                  return (
+                    <td key={di} className="px-2 py-2.5 text-center font-bold tabular-nums"
+                      style={{ color: dayTotal > 0 ? 'var(--accent-light)' : 'var(--text-muted)' }}>
+                      {dayTotal > 0 ? `$${dayTotal}` : '-'}
+                    </td>
+                  )
+                })}
+                {(() => {
+                  const grandTotal = TARGET_EMPLOYEES.reduce((sum, emp) => sum + grid[emp.id].total, 0)
+                  return (
+                    <td className="px-3 py-2.5 text-right font-bold tabular-nums"
+                      style={{ color: grandTotal > 0 ? 'var(--green)' : 'var(--text-muted)' }}>
+                      {grandTotal > 0 ? `$${grandTotal}` : '-'}
+                    </td>
+                  )
+                })()}
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
