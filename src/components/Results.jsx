@@ -87,9 +87,9 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
           const supportTotal = breakdown.filter(g => g.role !== 'server').reduce((s, g) => s + g.groupTotal, 0)
           if (supportTotal <= 0) return null
           return (
-            <div className="px-4 py-3 flex items-center justify-between" style={{ borderColor: 'var(--border)', background: 'color-mix(in srgb, var(--accent) 5%, transparent)' }}>
-              <span className="font-semibold text-sm" style={{ color: 'var(--accent-light)' }}>Support Total</span>
-              <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--accent-light)' }}>
+            <div className="px-4 py-3 flex items-center justify-between" style={{ borderColor: 'var(--border)', borderTopWidth: '2px', borderTopColor: 'var(--text-secondary)' }}>
+              <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Total</span>
+              <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--green)' }}>
                 ${supportTotal}
               </span>
             </div>
