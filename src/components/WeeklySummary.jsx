@@ -97,6 +97,8 @@ export default function WeeklySummary({ history }) {
   })
   const [showSettings, setShowSettings] = useState(false)
   const [shared, setShared] = useState(false)
+  const [emailSaved, setEmailSaved] = useState(false)
+  const [emailError, setEmailError] = useState('')
 
   const { start, end } = useMemo(() => {
     const now = new Date()
@@ -120,9 +122,21 @@ export default function WeeklySummary({ history }) {
     }
   }
 
+  const isValidEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
+
   const saveEmail = (val) => {
     setEmail(val)
-    try { localStorage.setItem('tc-weekly-email', val) } catch {}
+    setEmailSaved(false)
+    setEmailError('')
+    if (val && !isValidEmail(val)) {
+      setEmailError('Invalid email address')
+    } else if (val) {
+      try { localStorage.setItem('tc-weekly-email', val) } catch {}
+      setEmailSaved(true)
+      setTimeout(() => setEmailSaved(false), 3000)
+    } else {
+      try { localStorage.removeItem('tc-weekly-email') } catch {}
+    }
   }
 
   const hasData = TARGET_EMPLOYEES.some(e => grid[e.id].total > 0)
@@ -246,13 +260,37 @@ export default function WeeklySummary({ history }) {
             onChange={e => saveEmail(e.target.value)}
             placeholder="your@email.com"
             className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none"
-            style={{ background: 'var(--input-bg)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-            onFocus={e => { e.target.style.borderColor = 'var(--border-focus)'; e.target.style.boxShadow = `0 0 0 2px var(--accent-glow)` }}
-            onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none' }}
+            style={{
+              background: 'var(--input-bg)',
+              borderColor: emailError ? 'var(--red)' : emailSaved ? 'var(--green)' : 'var(--border)',
+              color: 'var(--text-primary)',
+            }}
+            onFocus={e => {
+              if (!emailError && !emailSaved) {
+                e.target.style.borderColor = 'var(--border-focus)'
+                e.target.style.boxShadow = `0 0 0 2px var(--accent-glow)`
+              }
+            }}
+            onBlur={e => {
+              if (!emailError && !emailSaved) {
+                e.target.style.borderColor = 'var(--border)'
+              }
+              e.target.style.boxShadow = 'none'
+            }}
           />
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-            Auto-sent every Sunday at 10am EST via Vercel cron
-          </p>
+          {emailError && (
+            <p className="text-xs font-medium" style={{ color: 'var(--red)' }}>{emailError}</p>
+          )}
+          {emailSaved && (
+            <p className="text-xs font-medium" style={{ color: 'var(--green)' }}>
+              Saved — weekly summary will be sent to {email}
+            </p>
+          )}
+          {!emailError && !emailSaved && (
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              {email ? `Current: ${email}` : 'Auto-sent every Sunday at 10am EST'}
+            </p>
+          )}
         </div>
       </div>
 
