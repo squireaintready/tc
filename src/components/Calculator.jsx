@@ -76,47 +76,58 @@ export default function Calculator({ onSaveHistory, history }) {
   const [showLoadSetup, setShowLoadSetup] = useState(false)
   const [calcFlash, setCalcFlash] = useState(false)
   const resultsRef = useRef(null)
-  const [splitMode, setSplitMode] = useState(false)
-  const [lunchTips, setLunchTips] = useState('')
-  const [dinnerTips, setDinnerTips] = useState('')
-  const [lunchStaff, setLunchStaff] = useState({})
-  const [dinnerStaff, setDinnerStaff] = useState({})
-  const [lunchDavidPercent, setLunchDavidPercent] = useState(TRAINEE.percentage)
-  const [dinnerDavidPercent, setDinnerDavidPercent] = useState(TRAINEE.percentage)
-  const [lunchPaolaUdon, setLunchPaolaUdon] = useState(false)
-  const [dinnerPaolaUdon, setDinnerPaolaUdon] = useState(false)
-  const [lunchPastryBusboy, setLunchPastryBusboy] = useState(null)
-  const [dinnerPastryBusboy, setDinnerPastryBusboy] = useState(null)
+  const [splitMode, setSplitMode] = useState('none') // 'none', 'lunch', 'dinner'
+
+  const cycleSplitMode = () => {
+    if (splitMode === 'none') setSplitMode('lunch')
+    else if (splitMode === 'lunch') setSplitMode('dinner')
+    else setSplitMode('none')
+  }
+
+  const formatStaffNames = (enabledStaffObj) => {
+    const enabledIds = Object.entries(enabledStaffObj || {}).filter(([, v]) => v).map(([k]) => k)
+
+    // Create a map of id to name
+    const idToName = {}
+    SERVERS.forEach(s => { idToName[s.id] = s.name })
+    idToName[TRAINEE.id] = TRAINEE.name
+    idToName[PAOLA.id] = PAOLA.name
+    BUSBOYS.forEach(b => { idToName[b.id] = b.name })
+    idToName[MARIA.id] = MARIA.name
+
+    // Sort: servers, trainee, paola, busboys, maria
+    const sortOrder = [
+      ...SERVERS.map(s => s.id),
+      TRAINEE.id,
+      PAOLA.id,
+      ...BUSBOYS.map(b => b.id),
+      MARIA.id
+    ]
+
+    const sorted = enabledIds.sort((a, b) => {
+      const aIndex = sortOrder.indexOf(a)
+      const bIndex = sortOrder.indexOf(b)
+      if (aIndex === -1) return 1
+      if (bIndex === -1) return -1
+      return aIndex - bIndex
+    })
+
+    return sorted.map(id => idToName[id] || id.charAt(0).toUpperCase() + id.slice(1)).join(', ')
+  }
 
   const loadSetup = (h) => {
-    if (h.splitMode) {
-      setSplitMode(true)
-      setLunchTips('')
-      setDinnerTips('')
-      setLunchStaff(h.lunchStaff || {})
-      setDinnerStaff(h.dinnerStaff || {})
-      setLunchDavidPercent(h.lunchDavidPercent || 90)
-      setDinnerDavidPercent(h.dinnerDavidPercent || 90)
-      setLunchPaolaUdon(h.lunchPaolaUdon || false)
-      setDinnerPaolaUdon(h.dinnerPaolaUdon || false)
-      setLunchPastryBusboy(h.lunchPastryBusboy || null)
-      setDinnerPastryBusboy(h.dinnerPastryBusboy || null)
-    } else {
-      setSplitMode(false)
-      setTotalTips('')
-      setEnabledStaff(h.enabledStaff || {})
-      setDavidPercent(h.davidPercent || 90)
-      setPaolaUdon(h.paolaUdon || false)
-      setPastryBusboy(h.pastryBusboy || null)
-    }
+    setSplitMode(h.shift || 'none')
+    setTotalTips('')
+    setEnabledStaff(h.enabledStaff || {})
+    setDavidPercent(h.davidPercent || 90)
+    setPaolaUdon(h.paolaUdon || false)
+    setPastryBusboy(h.pastryBusboy || null)
     setBreakdown([])
     setRemainder(0)
     setShowLoadSetup(false)
   }
 
   const toggle = (id) => setEnabledStaff(prev => ({ ...prev, [id]: !prev[id] }))
-  const toggleLunch = (id) => setLunchStaff(prev => ({ ...prev, [id]: !prev[id] }))
-  const toggleDinner = (id) => setDinnerStaff(prev => ({ ...prev, [id]: !prev[id] }))
 
   const buildStaffArray = (staffConfig, davidPct, paolaUdn, pastryBoy, shift = null) => {
     const staff = []
@@ -167,47 +178,13 @@ export default function Calculator({ onSaveHistory, history }) {
   }
 
   const calculate = () => {
-    if (splitMode) {
-      const lTips = parseFloat(lunchTips)
-      const dTips = parseFloat(dinnerTips)
-      if ((!lTips || lTips <= 0) && (!dTips || dTips <= 0)) return
-
-      let lunchResult = { breakdown: [], remainder: 0 }
-      let dinnerResult = { breakdown: [], remainder: 0 }
-
-      // Calculate lunch
-      if (lTips > 0) {
-        const lStaff = buildStaffArray(lunchStaff, lunchDavidPercent, lunchPaolaUdon, lunchPastryBusboy, 'Lunch')
-        if (lStaff.length > 0) {
-          lunchResult = calculateTips(lTips, lStaff)
-        }
-      }
-
-      // Calculate dinner
-      if (dTips > 0) {
-        const dStaff = buildStaffArray(dinnerStaff, dinnerDavidPercent, dinnerPaolaUdon, dinnerPastryBusboy, 'Dinner')
-        if (dStaff.length > 0) {
-          dinnerResult = calculateTips(dTips, dStaff)
-        }
-      }
-
-      // Merge breakdowns
-      const combinedBreakdown = mergeBreakdowns(lunchResult.breakdown, dinnerResult.breakdown)
-      const combinedRemainder = lunchResult.remainder + dinnerResult.remainder
-      const combinedTotal = (lTips || 0) + (dTips || 0)
-
-      setBreakdown(combinedBreakdown)
-      setRemainder(combinedRemainder)
-      setTotalTips(String(combinedTotal))
-    } else {
-      const tips = parseFloat(totalTips)
-      if (!tips || tips <= 0) return
-      const staff = buildStaffArray(enabledStaff, davidPercent, paolaUdon, pastryBusboy)
-      if (!staff.length) return
-      const result = calculateTips(tips, staff)
-      setBreakdown(result.breakdown)
-      setRemainder(result.remainder)
-    }
+    const tips = parseFloat(totalTips)
+    if (!tips || tips <= 0) return
+    const staff = buildStaffArray(enabledStaff, davidPercent, paolaUdon, pastryBusboy)
+    if (!staff.length) return
+    const result = calculateTips(tips, staff)
+    setBreakdown(result.breakdown)
+    setRemainder(result.remainder)
 
     setCalcFlash(true)
     setTimeout(() => setCalcFlash(false), 600)
@@ -220,37 +197,22 @@ export default function Calculator({ onSaveHistory, history }) {
       totalTips: parseFloat(totalTips),
       remainder,
       breakdown: breakdown.map(g => ({ label: g.label, role: g.role, percentage: g.percentage, count: g.count, perPerson: g.perPerson, groupTotal: g.groupTotal })),
+      enabledStaff: { ...enabledStaff },
+      davidPercent,
+      paolaUdon,
+      pastryBusboy,
     }
 
-    if (splitMode) {
-      entry.splitMode = true
-      entry.lunchTips = parseFloat(lunchTips) || 0
-      entry.dinnerTips = parseFloat(dinnerTips) || 0
-      entry.lunchStaff = { ...lunchStaff }
-      entry.dinnerStaff = { ...dinnerStaff }
-      entry.lunchDavidPercent = lunchDavidPercent
-      entry.dinnerDavidPercent = dinnerDavidPercent
-      entry.lunchPaolaUdon = lunchPaolaUdon
-      entry.dinnerPaolaUdon = dinnerPaolaUdon
-      entry.lunchPastryBusboy = lunchPastryBusboy
-      entry.dinnerPastryBusboy = dinnerPastryBusboy
-    } else {
-      entry.enabledStaff = { ...enabledStaff }
-      entry.davidPercent = davidPercent
-      entry.paolaUdon = paolaUdon
-      entry.pastryBusboy = pastryBusboy
+    if (splitMode !== 'none') {
+      entry.shift = splitMode // 'lunch' or 'dinner'
     }
 
     onSaveHistory(entry)
   }
 
-  const enabledCount = splitMode
-    ? Object.values(lunchStaff).filter(Boolean).length + Object.values(dinnerStaff).filter(Boolean).length
-    : Object.values(enabledStaff).filter(Boolean).length
+  const enabledCount = Object.values(enabledStaff).filter(Boolean).length
   const isFun = theme === 'fun'
-  const canCalculate = splitMode
-    ? ((parseFloat(lunchTips) > 0 && Object.values(lunchStaff).some(Boolean)) || (parseFloat(dinnerTips) > 0 && Object.values(dinnerStaff).some(Boolean)))
-    : (parseFloat(totalTips) > 0 && enabledCount > 0)
+  const canCalculate = parseFloat(totalTips) > 0 && enabledCount > 0
 
   return (
     <div className="space-y-4">
@@ -280,7 +242,7 @@ export default function Calculator({ onSaveHistory, history }) {
                 >
                   <div className="flex justify-between items-center">
                     <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {Object.entries(h.enabledStaff || {}).filter(([, v]) => v).map(([k]) => k).join(', ')}
+                      {formatStaffNames(h.enabledStaff)}
                     </div>
                     <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                       {new Date(h.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
@@ -293,24 +255,24 @@ export default function Calculator({ onSaveHistory, history }) {
         </div>
       )}
 
-      {!splitMode ? (
-        <>
-          {/* Total tips input */}
+      {/* Total tips input */}
       <div className="fun-card rounded-2xl border p-5 transition-all duration-400"
         style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
         <div className="flex items-center justify-between mb-3">
           <label className="text-xs font-semibold uppercase tracking-wider"
             style={{ color: 'var(--text-secondary)' }}>
             {isFun ? '💰 Total Tips 💰' : 'Total Tips'}
+            {splitMode === 'lunch' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>🌤️ LUNCH</span>}
+            {splitMode === 'dinner' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>🌙 DINNER</span>}
           </label>
           <button
-            onClick={() => setSplitMode(!splitMode)}
+            onClick={cycleSplitMode}
             className="p-1 rounded transition-opacity hover:opacity-100"
-            style={{ opacity: 0.3, color: 'var(--text-secondary)' }}
-            title="Split lunch/dinner"
+            style={{ opacity: 0.2, color: 'var(--text-secondary)' }}
+            title="Cycle shift: None → Lunch → Dinner"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>
         </div>
@@ -386,186 +348,6 @@ export default function Calculator({ onSaveHistory, history }) {
         <StaffRow name="Maria" enabled={!!enabledStaff['maria']} onToggle={() => toggle('maria')}
           badge="Udon" badgeColor="var(--accent)" detail="20%" />
       </SectionCard>
-        </>
-      ) : (
-        <>
-          {/* Lunch Section */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--accent-light)' }}>
-                🌤️ Lunch
-              </h3>
-              <button
-                onClick={() => setSplitMode(!splitMode)}
-                className="p-1 rounded transition-opacity hover:opacity-100"
-                style={{ opacity: 0.3, color: 'var(--text-secondary)' }}
-                title="Switch to single mode"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="fun-card rounded-2xl border p-5 transition-all duration-400"
-              style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
-              <label className="block text-xs font-semibold uppercase tracking-wider mb-3"
-                style={{ color: 'var(--text-secondary)' }}>
-                Total Tips
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold"
-                  style={{ color: 'color-mix(in srgb, var(--accent-light) 50%, transparent)' }}>$</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  pattern="[0-9]*\.?[0-9]*"
-                  value={lunchTips}
-                  onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setLunchTips(v) }}
-                  placeholder="0"
-                  className="w-full pl-10 pr-4 py-3 text-3xl font-bold rounded-xl border transition-all duration-200 focus:outline-none"
-                  style={{
-                    background: 'var(--input-bg)',
-                    borderColor: 'var(--border)',
-                    color: 'var(--text-primary)',
-                  }}
-                  onFocus={e => { e.target.style.borderColor = 'var(--border-focus)'; e.target.style.boxShadow = `0 0 0 2px var(--accent-glow)` }}
-                  onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none' }}
-                />
-              </div>
-            </div>
-
-            <SectionCard title="Servers (100%)">
-              {SERVERS.map(s => (
-                <StaffRow key={s.id} name={s.name} enabled={!!lunchStaff[s.id]} onToggle={() => toggleLunch(s.id)} />
-              ))}
-              <StaffRow
-                name="David" enabled={!!lunchStaff['david']} onToggle={() => toggleLunch('david')}
-                badge="Trainee" badgeColor="var(--amber)" detail={`${lunchDavidPercent}%`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Tip %</span>
-                  <select value={lunchDavidPercent} onChange={e => setLunchDavidPercent(Number(e.target.value))}
-                    className="rounded-lg px-2 py-1 text-sm border focus:outline-none"
-                    style={{ background: 'var(--surface-lighter)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
-                    {[50, 60, 70, 80, 90, 100].map(p => <option key={p} value={p}>{p}%</option>)}
-                  </select>
-                </div>
-              </StaffRow>
-              <StaffRow
-                name="Paola" enabled={!!lunchStaff['paola']} onToggle={() => toggleLunch('paola')}
-                detail={lunchPaolaUdon ? '20%' : '40%'}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Udon (20%)</span>
-                  <Toggle small on={lunchPaolaUdon} onToggle={() => setLunchPaolaUdon(!lunchPaolaUdon)} />
-                </div>
-              </StaffRow>
-            </SectionCard>
-
-            <SectionCard title="Busboys">
-              {BUSBOYS.map(b => (
-                <StaffRow
-                  key={b.id} name={b.name} enabled={!!lunchStaff[b.id]} onToggle={() => toggleLunch(b.id)}
-                  badge={lunchPastryBusboy === b.id ? 'Pastry' : null} badgeColor="var(--amber)"
-                  detail={lunchPastryBusboy === b.id ? '20%' : `${b.percentage}%`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Pastry (20%)</span>
-                    <Toggle small on={lunchPastryBusboy === b.id} onToggle={() => setLunchPastryBusboy(lunchPastryBusboy === b.id ? null : b.id)} />
-                  </div>
-                </StaffRow>
-              ))}
-            </SectionCard>
-
-            <SectionCard title="Other">
-              <StaffRow name="Maria" enabled={!!lunchStaff['maria']} onToggle={() => toggleLunch('maria')}
-                badge="Udon" badgeColor="var(--accent)" detail="20%" />
-            </SectionCard>
-          </div>
-
-          {/* Dinner Section */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider px-1" style={{ color: 'var(--accent-light)' }}>
-              🌙 Dinner
-            </h3>
-            <div className="fun-card rounded-2xl border p-5 transition-all duration-400"
-              style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
-              <label className="block text-xs font-semibold uppercase tracking-wider mb-3"
-                style={{ color: 'var(--text-secondary)' }}>
-                Total Tips
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold"
-                  style={{ color: 'color-mix(in srgb, var(--accent-light) 50%, transparent)' }}>$</span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  pattern="[0-9]*\.?[0-9]*"
-                  value={dinnerTips}
-                  onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setDinnerTips(v) }}
-                  placeholder="0"
-                  className="w-full pl-10 pr-4 py-3 text-3xl font-bold rounded-xl border transition-all duration-200 focus:outline-none"
-                  style={{
-                    background: 'var(--input-bg)',
-                    borderColor: 'var(--border)',
-                    color: 'var(--text-primary)',
-                  }}
-                  onFocus={e => { e.target.style.borderColor = 'var(--border-focus)'; e.target.style.boxShadow = `0 0 0 2px var(--accent-glow)` }}
-                  onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none' }}
-                />
-              </div>
-            </div>
-
-            <SectionCard title="Servers (100%)">
-              {SERVERS.map(s => (
-                <StaffRow key={s.id} name={s.name} enabled={!!dinnerStaff[s.id]} onToggle={() => toggleDinner(s.id)} />
-              ))}
-              <StaffRow
-                name="David" enabled={!!dinnerStaff['david']} onToggle={() => toggleDinner('david')}
-                badge="Trainee" badgeColor="var(--amber)" detail={`${dinnerDavidPercent}%`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Tip %</span>
-                  <select value={dinnerDavidPercent} onChange={e => setDinnerDavidPercent(Number(e.target.value))}
-                    className="rounded-lg px-2 py-1 text-sm border focus:outline-none"
-                    style={{ background: 'var(--surface-lighter)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
-                    {[50, 60, 70, 80, 90, 100].map(p => <option key={p} value={p}>{p}%</option>)}
-                  </select>
-                </div>
-              </StaffRow>
-              <StaffRow
-                name="Paola" enabled={!!dinnerStaff['paola']} onToggle={() => toggleDinner('paola')}
-                detail={dinnerPaolaUdon ? '20%' : '40%'}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Udon (20%)</span>
-                  <Toggle small on={dinnerPaolaUdon} onToggle={() => setDinnerPaolaUdon(!dinnerPaolaUdon)} />
-                </div>
-              </StaffRow>
-            </SectionCard>
-
-            <SectionCard title="Busboys">
-              {BUSBOYS.map(b => (
-                <StaffRow
-                  key={b.id} name={b.name} enabled={!!dinnerStaff[b.id]} onToggle={() => toggleDinner(b.id)}
-                  badge={dinnerPastryBusboy === b.id ? 'Pastry' : null} badgeColor="var(--amber)"
-                  detail={dinnerPastryBusboy === b.id ? '20%' : `${b.percentage}%`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Pastry (20%)</span>
-                    <Toggle small on={dinnerPastryBusboy === b.id} onToggle={() => setDinnerPastryBusboy(dinnerPastryBusboy === b.id ? null : b.id)} />
-                  </div>
-                </StaffRow>
-              ))}
-            </SectionCard>
-
-            <SectionCard title="Other">
-              <StaffRow name="Maria" enabled={!!dinnerStaff['maria']} onToggle={() => toggleDinner('maria')}
-                badge="Udon" badgeColor="var(--accent)" detail="20%" />
-            </SectionCard>
-          </div>
-        </>
-      )}
 
       {/* Calculate button */}
       <button

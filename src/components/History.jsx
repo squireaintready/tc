@@ -24,6 +24,7 @@ export default function History({ history, onDelete, onEdit }) {
     const entry = history.find(h => h.id === id)
     if (editData.date !== entry.date) return true
     if (editData.totalTips !== entry.totalTips) return true
+    if ((editData.shift || 'none') !== (entry.shift || 'none')) return true
     for (let i = 0; i < editData.breakdown.length; i++) {
       if (editData.breakdown[i].perPerson !== entry.breakdown[i].perPerson) return true
     }
@@ -54,6 +55,7 @@ export default function History({ history, onDelete, onEdit }) {
         date: entry.date,
         totalTips: entry.totalTips,
         breakdown: entry.breakdown.map(g => ({ ...g })),
+        shift: entry.shift || 'none',
       })
       setConfirmEditId(null)
     }
@@ -63,6 +65,16 @@ export default function History({ history, onDelete, onEdit }) {
     setEditingId(null)
     setEditData(null)
     setConfirmEditId(null)
+  }
+
+  const cycleSplitMode = () => {
+    setEditData(prev => {
+      const updated = { ...prev }
+      if (prev.shift === 'none' || !prev.shift) updated.shift = 'lunch'
+      else if (prev.shift === 'lunch') updated.shift = 'dinner'
+      else updated.shift = 'none'
+      return updated
+    })
   }
 
   const updateEditField = (field, value) => {
@@ -128,21 +140,45 @@ export default function History({ history, onDelete, onEdit }) {
               <div className="flex justify-between items-start gap-2">
                 <div className="flex-1 min-w-0">
                   {editingId === h.id ? (
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>$</span>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        value={editData.totalTips}
-                        onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) updateEditField('total', v) }}
-                        className="flex-1 px-1 py-0 text-2xl font-bold tabular-nums bg-transparent border-0 focus:outline-none"
-                        style={{ color: 'var(--accent-light)' }}
-                      />
-                    </div>
+                    <>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>$</span>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={editData.totalTips}
+                          onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) updateEditField('total', v) }}
+                          className="flex-1 px-1 py-0 text-2xl font-bold tabular-nums bg-transparent border-0 focus:outline-none"
+                          style={{ color: 'var(--accent-light)' }}
+                        />
+                        <button
+                          onClick={cycleSplitMode}
+                          className="p-0.5 rounded transition-opacity hover:opacity-100 ml-1"
+                          style={{ opacity: 0.2, color: 'var(--text-secondary)' }}
+                          title="Cycle shift: None → Lunch → Dinner"
+                        >
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                        </button>
+                      </div>
+                      {editData.shift && editData.shift !== 'none' && (
+                        <div className="text-[10px] px-1.5 py-0.5 rounded font-bold inline-block mt-0.5"
+                          style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
+                          {editData.shift === 'lunch' ? '🌤️ LUNCH' : '🌙 DINNER'}
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className={`text-2xl font-bold tabular-nums ${isFun ? 'fun-rainbow' : ''}`}
                       style={{ color: isFun ? undefined : 'var(--text-primary)' }}>
                       ${h.totalTips}
+                      {h.shift && h.shift !== 'none' && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded font-bold ml-2"
+                          style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
+                          {h.shift === 'lunch' ? '🌤️ LUNCH' : '🌙 DINNER'}
+                        </span>
+                      )}
                     </div>
                   )}
                   {editingId === h.id ? (
