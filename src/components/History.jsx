@@ -265,7 +265,7 @@ export default function History({ history, onDelete, onEdit }) {
                   <div key={i} className="flex justify-between items-center py-2" style={{ borderColor: 'var(--border)' }}>
                     <span style={{ color: 'var(--text-secondary)' }}>
                       {g.label || g.name}
-                      {g.count > 1 && <span className="text-xs ml-1" style={{ color: 'var(--accent-light)' }}>×{g.count}</span>}
+                      {g.count > 1 && <span className="text-xs ml-1 font-bold" style={{ color: 'var(--accent)' }}>×{g.count}</span>}
                       {' '}<span style={{ color: 'var(--text-muted)' }}>{g.percentage}%</span>
                     </span>
                     {editingId === h.id ? (
@@ -279,24 +279,12 @@ export default function History({ history, onDelete, onEdit }) {
                           className="w-14 px-0 py-0 text-sm font-semibold text-right bg-transparent border-0 tabular-nums focus:outline-none"
                           style={{ color: 'var(--accent-light)' }}
                         />
-                        {g.count > 1 && (
-                          <span className="text-xs px-1.5 py-0.5 rounded font-bold"
-                            style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
-                            ×{g.count}
-                          </span>
-                        )}
                       </div>
                     ) : (
                       <div className="flex items-center gap-1.5 justify-end">
                         <span className="font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>
                           ${g.perPerson || g.amount}
                         </span>
-                        {g.count > 1 && (
-                          <span className="text-xs px-1.5 py-0.5 rounded font-bold"
-                            style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
-                            ×{g.count}
-                          </span>
-                        )}
                       </div>
                     )}
                   </div>
@@ -307,6 +295,10 @@ export default function History({ history, onDelete, onEdit }) {
                     <span className="font-semibold tabular-nums" style={{ color: 'var(--amber)' }}>${h.remainder}</span>
                   </div>
                 )}
+                <div className="flex justify-between items-center py-2" style={{ borderColor: 'var(--border)' }}>
+                  <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>Total</span>
+                  <span className="font-semibold tabular-nums" style={{ color: 'var(--text-primary)' }}>${h.totalTips}</span>
+                </div>
               </div>
             </div>
 

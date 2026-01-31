@@ -47,8 +47,8 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
                   {g.label}
                 </span>
                 {g.count > 1 && (
-                  <span className="text-xs px-1.5 py-0.5 rounded font-bold"
-                    style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
+                  <span className="text-xs font-bold"
+                    style={{ color: 'var(--accent)' }}>
                     ×{g.count}
                   </span>
                 )}
@@ -60,8 +60,8 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
                   ${g.perPerson}
                 </span>
                 {g.count > 1 && (
-                  <span className="text-xs px-1.5 py-0.5 rounded font-bold"
-                    style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
+                  <span className="text-xs font-bold"
+                    style={{ color: 'var(--accent)' }}>
                     ×{g.count}
                   </span>
                 )}
@@ -87,15 +87,17 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
           </div>
         ))}
 
-        {/* Support total (everyone except servers) */}
+        {/* Bussers total (busboys + Maria + Paola) */}
         {(() => {
-          const supportTotal = breakdown.filter(g => g.role !== 'server').reduce((s, g) => s + g.groupTotal, 0)
-          if (supportTotal <= 0) return null
+          const bussersTotal = breakdown.filter(g =>
+            g.role === 'busboy' || g.role === 'other' || g.label === 'Paola'
+          ).reduce((s, g) => s + g.groupTotal, 0)
+          if (bussersTotal <= 0) return null
           return (
             <div className="px-4 py-3 flex items-center justify-between" style={{ borderColor: 'var(--border)', borderTopWidth: '2px', borderTopColor: 'var(--text-secondary)' }}>
-              <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Total</span>
+              <span className="font-medium" style={{ color: 'var(--text-primary)' }}>Bussers Total</span>
               <span className="text-xl font-bold tabular-nums" style={{ color: 'var(--green)' }}>
-                ${supportTotal}
+                ${bussersTotal}
               </span>
             </div>
           )
