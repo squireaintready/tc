@@ -203,7 +203,7 @@ export default function WeeklySummary({ history }) {
 
       pdf.setFontSize(18)
       pdf.setFont('helvetica', 'bold')
-      pdf.text(`${emp.name} - Pay Calendar`, 40, 40)
+      pdf.text(`${emp.name} - Weekly Calendar`, 40, 40)
 
       pdf.setFontSize(12)
       pdf.setFont('helvetica', 'normal')
@@ -219,30 +219,77 @@ export default function WeeklySummary({ history }) {
       for (const entry of periodEntries) {
         const pay = getEmployeePay(entry, selectedEmployee)
         if (pay != null) {
-          const dateKey = new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          const date = new Date(entry.date)
+          const dateKey = date.toISOString().split('T')[0]
           dailyPay[dateKey] = (dailyPay[dateKey] || 0) + pay
         }
       }
 
-      // Create calendar-style rows
-      const head = [['Date', 'Day', 'Tips']]
-      const body = Object.entries(dailyPay).map(([dateStr, amount]) => {
-        const d = new Date(dateStr)
-        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' })
-        return [dateStr, dayName, `$${amount}`]
-      })
+      // Build weekly grid (Sun-Sat weeks)
+      const weeks = []
+      let currentDate = new Date(summaryStart)
+
+      while (currentDate <= summaryEnd) {
+        // Find Sunday of this week
+        const weekStart = new Date(currentDate)
+        weekStart.setDate(currentDate.getDate() - currentDate.getDay())
+
+        // Build 7 days for this week
+        const weekDays = []
+        let weekTotal = 0
+        for (let i = 0; i < 7; i++) {
+          const day = new Date(weekStart)
+          day.setDate(weekStart.getDate() + i)
+
+          // Only include if within period
+          if (day >= summaryStart && day <= summaryEnd) {
+            const dateKey = day.toISOString().split('T')[0]
+            const amount = dailyPay[dateKey] || 0
+            weekDays.push(amount)
+            weekTotal += amount
+          } else {
+            weekDays.push(null)
+          }
+        }
+
+        // Add week if it has any data
+        if (weekTotal > 0) {
+          const weekLabel = `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+          weeks.push({ label: weekLabel, days: weekDays, total: weekTotal })
+        }
+
+        // Move to next week
+        currentDate.setDate(currentDate.getDate() + (7 - currentDate.getDay()))
+      }
+
+      // Create weekly grid table
+      const head = [['Week', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Total']]
+      const body = weeks.map(week => [
+        week.label,
+        ...week.days.map(v => v != null ? (v > 0 ? `$${v}` : '-') : '-'),
+        `$${week.total}`
+      ])
+
+      // Add totals row
+      const dayTotals = []
+      for (let i = 0; i < 7; i++) {
+        const total = weeks.reduce((sum, week) => sum + (week.days[i] || 0), 0)
+        dayTotals.push(total > 0 ? `$${total}` : '-')
+      }
+      const foot = [['Total', ...dayTotals, `$${empData.total}`]]
 
       autoTable(pdf, {
         startY: 80,
         head,
         body,
+        foot,
         theme: 'grid',
-        styles: { fontSize: 10, cellPadding: 6, font: 'helvetica' },
-        headStyles: { fillColor: [108, 92, 231], textColor: 255, fontStyle: 'bold', halign: 'center' },
+        styles: { fontSize: 9, cellPadding: 5, halign: 'center', font: 'helvetica' },
+        headStyles: { fillColor: [108, 92, 231], textColor: 255, fontStyle: 'bold' },
+        footStyles: { fillColor: [240, 240, 240], textColor: [30, 30, 30], fontStyle: 'bold' },
         columnStyles: {
           0: { halign: 'left', fontStyle: 'bold' },
-          1: { halign: 'center' },
-          2: { halign: 'right', fontStyle: 'bold' },
+          8: { fontStyle: 'bold' }
         },
         alternateRowStyles: { fillColor: [248, 249, 250] },
       })
@@ -277,24 +324,40 @@ export default function WeeklySummary({ history }) {
       return
     }
 
-    // All employees summary (original table format)
+    // All employees or class summary (table format)
+    const classTitle = classFilter === 'servers' ? 'Servers Summary' :
+                       classFilter === 'support' ? 'Support Summary' :
+                       'Employee Summary'
+
     pdf.setFontSize(18)
     pdf.setFont('helvetica', 'bold')
-    pdf.text('Employee Summary', 40, 40)
+    pdf.text(classTitle, 40, 40)
 
     pdf.setFontSize(12)
     pdf.setFont('helvetica', 'normal')
     pdf.text(summaryLabel, 40, 60)
 
     const head = [['Employee', 'Days Worked', 'Total Tips']]
-    const body = ALL_EMPLOYEES
-      .filter(emp => employeeSummary[emp.id].total > 0)
-      .map(emp => {
-        const data = employeeSummary[emp.id]
-        return [data.name, data.count, `$${data.total}`]
-      })
+    const filteredEmployees = ALL_EMPLOYEES.filter(emp => {
+      // Filter by class
+      if (classFilter === 'servers') {
+        const isServer = SERVERS.some(s => s.id === emp.id)
+        const isTrainee = emp.id === TRAINEE.id
+        if (!isServer && !isTrainee) return false
+      } else if (classFilter === 'support') {
+        const isBusboy = BUSBOYS.some(b => b.id === emp.id)
+        if (!isBusboy && emp.id !== 'paola' && emp.id !== 'maria') return false
+      }
+      // Only include if they have tips
+      return employeeSummary[emp.id].total > 0
+    })
 
-    const grandTotal = ALL_EMPLOYEES.reduce((s, e) => s + employeeSummary[e.id].total, 0)
+    const body = filteredEmployees.map(emp => {
+      const data = employeeSummary[emp.id]
+      return [data.name, data.count, `$${data.total}`]
+    })
+
+    const grandTotal = filteredEmployees.reduce((s, e) => s + employeeSummary[e.id].total, 0)
 
     autoTable(pdf, {
       startY: 75,
@@ -696,7 +759,11 @@ export default function WeeklySummary({ history }) {
               <div className="grid grid-cols-2 gap-2">
                 <select
                   value={selectedEmployee}
-                  onChange={(e) => setSelectedEmployee(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    setSelectedEmployee(val)
+                    if (val !== 'all') setClassFilter('all')
+                  }}
                   className="px-3 py-2.5 rounded-xl border text-sm focus:outline-none"
                   style={{
                     background: 'var(--input-bg)',
@@ -808,9 +875,13 @@ export default function WeeklySummary({ history }) {
             // Card grid view for all/filtered employees
             <div className="fun-card rounded-2xl border p-3"
               style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
-              <div className={`grid gap-2 ${classFilter === 'all' ? 'grid-cols-4' : 'grid-cols-3'}`}>
+              <div className={`grid gap-2 ${classFilter === 'all' || searchEmployee ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 {ALL_EMPLOYEES.filter(emp => {
-                  // Class filter
+                  // Search filter takes priority - if searching, ignore class filter
+                  if (searchEmployee) {
+                    return emp.name.toLowerCase().includes(searchEmployee.toLowerCase())
+                  }
+                  // Class filter only applies when not searching
                   if (classFilter === 'servers') {
                     const isServer = SERVERS.some(s => s.id === emp.id)
                     const isTrainee = emp.id === TRAINEE.id
@@ -819,8 +890,6 @@ export default function WeeklySummary({ history }) {
                     const isBusboy = BUSBOYS.some(b => b.id === emp.id)
                     if (!isBusboy && emp.id !== 'paola' && emp.id !== 'maria') return false
                   }
-                  // Search filter
-                  if (searchEmployee && !emp.name.toLowerCase().includes(searchEmployee.toLowerCase())) return false
                   return true
                 }).map(emp => {
                   const data = employeeSummary[emp.id]
