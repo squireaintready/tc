@@ -6,9 +6,11 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
   const { theme } = useTheme()
   const isFun = theme === 'fun'
   const [saved, setSaved] = useState(false)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [selectedDate, setSelectedDate] = useState(() => new Date())
 
   const handleSave = () => {
-    onSave()
+    onSave(selectedDate.toISOString())
     setSaved(true)
     setTimeout(() => setSaved(false), 1500)
   }
@@ -52,13 +54,16 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
                 )}
                 <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{g.percentage}%</span>
               </div>
-              <div className="text-right shrink-0 ml-3">
+              <div className="text-right shrink-0 ml-3 flex items-center gap-1.5 justify-end">
                 <span className={`text-xl font-bold tabular-nums ${isFun ? 'fun-amount' : ''}`}
                   style={{ color: isFun ? undefined : 'var(--green)' }}>
                   ${g.perPerson}
                 </span>
                 {g.count > 1 && (
-                  <span className="text-xs ml-1" style={{ color: 'var(--text-secondary)' }}>ea</span>
+                  <span className="text-xs px-1.5 py-0.5 rounded font-bold"
+                    style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
+                    ×{g.count}
+                  </span>
                 )}
               </div>
             </div>
@@ -113,6 +118,25 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
           ${displayTotal} / ${totalTips}
         </span>
       </div>
+
+      {!saved && (
+        <button
+          onClick={() => setShowDatePicker(!showDatePicker)}
+          className="w-full py-2.5 rounded-xl border text-sm font-medium transition-all"
+          style={{ background: 'var(--surface-lighter)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
+        >
+          📅 {new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+        </button>
+      )}
+      {showDatePicker && (
+        <input
+          type="datetime-local"
+          value={selectedDate.toISOString().slice(0, 16)}
+          onChange={e => setSelectedDate(new Date(e.target.value))}
+          className="w-full px-4 py-3 rounded-xl border text-sm"
+          style={{ background: 'var(--input-bg)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+        />
+      )}
 
       <button
         onClick={handleSave}

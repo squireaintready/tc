@@ -4,7 +4,7 @@ import History from './components/History'
 import WeeklySummary from './components/WeeklySummary'
 import { db } from './firebase'
 import {
-  collection, addDoc, deleteDoc, doc,
+  collection, addDoc, deleteDoc, doc, updateDoc,
   onSnapshot, query, orderBy, serverTimestamp
 } from 'firebase/firestore'
 import { useTheme, ThemeToggle } from './ThemeContext'
@@ -84,6 +84,14 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
     }
   }
 
+  const editHistory = async (id, updates) => {
+    if (firebaseReady) {
+      await updateDoc(doc(db, 'history', id), updates)
+    } else {
+      setHistory(prev => prev.map(h => h.id === id ? { ...h, ...updates } : h))
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col max-w-lg mx-auto">
       <header className="border-b px-5 pt-3 pb-0"
@@ -125,7 +133,7 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
         </div>
         <div style={{ display: tab === 'History' ? 'block' : 'none' }}>
           {historyUnlocked
-            ? <History history={history} onDelete={deleteHistory} />
+            ? <History history={history} onDelete={deleteHistory} onEdit={editHistory} />
             : <HistoryLock onUnlock={onUnlockHistory} />
           }
         </div>

@@ -76,54 +76,181 @@ export default function Calculator({ onSaveHistory, history }) {
   const [showLoadSetup, setShowLoadSetup] = useState(false)
   const [calcFlash, setCalcFlash] = useState(false)
   const resultsRef = useRef(null)
+  const [splitMode, setSplitMode] = useState(false)
+  const [lunchTips, setLunchTips] = useState('')
+  const [dinnerTips, setDinnerTips] = useState('')
+  const [lunchStaff, setLunchStaff] = useState({})
+  const [dinnerStaff, setDinnerStaff] = useState({})
+  const [lunchDavidPercent, setLunchDavidPercent] = useState(TRAINEE.percentage)
+  const [dinnerDavidPercent, setDinnerDavidPercent] = useState(TRAINEE.percentage)
+  const [lunchPaolaUdon, setLunchPaolaUdon] = useState(false)
+  const [dinnerPaolaUdon, setDinnerPaolaUdon] = useState(false)
+  const [lunchPastryBusboy, setLunchPastryBusboy] = useState(null)
+  const [dinnerPastryBusboy, setDinnerPastryBusboy] = useState(null)
 
   const loadSetup = (h) => {
-    setTotalTips(String(h.totalTips))
-    setEnabledStaff(h.enabledStaff || {})
-    setDavidPercent(h.davidPercent || 90)
-    setPaolaUdon(h.paolaUdon || false)
-    setPastryBusboy(h.pastryBusboy || null)
+    if (h.splitMode) {
+      setSplitMode(true)
+      setLunchTips('')
+      setDinnerTips('')
+      setLunchStaff(h.lunchStaff || {})
+      setDinnerStaff(h.dinnerStaff || {})
+      setLunchDavidPercent(h.lunchDavidPercent || 90)
+      setDinnerDavidPercent(h.dinnerDavidPercent || 90)
+      setLunchPaolaUdon(h.lunchPaolaUdon || false)
+      setDinnerPaolaUdon(h.dinnerPaolaUdon || false)
+      setLunchPastryBusboy(h.lunchPastryBusboy || null)
+      setDinnerPastryBusboy(h.dinnerPastryBusboy || null)
+    } else {
+      setSplitMode(false)
+      setTotalTips('')
+      setEnabledStaff(h.enabledStaff || {})
+      setDavidPercent(h.davidPercent || 90)
+      setPaolaUdon(h.paolaUdon || false)
+      setPastryBusboy(h.pastryBusboy || null)
+    }
     setBreakdown([])
     setRemainder(0)
     setShowLoadSetup(false)
   }
 
   const toggle = (id) => setEnabledStaff(prev => ({ ...prev, [id]: !prev[id] }))
+  const toggleLunch = (id) => setLunchStaff(prev => ({ ...prev, [id]: !prev[id] }))
+  const toggleDinner = (id) => setDinnerStaff(prev => ({ ...prev, [id]: !prev[id] }))
+
+  const buildStaffArray = (staffConfig, davidPct, paolaUdn, pastryBoy, shift = null) => {
+    const staff = []
+    for (const s of SERVERS) {
+      if (staffConfig[s.id]) staff.push(shift ? { ...s, shift } : { ...s })
+    }
+    for (const b of BUSBOYS) {
+      if (!staffConfig[b.id]) continue
+      const busboy = pastryBoy === b.id ? { ...b, percentage: 20, name: `${b.name} (Pastry)` } : { ...b }
+      staff.push(shift ? { ...busboy, shift } : busboy)
+    }
+    if (staffConfig[TRAINEE.id]) {
+      staff.push(shift ? { ...TRAINEE, percentage: davidPct, shift } : { ...TRAINEE, percentage: davidPct })
+    }
+    if (staffConfig['paola']) {
+      staff.push(shift ? { ...PAOLA, percentage: paolaUdn ? 20 : 40, shift } : { ...PAOLA, percentage: paolaUdn ? 20 : 40 })
+    }
+    if (staffConfig['maria']) {
+      staff.push(shift ? { ...MARIA, shift } : { ...MARIA })
+    }
+    return staff
+  }
+
+  const mergeBreakdowns = (lunch, dinner) => {
+    const byPerson = {}
+
+    for (const item of lunch) {
+      const key = item.label
+      byPerson[key] = { ...item, shift: 'Lunch' }
+    }
+
+    for (const item of dinner) {
+      const key = item.label
+      if (byPerson[key]) {
+        // Person worked both shifts - combine
+        byPerson[key].perPerson += item.perPerson
+        byPerson[key].groupTotal += item.groupTotal
+        byPerson[key].shift = 'Both'
+      } else {
+        byPerson[key] = { ...item, shift: 'Dinner' }
+      }
+    }
+
+    return Object.values(byPerson).map(item => ({
+      ...item,
+      label: item.shift === 'Both' ? item.label : `${item.label} (${item.shift})`
+    }))
+  }
 
   const calculate = () => {
-    const tips = parseFloat(totalTips)
-    if (!tips || tips <= 0) return
-    const staff = []
-    for (const s of SERVERS) { if (enabledStaff[s.id]) staff.push({ ...s }) }
-    for (const b of BUSBOYS) {
-      if (!enabledStaff[b.id]) continue
-      staff.push(pastryBusboy === b.id ? { ...b, percentage: 20, name: `${b.name} (Pastry)` } : { ...b })
+    if (splitMode) {
+      const lTips = parseFloat(lunchTips)
+      const dTips = parseFloat(dinnerTips)
+      if ((!lTips || lTips <= 0) && (!dTips || dTips <= 0)) return
+
+      let lunchResult = { breakdown: [], remainder: 0 }
+      let dinnerResult = { breakdown: [], remainder: 0 }
+
+      // Calculate lunch
+      if (lTips > 0) {
+        const lStaff = buildStaffArray(lunchStaff, lunchDavidPercent, lunchPaolaUdon, lunchPastryBusboy, 'Lunch')
+        if (lStaff.length > 0) {
+          lunchResult = calculateTips(lTips, lStaff)
+        }
+      }
+
+      // Calculate dinner
+      if (dTips > 0) {
+        const dStaff = buildStaffArray(dinnerStaff, dinnerDavidPercent, dinnerPaolaUdon, dinnerPastryBusboy, 'Dinner')
+        if (dStaff.length > 0) {
+          dinnerResult = calculateTips(dTips, dStaff)
+        }
+      }
+
+      // Merge breakdowns
+      const combinedBreakdown = mergeBreakdowns(lunchResult.breakdown, dinnerResult.breakdown)
+      const combinedRemainder = lunchResult.remainder + dinnerResult.remainder
+      const combinedTotal = (lTips || 0) + (dTips || 0)
+
+      setBreakdown(combinedBreakdown)
+      setRemainder(combinedRemainder)
+      setTotalTips(String(combinedTotal))
+    } else {
+      const tips = parseFloat(totalTips)
+      if (!tips || tips <= 0) return
+      const staff = buildStaffArray(enabledStaff, davidPercent, paolaUdon, pastryBusboy)
+      if (!staff.length) return
+      const result = calculateTips(tips, staff)
+      setBreakdown(result.breakdown)
+      setRemainder(result.remainder)
     }
-    if (enabledStaff[TRAINEE.id]) staff.push({ ...TRAINEE, percentage: davidPercent })
-    if (enabledStaff['paola']) staff.push({ ...PAOLA, percentage: paolaUdon ? 20 : 40 })
-    if (enabledStaff['maria']) staff.push({ ...MARIA })
-    if (!staff.length) return
-    const result = calculateTips(tips, staff)
-    setBreakdown(result.breakdown)
-    setRemainder(result.remainder)
+
     setCalcFlash(true)
     setTimeout(() => setCalcFlash(false), 600)
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
   }
 
-  const handleSave = () => {
-    onSaveHistory({
-      date: new Date().toISOString(),
+  const handleSave = (dateISO) => {
+    const entry = {
+      date: dateISO,
       totalTips: parseFloat(totalTips),
-      enabledStaff: { ...enabledStaff },
-      davidPercent, paolaUdon, pastryBusboy,
       remainder,
       breakdown: breakdown.map(g => ({ label: g.label, role: g.role, percentage: g.percentage, count: g.count, perPerson: g.perPerson, groupTotal: g.groupTotal })),
-    })
+    }
+
+    if (splitMode) {
+      entry.splitMode = true
+      entry.lunchTips = parseFloat(lunchTips) || 0
+      entry.dinnerTips = parseFloat(dinnerTips) || 0
+      entry.lunchStaff = { ...lunchStaff }
+      entry.dinnerStaff = { ...dinnerStaff }
+      entry.lunchDavidPercent = lunchDavidPercent
+      entry.dinnerDavidPercent = dinnerDavidPercent
+      entry.lunchPaolaUdon = lunchPaolaUdon
+      entry.dinnerPaolaUdon = dinnerPaolaUdon
+      entry.lunchPastryBusboy = lunchPastryBusboy
+      entry.dinnerPastryBusboy = dinnerPastryBusboy
+    } else {
+      entry.enabledStaff = { ...enabledStaff }
+      entry.davidPercent = davidPercent
+      entry.paolaUdon = paolaUdon
+      entry.pastryBusboy = pastryBusboy
+    }
+
+    onSaveHistory(entry)
   }
 
-  const enabledCount = Object.values(enabledStaff).filter(Boolean).length
+  const enabledCount = splitMode
+    ? Object.values(lunchStaff).filter(Boolean).length + Object.values(dinnerStaff).filter(Boolean).length
+    : Object.values(enabledStaff).filter(Boolean).length
   const isFun = theme === 'fun'
+  const canCalculate = splitMode
+    ? ((parseFloat(lunchTips) > 0 && Object.values(lunchStaff).some(Boolean)) || (parseFloat(dinnerTips) > 0 && Object.values(dinnerStaff).some(Boolean)))
+    : (parseFloat(totalTips) > 0 && enabledCount > 0)
 
   return (
     <div className="space-y-4">
@@ -135,7 +262,7 @@ export default function Calculator({ onSaveHistory, history }) {
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl border text-sm font-semibold transition-all active:scale-[0.98]"
             style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)', color: 'var(--accent-light)' }}
           >
-            {showLoadSetup ? 'Hide' : 'Load Previous Setup'}
+            {showLoadSetup ? 'Hide' : 'Load History'}
             <svg className={`w-4 h-4 transition-transform duration-200 ${showLoadSetup ? 'rotate-180' : ''}`}
               fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -152,13 +279,12 @@ export default function Calculator({ onSaveHistory, history }) {
                   style={{ borderColor: 'var(--border)' }}
                 >
                   <div className="flex justify-between items-center">
-                    <span className="font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>${h.totalTips}</span>
+                    <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                      {Object.entries(h.enabledStaff || {}).filter(([, v]) => v).map(([k]) => k).join(', ')}
+                    </div>
                     <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                       {new Date(h.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                     </span>
-                  </div>
-                  <div className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-                    {Object.entries(h.enabledStaff || {}).filter(([, v]) => v).map(([k]) => k).join(', ')}
                   </div>
                 </button>
               ))}
@@ -167,13 +293,27 @@ export default function Calculator({ onSaveHistory, history }) {
         </div>
       )}
 
-      {/* Total tips input */}
+      {!splitMode ? (
+        <>
+          {/* Total tips input */}
       <div className="fun-card rounded-2xl border p-5 transition-all duration-400"
         style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
-        <label className="block text-xs font-semibold uppercase tracking-wider mb-3"
-          style={{ color: 'var(--text-secondary)' }}>
-          {isFun ? '💰 Total Tips 💰' : 'Total Tips'}
-        </label>
+        <div className="flex items-center justify-between mb-3">
+          <label className="text-xs font-semibold uppercase tracking-wider"
+            style={{ color: 'var(--text-secondary)' }}>
+            {isFun ? '💰 Total Tips 💰' : 'Total Tips'}
+          </label>
+          <button
+            onClick={() => setSplitMode(!splitMode)}
+            className="p-1 rounded transition-opacity hover:opacity-100"
+            style={{ opacity: 0.3, color: 'var(--text-secondary)' }}
+            title="Split lunch/dinner"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12M8 12h12M8 17h12M4 7h.01M4 12h.01M4 17h.01" />
+            </svg>
+          </button>
+        </div>
         <div className="relative">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-3xl font-bold"
             style={{ color: 'color-mix(in srgb, var(--accent-light) 50%, transparent)' }}>$</span>
@@ -246,11 +386,191 @@ export default function Calculator({ onSaveHistory, history }) {
         <StaffRow name="Maria" enabled={!!enabledStaff['maria']} onToggle={() => toggle('maria')}
           badge="Udon" badgeColor="var(--accent)" detail="20%" />
       </SectionCard>
+        </>
+      ) : (
+        <>
+          {/* Lunch Section */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--accent-light)' }}>
+                🌤️ Lunch
+              </h3>
+              <button
+                onClick={() => setSplitMode(!splitMode)}
+                className="p-1 rounded transition-opacity hover:opacity-100"
+                style={{ opacity: 0.3, color: 'var(--text-secondary)' }}
+                title="Switch to single mode"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="fun-card rounded-2xl border p-5 transition-all duration-400"
+              style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-3"
+                style={{ color: 'var(--text-secondary)' }}>
+                Total Tips
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold"
+                  style={{ color: 'color-mix(in srgb, var(--accent-light) 50%, transparent)' }}>$</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
+                  value={lunchTips}
+                  onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setLunchTips(v) }}
+                  placeholder="0"
+                  className="w-full pl-10 pr-4 py-3 text-3xl font-bold rounded-xl border transition-all duration-200 focus:outline-none"
+                  style={{
+                    background: 'var(--input-bg)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text-primary)',
+                  }}
+                  onFocus={e => { e.target.style.borderColor = 'var(--border-focus)'; e.target.style.boxShadow = `0 0 0 2px var(--accent-glow)` }}
+                  onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none' }}
+                />
+              </div>
+            </div>
+
+            <SectionCard title="Servers (100%)">
+              {SERVERS.map(s => (
+                <StaffRow key={s.id} name={s.name} enabled={!!lunchStaff[s.id]} onToggle={() => toggleLunch(s.id)} />
+              ))}
+              <StaffRow
+                name="David" enabled={!!lunchStaff['david']} onToggle={() => toggleLunch('david')}
+                badge="Trainee" badgeColor="var(--amber)" detail={`${lunchDavidPercent}%`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Tip %</span>
+                  <select value={lunchDavidPercent} onChange={e => setLunchDavidPercent(Number(e.target.value))}
+                    className="rounded-lg px-2 py-1 text-sm border focus:outline-none"
+                    style={{ background: 'var(--surface-lighter)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
+                    {[50, 60, 70, 80, 90, 100].map(p => <option key={p} value={p}>{p}%</option>)}
+                  </select>
+                </div>
+              </StaffRow>
+              <StaffRow
+                name="Paola" enabled={!!lunchStaff['paola']} onToggle={() => toggleLunch('paola')}
+                detail={lunchPaolaUdon ? '20%' : '40%'}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Udon (20%)</span>
+                  <Toggle small on={lunchPaolaUdon} onToggle={() => setLunchPaolaUdon(!lunchPaolaUdon)} />
+                </div>
+              </StaffRow>
+            </SectionCard>
+
+            <SectionCard title="Busboys">
+              {BUSBOYS.map(b => (
+                <StaffRow
+                  key={b.id} name={b.name} enabled={!!lunchStaff[b.id]} onToggle={() => toggleLunch(b.id)}
+                  badge={lunchPastryBusboy === b.id ? 'Pastry' : null} badgeColor="var(--amber)"
+                  detail={lunchPastryBusboy === b.id ? '20%' : `${b.percentage}%`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Pastry (20%)</span>
+                    <Toggle small on={lunchPastryBusboy === b.id} onToggle={() => setLunchPastryBusboy(lunchPastryBusboy === b.id ? null : b.id)} />
+                  </div>
+                </StaffRow>
+              ))}
+            </SectionCard>
+
+            <SectionCard title="Other">
+              <StaffRow name="Maria" enabled={!!lunchStaff['maria']} onToggle={() => toggleLunch('maria')}
+                badge="Udon" badgeColor="var(--accent)" detail="20%" />
+            </SectionCard>
+          </div>
+
+          {/* Dinner Section */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider px-1" style={{ color: 'var(--accent-light)' }}>
+              🌙 Dinner
+            </h3>
+            <div className="fun-card rounded-2xl border p-5 transition-all duration-400"
+              style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-3"
+                style={{ color: 'var(--text-secondary)' }}>
+                Total Tips
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold"
+                  style={{ color: 'color-mix(in srgb, var(--accent-light) 50%, transparent)' }}>$</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
+                  value={dinnerTips}
+                  onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setDinnerTips(v) }}
+                  placeholder="0"
+                  className="w-full pl-10 pr-4 py-3 text-3xl font-bold rounded-xl border transition-all duration-200 focus:outline-none"
+                  style={{
+                    background: 'var(--input-bg)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--text-primary)',
+                  }}
+                  onFocus={e => { e.target.style.borderColor = 'var(--border-focus)'; e.target.style.boxShadow = `0 0 0 2px var(--accent-glow)` }}
+                  onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none' }}
+                />
+              </div>
+            </div>
+
+            <SectionCard title="Servers (100%)">
+              {SERVERS.map(s => (
+                <StaffRow key={s.id} name={s.name} enabled={!!dinnerStaff[s.id]} onToggle={() => toggleDinner(s.id)} />
+              ))}
+              <StaffRow
+                name="David" enabled={!!dinnerStaff['david']} onToggle={() => toggleDinner('david')}
+                badge="Trainee" badgeColor="var(--amber)" detail={`${dinnerDavidPercent}%`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Tip %</span>
+                  <select value={dinnerDavidPercent} onChange={e => setDinnerDavidPercent(Number(e.target.value))}
+                    className="rounded-lg px-2 py-1 text-sm border focus:outline-none"
+                    style={{ background: 'var(--surface-lighter)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
+                    {[50, 60, 70, 80, 90, 100].map(p => <option key={p} value={p}>{p}%</option>)}
+                  </select>
+                </div>
+              </StaffRow>
+              <StaffRow
+                name="Paola" enabled={!!dinnerStaff['paola']} onToggle={() => toggleDinner('paola')}
+                detail={dinnerPaolaUdon ? '20%' : '40%'}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Udon (20%)</span>
+                  <Toggle small on={dinnerPaolaUdon} onToggle={() => setDinnerPaolaUdon(!dinnerPaolaUdon)} />
+                </div>
+              </StaffRow>
+            </SectionCard>
+
+            <SectionCard title="Busboys">
+              {BUSBOYS.map(b => (
+                <StaffRow
+                  key={b.id} name={b.name} enabled={!!dinnerStaff[b.id]} onToggle={() => toggleDinner(b.id)}
+                  badge={dinnerPastryBusboy === b.id ? 'Pastry' : null} badgeColor="var(--amber)"
+                  detail={dinnerPastryBusboy === b.id ? '20%' : `${b.percentage}%`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Pastry (20%)</span>
+                    <Toggle small on={dinnerPastryBusboy === b.id} onToggle={() => setDinnerPastryBusboy(dinnerPastryBusboy === b.id ? null : b.id)} />
+                  </div>
+                </StaffRow>
+              ))}
+            </SectionCard>
+
+            <SectionCard title="Other">
+              <StaffRow name="Maria" enabled={!!dinnerStaff['maria']} onToggle={() => toggleDinner('maria')}
+                badge="Udon" badgeColor="var(--accent)" detail="20%" />
+            </SectionCard>
+          </div>
+        </>
+      )}
 
       {/* Calculate button */}
       <button
         onClick={calculate}
-        disabled={!totalTips || enabledCount === 0}
+        disabled={!canCalculate}
         className={`w-full py-4 active:scale-[0.98] disabled:opacity-30 disabled:active:scale-100 rounded-2xl font-bold text-xl transition-all duration-200 ${isFun ? 'fun-glow-btn' : ''}`}
         style={{
           background: calcFlash ? 'var(--green)' : 'var(--accent)',
