@@ -39,8 +39,14 @@ function getEmployeePay(entry, employeeId) {
 
   // Determine the effective percentage for this employee in this entry
   let effectivePct
+  const server = SERVERS.find(s => s.id === employeeId)
   const busboy = BUSBOYS.find(b => b.id === employeeId)
-  if (busboy) {
+
+  if (server) {
+    effectivePct = server.percentage // 100
+  } else if (employeeId === TRAINEE.id) {
+    effectivePct = entry.davidPercent || TRAINEE.percentage // adjustable, defaults to 90
+  } else if (busboy) {
     effectivePct = entry.pastryBusboy === employeeId ? 20 : busboy.percentage
   } else if (employeeId === 'maria') {
     effectivePct = MARIA.percentage // 20
