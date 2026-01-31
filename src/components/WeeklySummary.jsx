@@ -112,7 +112,12 @@ export function formatGridAsText(grid, weekLabel) {
 export default function WeeklySummary({ history }) {
   const { theme } = useTheme()
   const isFun = theme === 'fun'
-  const [weekOffset, setWeekOffset] = useState(0)
+  const [weekOffset, setWeekOffset] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tc-weekOffset')
+      return saved ? parseInt(saved) : 0
+    } catch { return 0 }
+  })
   const [email, setEmail] = useState('')
   const [emailLoaded, setEmailLoaded] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -120,9 +125,24 @@ export default function WeeklySummary({ history }) {
   const [emailSaved, setEmailSaved] = useState(false)
   const [emailError, setEmailError] = useState('')
   const [viewMode, setViewMode] = useState('weekly') // 'weekly' or 'employee'
-  const [periodType, setPeriodType] = useState('month') // 'month', 'week', 'custom'
-  const [customStart, setCustomStart] = useState('')
-  const [customEnd, setCustomEnd] = useState('')
+  const [periodType, setPeriodType] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tc-periodType')
+      return saved || 'month'
+    } catch { return 'month' }
+  })
+  const [customStart, setCustomStart] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tc-customStart')
+      return saved || ''
+    } catch { return '' }
+  })
+  const [customEnd, setCustomEnd] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tc-customEnd')
+      return saved || ''
+    } catch { return '' }
+  })
   const [selectedEmployee, setSelectedEmployee] = useState('all')
   const [searchEmployee, setSearchEmployee] = useState('')
   const [classFilter, setClassFilter] = useState('all') // 'all', 'servers', 'support'
@@ -138,6 +158,23 @@ export default function WeeklySummary({ history }) {
       })
       .finally(() => setEmailLoaded(true))
   }, [])
+
+  // Persist time period settings to localStorage
+  useEffect(() => {
+    try { localStorage.setItem('tc-weekOffset', weekOffset.toString()) } catch {}
+  }, [weekOffset])
+
+  useEffect(() => {
+    try { localStorage.setItem('tc-periodType', periodType) } catch {}
+  }, [periodType])
+
+  useEffect(() => {
+    try { localStorage.setItem('tc-customStart', customStart) } catch {}
+  }, [customStart])
+
+  useEffect(() => {
+    try { localStorage.setItem('tc-customEnd', customEnd) } catch {}
+  }, [customEnd])
 
   const { start, end } = useMemo(() => {
     const now = new Date()
