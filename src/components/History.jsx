@@ -151,23 +151,26 @@ export default function History({ history, onDelete, onEdit }) {
                           className="flex-1 px-1 py-0 text-2xl font-bold tabular-nums bg-transparent border-0 focus:outline-none"
                           style={{ color: 'var(--accent-light)' }}
                         />
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
                         <button
                           onClick={cycleSplitMode}
-                          className="p-0.5 rounded transition-opacity hover:opacity-100 ml-1"
-                          style={{ opacity: 0.2, color: 'var(--text-secondary)' }}
+                          className="text-[10px] px-2 py-1 rounded-lg border transition-all hover:opacity-80"
+                          style={{ opacity: 0.5, color: 'var(--amber)', borderColor: 'color-mix(in srgb, var(--amber) 30%, transparent)' }}
                           title="Cycle shift: None → Lunch → Dinner"
                         >
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <svg className="w-3 h-3 inline mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                           </svg>
+                          {editData.shift === 'lunch' ? 'LUNCH' : editData.shift === 'dinner' ? 'DINNER' : 'SHIFT'}
                         </button>
+                        {editData.shift && editData.shift !== 'none' && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold"
+                            style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
+                            {editData.shift === 'lunch' ? '🌤️' : '🌙'}
+                          </span>
+                        )}
                       </div>
-                      {editData.shift && editData.shift !== 'none' && (
-                        <div className="text-[10px] px-1.5 py-0.5 rounded font-bold inline-block mt-0.5"
-                          style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
-                          {editData.shift === 'lunch' ? '🌤️ LUNCH' : '🌙 DINNER'}
-                        </div>
-                      )}
                     </>
                   ) : (
                     <div className={`text-2xl font-bold tabular-nums ${isFun ? 'fun-rainbow' : ''}`}

@@ -267,8 +267,8 @@ export default function Calculator({ onSaveHistory, history }) {
           </label>
           <button
             onClick={cycleSplitMode}
-            className="p-1 rounded transition-opacity hover:opacity-100"
-            style={{ opacity: 0.2, color: 'var(--text-secondary)' }}
+            className="p-1.5 rounded-lg border transition-all hover:opacity-80"
+            style={{ opacity: 0.5, color: 'var(--amber)', borderColor: 'color-mix(in srgb, var(--amber) 30%, transparent)' }}
             title="Cycle shift: None → Lunch → Dinner"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
