@@ -717,7 +717,7 @@ export default function WeeklySummary({ history }) {
               </label>
               <div className="flex gap-2">
                 <button
-                  onClick={() => { setClassFilter('all'); setSelectedEmployee('all') }}
+                  onClick={() => { setClassFilter('all'); setSelectedEmployee('all'); setSearchEmployee('') }}
                   className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all"
                   style={{
                     background: classFilter === 'all' ? 'var(--accent)' : 'transparent',
@@ -728,7 +728,7 @@ export default function WeeklySummary({ history }) {
                   All
                 </button>
                 <button
-                  onClick={() => { setClassFilter('servers'); setSelectedEmployee('all') }}
+                  onClick={() => { setClassFilter('servers'); setSelectedEmployee('all'); setSearchEmployee('') }}
                   className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all"
                   style={{
                     background: classFilter === 'servers' ? 'var(--accent)' : 'transparent',
@@ -739,7 +739,7 @@ export default function WeeklySummary({ history }) {
                   Servers
                 </button>
                 <button
-                  onClick={() => { setClassFilter('support'); setSelectedEmployee('all') }}
+                  onClick={() => { setClassFilter('support'); setSelectedEmployee('all'); setSearchEmployee('') }}
                   className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all"
                   style={{
                     background: classFilter === 'support' ? 'var(--accent)' : 'transparent',
@@ -922,7 +922,11 @@ export default function WeeklySummary({ history }) {
               .filter(e => {
                 // Specific employee filter
                 if (selectedEmployee !== 'all' && e.id !== selectedEmployee) return false
-                // Class filter
+                // Search filter takes priority - if searching, ignore class filter
+                if (searchEmployee) {
+                  return e.name.toLowerCase().includes(searchEmployee.toLowerCase())
+                }
+                // Class filter only applies when not searching
                 if (classFilter === 'servers') {
                   const isServer = SERVERS.some(s => s.id === e.id)
                   const isTrainee = e.id === TRAINEE.id
