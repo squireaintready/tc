@@ -164,12 +164,6 @@ export default function History({ history, onDelete, onEdit }) {
                           </svg>
                           {editData.shift === 'lunch' ? 'LUNCH' : editData.shift === 'dinner' ? 'DINNER' : 'FULL'}
                         </button>
-                        {editData.shift && editData.shift !== 'none' && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded font-bold"
-                            style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
-                            {editData.shift === 'lunch' ? '🌤️' : '🌙'}
-                          </span>
-                        )}
                       </div>
                     </>
                   ) : (
@@ -179,7 +173,7 @@ export default function History({ history, onDelete, onEdit }) {
                       {h.shift && h.shift !== 'none' && (
                         <span className="text-[10px] px-1.5 py-0.5 rounded font-bold ml-2"
                           style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
-                          {h.shift === 'lunch' ? '🌤️ LUNCH' : '🌙 DINNER'}
+                          {h.shift === 'lunch' ? 'LUNCH' : 'DINNER'}
                         </span>
                       )}
                     </div>

@@ -262,8 +262,8 @@ export default function Calculator({ onSaveHistory, history }) {
           <label className="text-xs font-semibold uppercase tracking-wider"
             style={{ color: 'var(--text-secondary)' }}>
             {isFun ? '💰 Total Tips 💰' : 'Total Tips'}
-            {splitMode === 'lunch' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>🌤️ LUNCH</span>}
-            {splitMode === 'dinner' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>🌙 DINNER</span>}
+            {splitMode === 'lunch' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>LUNCH</span>}
+            {splitMode === 'dinner' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>DINNER</span>}
           </label>
           <button
             onClick={cycleSplitMode}
