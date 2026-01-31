@@ -204,10 +204,19 @@ export default function WeeklySummary({ history }) {
   const handleShareEmployeeSummary = async () => {
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' })
 
-    // Check if sharing for a specific employee
-    if (selectedEmployee !== 'all') {
-      const emp = ALL_EMPLOYEES.find(e => e.id === selectedEmployee)
-      const empData = employeeSummary[selectedEmployee]
+    // Determine which employees to show based on filters
+    const filteredBySearch = searchEmployee
+      ? ALL_EMPLOYEES.filter(emp => emp.name.toLowerCase().includes(searchEmployee.toLowerCase()))
+      : null
+
+    // Check if sharing for a specific employee (either from dropdown or single search result)
+    const specificEmployee = selectedEmployee !== 'all'
+      ? selectedEmployee
+      : (filteredBySearch && filteredBySearch.length === 1 ? filteredBySearch[0].id : null)
+
+    if (specificEmployee) {
+      const emp = ALL_EMPLOYEES.find(e => e.id === specificEmployee)
+      const empData = employeeSummary[specificEmployee]
 
       pdf.setFontSize(18)
       pdf.setFont('helvetica', 'bold')
@@ -225,7 +234,7 @@ export default function WeeklySummary({ history }) {
 
       const dailyPay = {}
       for (const entry of periodEntries) {
-        const pay = getEmployeePay(entry, selectedEmployee)
+        const pay = getEmployeePay(entry, specificEmployee)
         if (pay != null) {
           const date = new Date(entry.date)
           const dateKey = date.toISOString().split('T')[0]
@@ -347,14 +356,19 @@ export default function WeeklySummary({ history }) {
 
     const head = [['Employee', 'Days Worked', 'Total Tips']]
     const filteredEmployees = ALL_EMPLOYEES.filter(emp => {
-      // Filter by class
-      if (classFilter === 'servers') {
-        const isServer = SERVERS.some(s => s.id === emp.id)
-        const isTrainee = emp.id === TRAINEE.id
-        if (!isServer && !isTrainee) return false
-      } else if (classFilter === 'support') {
-        const isBusboy = BUSBOYS.some(b => b.id === emp.id)
-        if (!isBusboy && emp.id !== 'paola' && emp.id !== 'maria') return false
+      // Search filter takes priority
+      if (searchEmployee) {
+        if (!emp.name.toLowerCase().includes(searchEmployee.toLowerCase())) return false
+      } else {
+        // Class filter only applies when not searching
+        if (classFilter === 'servers') {
+          const isServer = SERVERS.some(s => s.id === emp.id)
+          const isTrainee = emp.id === TRAINEE.id
+          if (!isServer && !isTrainee) return false
+        } else if (classFilter === 'support') {
+          const isBusboy = BUSBOYS.some(b => b.id === emp.id)
+          if (!isBusboy && emp.id !== 'paola' && emp.id !== 'maria') return false
+        }
       }
       // Only include if they have tips
       return employeeSummary[emp.id].total > 0
@@ -787,7 +801,10 @@ export default function WeeklySummary({ history }) {
                 <input
                   type="text"
                   value={searchEmployee}
-                  onChange={(e) => setSearchEmployee(e.target.value)}
+                  onChange={(e) => {
+                    setSearchEmployee(e.target.value)
+                    if (e.target.value) setClassFilter('all')
+                  }}
                   placeholder="Search..."
                   className="px-3 py-2.5 rounded-xl border text-sm focus:outline-none"
                   style={{
