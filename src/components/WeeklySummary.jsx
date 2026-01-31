@@ -191,7 +191,9 @@ export default function WeeklySummary({ history }) {
         const pay = getEmployeePay(entry, emp.id)
         if (pay != null) {
           summary[emp.id].total += pay
-          summary[emp.id].count++
+          // Lunch/Dinner = 0.5 day, Full day (no shift) = 1 day
+          const dayValue = (entry.shift === 'lunch' || entry.shift === 'dinner') ? 0.5 : 1
+          summary[emp.id].count += dayValue
         }
       }
     }
