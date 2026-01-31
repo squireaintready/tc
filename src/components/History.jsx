@@ -221,9 +221,9 @@ export default function History({ history, onDelete, onEdit }) {
                         onClick={() => handleEdit(h.id)}
                         className="text-xs font-medium px-2.5 py-1 rounded-lg border transition-all duration-200 active:scale-95"
                         style={{
-                          color: confirmEditId === h.id ? 'var(--btn-text)' : (hasChanges(h.id) ? 'var(--green)' : 'var(--text-secondary)'),
-                          background: confirmEditId === h.id ? 'var(--green)' : (hasChanges(h.id) ? 'color-mix(in srgb, var(--green) 20%, transparent)' : 'transparent'),
-                          borderColor: confirmEditId === h.id ? 'var(--green)' : (hasChanges(h.id) ? 'var(--green)' : 'var(--border)'),
+                          color: confirmEditId === h.id ? 'var(--btn-text)' : (hasChanges(h.id) ? (isFun ? 'color-mix(in srgb, var(--green) 80%, white)' : 'var(--green)') : 'var(--text-secondary)'),
+                          background: confirmEditId === h.id ? (isFun ? 'color-mix(in srgb, var(--green) 70%, #000)' : 'var(--green)') : (hasChanges(h.id) ? 'color-mix(in srgb, var(--green) 20%, transparent)' : 'transparent'),
+                          borderColor: confirmEditId === h.id ? (isFun ? 'color-mix(in srgb, var(--green) 70%, #000)' : 'var(--green)') : (hasChanges(h.id) ? (isFun ? 'color-mix(in srgb, var(--green) 70%, #000)' : 'var(--green)') : 'var(--border)'),
                         }}
                       >
                         {confirmEditId === h.id ? 'Confirm?' : (hasChanges(h.id) ? 'Save' : 'Done')}
