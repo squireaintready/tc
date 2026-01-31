@@ -187,7 +187,15 @@ export default function History({ history, onDelete, onEdit }) {
                   {editingId === h.id ? (
                     <input
                       type="datetime-local"
-                      value={new Date(editData.date).toISOString().slice(0, 16)}
+                      value={(() => {
+                        const d = new Date(editData.date)
+                        const year = d.getFullYear()
+                        const month = String(d.getMonth() + 1).padStart(2, '0')
+                        const day = String(d.getDate()).padStart(2, '0')
+                        const hours = String(d.getHours()).padStart(2, '0')
+                        const minutes = String(d.getMinutes()).padStart(2, '0')
+                        return `${year}-${month}-${day}T${hours}:${minutes}`
+                      })()}
                       onChange={e => updateEditField('date', e.target.value)}
                       className="text-xs px-0 py-0.5 rounded bg-transparent border-0 mt-1 focus:outline-none"
                       style={{ color: 'var(--accent-light)' }}
