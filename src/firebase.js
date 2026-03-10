@@ -16,5 +16,5 @@ export const db = getFirestore(app)
 
 // Enable offline persistence
 enableIndexedDbPersistence(db).catch((err) => {
-  console.warn('Firestore persistence failed:', err.code)
+  if (import.meta.env.DEV) console.warn('Firestore persistence failed:', err.code)
 })

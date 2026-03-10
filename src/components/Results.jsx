@@ -34,7 +34,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
     <div className="mt-2 space-y-4 animate-[fadeIn_0.3s_ease-out]">
       <h2 className="text-xs font-semibold uppercase tracking-wider px-1"
         style={{ color: 'var(--text-secondary)' }}>
-        {isFun ? '🎯 Breakdown' : 'Breakdown'}
+        Breakdown
       </h2>
 
       <div className="fun-card rounded-2xl border overflow-hidden divide-y"
@@ -87,10 +87,10 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
           </div>
         ))}
 
-        {/* Bussers total (busboys + Maria + Paola) */}
+        {/* Bussers total (busboys + modifiers + other) */}
         {(() => {
           const bussersTotal = breakdown.filter(g =>
-            g.role === 'busboy' || g.role === 'other' || g.label === 'Paola'
+            g.role === 'busboy' || g.role === 'other' || g.role === 'modifier'
           ).reduce((s, g) => s + g.groupTotal, 0)
           if (bussersTotal <= 0) return null
           return (
@@ -127,7 +127,10 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
           className="w-full py-2.5 rounded-xl border text-sm font-medium transition-all"
           style={{ background: 'var(--surface-lighter)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
         >
-          📅 {new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+          <svg className="w-4 h-4 inline -mt-0.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          {new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
         </button>
       )}
       {showDatePicker && (
@@ -152,7 +155,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
           boxShadow: saved ? '0 4px 30px var(--green)' : undefined,
         }}
       >
-        {saved ? '✓ Saved!' : (isFun ? '💾 Save to History' : 'Save to History')}
+        {saved ? '✓ Saved!' : 'Save to History'}
       </button>
     </div>
   )

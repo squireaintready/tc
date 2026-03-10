@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Calculator from './components/Calculator'
 import History from './components/History'
 import WeeklySummary from './components/WeeklySummary'
+import StaffManager from './components/StaffManager'
 import { db } from './firebase'
 import {
   collection, addDoc, deleteDoc, doc, updateDoc,
@@ -9,7 +10,7 @@ import {
 } from 'firebase/firestore'
 import { useTheme, ThemeToggle } from './ThemeContext'
 
-const TABS = ['Calculator', 'Weekly', 'History']
+const TABS = ['Calculator', 'Weekly', 'History', 'Staff']
 
 function useLocalStorage(key, initial) {
   const [data, setData] = useState(() => {
@@ -49,7 +50,16 @@ export default function App() {
 function AppInner({ historyUnlocked, onUnlockHistory }) {
   const { theme } = useTheme()
   const isFun = theme === 'fun'
-  const [tab, setTab] = useState('Calculator')
+  const [tab, setTab] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tc-active-tab')
+      return TABS.includes(saved) ? saved : 'Calculator'
+    } catch { return 'Calculator' }
+  })
+
+  useEffect(() => {
+    try { localStorage.setItem('tc-active-tab', tab) } catch {}
+  }, [tab])
   const [history, setHistory] = useLocalStorage('tc-history', [])
   const [firebaseReady, setFirebaseReady] = useState(false)
 
@@ -60,11 +70,11 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
         setFirebaseReady(true)
         setHistory(snap.docs.map(d => ({ id: d.id, ...d.data() })))
       }, () => {
-        console.warn('Using localStorage (Firebase unavailable)')
+        if (import.meta.env.DEV) console.warn('Using localStorage (Firebase unavailable)')
       })
       return unsub
     } catch {
-      console.warn('Using localStorage (Firebase unavailable)')
+      if (import.meta.env.DEV) console.warn('Using localStorage (Firebase unavailable)')
     }
   }, [])
 
@@ -99,7 +109,7 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
         <div className="flex items-center justify-between mb-3">
           <h1 className={`text-lg font-bold tracking-tight ${isFun ? 'fun-rainbow' : ''}`}
             style={{ color: isFun ? undefined : 'var(--text-primary)' }}>
-            {isFun ? '🎉 Tips Calculator' : 'Tips Calculator'}
+            Tips Calculator
           </h1>
           <ThemeToggle />
         </div>
@@ -137,6 +147,12 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
             : <HistoryLock onUnlock={onUnlockHistory} />
           }
         </div>
+        <div style={{ display: tab === 'Staff' ? 'block' : 'none' }}>
+          {historyUnlocked
+            ? <StaffManager />
+            : <HistoryLock onUnlock={onUnlockHistory} />
+          }
+        </div>
       </main>
     </div>
   )
@@ -145,14 +161,29 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
 function PasswordGate({ password, onUnlock, title }) {
   const [pw, setPw] = useState('')
   const [error, setError] = useState(false)
+  const [attempts, setAttempts] = useState(0)
+  const [lockSeconds, setLockSeconds] = useState(0)
 
   const submit = (e) => {
     e.preventDefault()
+    if (lockSeconds > 0) return
     if (pw === password) {
       onUnlock()
     } else {
+      const next = attempts + 1
+      setAttempts(next)
       setError(true)
       setTimeout(() => setError(false), 1500)
+      if (next >= 5) {
+        setAttempts(0)
+        setLockSeconds(30)
+        const tick = setInterval(() => {
+          setLockSeconds(prev => {
+            if (prev <= 1) { clearInterval(tick); return 0 }
+            return prev - 1
+          })
+        }, 1000)
+      }
     }
   }
 
@@ -172,25 +203,28 @@ function PasswordGate({ password, onUnlock, title }) {
           value={pw}
           onChange={e => { setPw(e.target.value); setError(false) }}
           placeholder="Password"
+          disabled={lockSeconds > 0}
           className="flex-1 px-4 py-3 rounded-xl border focus:outline-none text-lg transition-all duration-200"
           style={{
             background: 'var(--input-bg)',
             borderColor: 'var(--border)',
             color: 'var(--text-primary)',
+            opacity: lockSeconds > 0 ? 0.5 : 1,
           }}
           onFocus={e => { e.target.style.borderColor = 'var(--border-focus)'; e.target.style.boxShadow = `0 0 0 2px var(--accent-glow)` }}
           onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none' }}
           autoFocus
         />
         <button type="submit"
+          disabled={lockSeconds > 0}
           className="px-5 py-3 active:scale-95 rounded-xl font-semibold transition-all duration-150"
-          style={{ background: 'var(--accent)', color: 'var(--btn-text)' }}>
-          Go
+          style={{ background: 'var(--accent)', color: 'var(--btn-text)', opacity: lockSeconds > 0 ? 0.5 : 1 }}>
+          {lockSeconds > 0 ? lockSeconds : 'Go'}
         </button>
       </form>
       <div className="text-sm font-medium transition-all duration-300"
-        style={{ color: 'var(--red)', opacity: error ? 1 : 0 }}>
-        Wrong password
+        style={{ color: 'var(--red)', opacity: (error || lockSeconds > 0) ? 1 : 0 }}>
+        {lockSeconds > 0 ? `Too many attempts. Try again in ${lockSeconds}s` : 'Wrong password'}
       </div>
     </div>
   )

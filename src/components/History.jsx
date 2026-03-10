@@ -116,7 +116,7 @@ export default function History({ history, onDelete, onEdit }) {
       <div className="space-y-4">
         <h2 className="text-xs font-semibold uppercase tracking-wider px-1"
           style={{ color: 'var(--text-secondary)' }}>
-          {isFun ? '📜 History' : 'History'}
+          History
         </h2>
         <div className="fun-card rounded-2xl border px-4 py-12 text-center"
           style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
@@ -130,7 +130,7 @@ export default function History({ history, onDelete, onEdit }) {
     <div className="space-y-4">
       <h2 className="text-xs font-semibold uppercase tracking-wider px-1"
         style={{ color: 'var(--text-secondary)' }}>
-        {isFun ? '📜 History' : 'History'}
+        History
       </h2>
       <div className="space-y-3">
         {history.map((h) => (

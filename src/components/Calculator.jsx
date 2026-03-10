@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import Results from './Results'
 import { calculateTips } from '../utils/calculateTips'
-import { SERVERS, BUSBOYS, PAOLA, MARIA, TRAINEE } from '../staff'
+import { useStaffContext } from '../StaffContext'
+import { getServers, getBusboys, getTrainees, getOthers } from '../staff'
 import { useTheme } from '../ThemeContext'
 
 function Toggle({ on, onToggle, small }) {
@@ -23,20 +24,6 @@ function Toggle({ on, onToggle, small }) {
         }`}
         style={{ background: 'var(--toggle-dot)' }}
       />
-    </div>
-  )
-}
-
-function SectionCard({ title, children }) {
-  return (
-    <div className="fun-card rounded-2xl border overflow-hidden transition-all duration-400"
-      style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
-      <div className="px-4 pt-3 pb-1">
-        <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>{title}</h3>
-      </div>
-      <div className="px-4 pb-2 divide-y" style={{ borderColor: 'var(--border)' }}>
-        {children}
-      </div>
     </div>
   )
 }
@@ -66,17 +53,69 @@ function StaffRow({ name, enabled, onToggle, badge, badgeColor, detail, children
 
 export default function Calculator({ onSaveHistory, history }) {
   const { theme } = useTheme()
+  const { staff } = useStaffContext()
   const [totalTips, setTotalTips] = useState('')
-  const [enabledStaff, setEnabledStaff] = useState({})
-  const [davidPercent, setDavidPercent] = useState(TRAINEE.percentage)
-  const [paolaUdon, setPaolaUdon] = useState(false)
-  const [pastryBusboy, setPastryBusboy] = useState(null)
+  const [enabledStaff, setEnabledStaff] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('tc-enabled-staff')) || {} } catch { return {} }
+  })
+  const [traineePercents, setTraineePercents] = useState({})
+  const [modifierToggles, setModifierToggles] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('tc-modifier-toggles')) || {} } catch { return {} }
+  })
+  const [pastryBusboy, setPastryBusboy] = useState(() => {
+    try { return localStorage.getItem('tc-pastry-busboy') || null } catch { return null }
+  })
   const [breakdown, setBreakdown] = useState([])
   const [remainder, setRemainder] = useState(0)
   const [showLoadSetup, setShowLoadSetup] = useState(false)
+  const [showAllHistory, setShowAllHistory] = useState(false)
   const [calcFlash, setCalcFlash] = useState(false)
   const resultsRef = useRef(null)
-  const [splitMode, setSplitMode] = useState('none') // 'none', 'lunch', 'dinner'
+  const tipsInputRef = useRef(null)
+  const [splitMode, setSplitMode] = useState(() => {
+    try { return localStorage.getItem('tc-split-mode') || 'none' } catch { return 'none' }
+  })
+
+  // #2: Persist staff selection to localStorage
+  useEffect(() => {
+    try { localStorage.setItem('tc-enabled-staff', JSON.stringify(enabledStaff)) } catch {}
+  }, [enabledStaff])
+  useEffect(() => {
+    try { localStorage.setItem('tc-modifier-toggles', JSON.stringify(modifierToggles)) } catch {}
+  }, [modifierToggles])
+  useEffect(() => {
+    try { localStorage.setItem('tc-pastry-busboy', pastryBusboy || '') } catch {}
+  }, [pastryBusboy])
+  useEffect(() => {
+    try { localStorage.setItem('tc-split-mode', splitMode) } catch {}
+  }, [splitMode])
+
+  // #8: Auto-focus tips input on mount
+  useEffect(() => {
+    tipsInputRef.current?.focus()
+  }, [])
+
+  const servers = getServers(staff)
+  const trainees = getTrainees(staff)
+  const busboys = getBusboys(staff)
+  const others = getOthers(staff)
+  // Full servers (100%), sub-100% servers treated as trainees
+  const fullServers = servers.filter(s => !s.modifiers?.altPercentage && s.percentage >= 100)
+  const subServers = servers.filter(s => !s.modifiers?.altPercentage && s.percentage < 100)
+  const allTrainees = [...trainees, ...subServers]
+  // Modifier servers (e.g. Paola) rendered in Busboys section
+  const modifierServers = servers.filter(s => s.modifiers?.altPercentage)
+
+  // Initialize trainee percents for all trainees (including sub-100% servers)
+  useEffect(() => {
+    setTraineePercents(prev => {
+      const updated = { ...prev }
+      for (const t of allTrainees) {
+        if (updated[t.id] == null) updated[t.id] = t.percentage
+      }
+      return updated
+    })
+  }, [staff])
 
   const cycleSplitMode = () => {
     if (splitMode === 'none') setSplitMode('lunch')
@@ -86,24 +125,9 @@ export default function Calculator({ onSaveHistory, history }) {
 
   const formatStaffNames = (enabledStaffObj) => {
     const enabledIds = Object.entries(enabledStaffObj || {}).filter(([, v]) => v).map(([k]) => k)
-
-    // Create a map of id to name
     const idToName = {}
-    SERVERS.forEach(s => { idToName[s.id] = s.name })
-    idToName[TRAINEE.id] = TRAINEE.name
-    idToName[PAOLA.id] = PAOLA.name
-    BUSBOYS.forEach(b => { idToName[b.id] = b.name })
-    idToName[MARIA.id] = MARIA.name
-
-    // Sort: servers, trainee, paola, busboys, maria
-    const sortOrder = [
-      ...SERVERS.map(s => s.id),
-      TRAINEE.id,
-      PAOLA.id,
-      ...BUSBOYS.map(b => b.id),
-      MARIA.id
-    ]
-
+    for (const s of staff) idToName[s.id] = s.name
+    const sortOrder = staff.map(s => s.id)
     const sorted = enabledIds.sort((a, b) => {
       const aIndex = sortOrder.indexOf(a)
       const bIndex = sortOrder.indexOf(b)
@@ -111,7 +135,6 @@ export default function Calculator({ onSaveHistory, history }) {
       if (bIndex === -1) return -1
       return aIndex - bIndex
     })
-
     return sorted.map(id => idToName[id] || id.charAt(0).toUpperCase() + id.slice(1)).join(', ')
   }
 
@@ -119,70 +142,87 @@ export default function Calculator({ onSaveHistory, history }) {
     setSplitMode(h.shift || 'none')
     setTotalTips('')
     setEnabledStaff(h.enabledStaff || {})
-    setDavidPercent(h.davidPercent || 90)
-    setPaolaUdon(h.paolaUdon || false)
+
+    // Load trainee percents (backward compat: old davidPercent → traineePercents)
+    if (h.traineePercents) {
+      setTraineePercents(h.traineePercents)
+    } else {
+      const tp = {}
+      for (const t of trainees) tp[t.id] = t.percentage
+      if (h.davidPercent != null) tp['david'] = h.davidPercent
+      setTraineePercents(tp)
+    }
+
+    // Load modifier toggles (backward compat: old paolaUdon → modifierToggles)
+    if (h.modifierToggles) {
+      setModifierToggles(h.modifierToggles)
+    } else {
+      const mt = {}
+      if (h.paolaUdon) mt['paola'] = true
+      setModifierToggles(mt)
+    }
+
     setPastryBusboy(h.pastryBusboy || null)
     setBreakdown([])
     setRemainder(0)
     setShowLoadSetup(false)
+    setShowAllHistory(false)
   }
 
   const toggle = (id) => setEnabledStaff(prev => ({ ...prev, [id]: !prev[id] }))
 
-  const buildStaffArray = (staffConfig, davidPct, paolaUdn, pastryBoy, shift = null) => {
-    const staff = []
-    for (const s of SERVERS) {
-      if (staffConfig[s.id]) staff.push(shift ? { ...s, shift } : { ...s })
-    }
-    for (const b of BUSBOYS) {
-      if (!staffConfig[b.id]) continue
-      const busboy = pastryBoy === b.id ? { ...b, percentage: 20, name: `${b.name} (Pastry)` } : { ...b }
-      staff.push(shift ? { ...busboy, shift } : busboy)
-    }
-    if (staffConfig[TRAINEE.id]) {
-      staff.push(shift ? { ...TRAINEE, percentage: davidPct, shift } : { ...TRAINEE, percentage: davidPct })
-    }
-    if (staffConfig['paola']) {
-      staff.push(shift ? { ...PAOLA, percentage: paolaUdn ? 20 : 40, shift } : { ...PAOLA, percentage: paolaUdn ? 20 : 40 })
-    }
-    if (staffConfig['maria']) {
-      staff.push(shift ? { ...MARIA, shift } : { ...MARIA })
-    }
-    return staff
+  const toggleAllServers = () => {
+    const allOn = fullServers.every(s => enabledStaff[s.id])
+    setEnabledStaff(prev => {
+      const updated = { ...prev }
+      for (const s of fullServers) updated[s.id] = !allOn
+      return updated
+    })
   }
 
-  const mergeBreakdowns = (lunch, dinner) => {
-    const byPerson = {}
+  const buildStaffArray = () => {
+    const result = []
+    const shift = splitMode !== 'none' ? splitMode : null
 
-    for (const item of lunch) {
-      const key = item.label
-      byPerson[key] = { ...item, shift: 'Lunch' }
+    for (const s of fullServers) {
+      if (!enabledStaff[s.id]) continue
+      result.push(shift ? { ...s, shift } : { ...s })
     }
 
-    for (const item of dinner) {
-      const key = item.label
-      if (byPerson[key]) {
-        // Person worked both shifts - combine
-        byPerson[key].perPerson += item.perPerson
-        byPerson[key].groupTotal += item.groupTotal
-        byPerson[key].shift = 'Both'
-      } else {
-        byPerson[key] = { ...item, shift: 'Dinner' }
-      }
+    for (const t of allTrainees) {
+      if (!enabledStaff[t.id]) continue
+      const pct = traineePercents[t.id] ?? t.percentage
+      result.push(shift ? { ...t, percentage: pct, shift } : { ...t, percentage: pct })
     }
 
-    return Object.values(byPerson).map(item => ({
-      ...item,
-      label: item.shift === 'Both' ? item.label : `${item.label} (${item.shift})`
-    }))
+    for (const s of modifierServers) {
+      if (!enabledStaff[s.id]) continue
+      const toggled = modifierToggles[s.id]
+      const pct = toggled ? s.modifiers.altPercentage : s.percentage
+      result.push(shift ? { ...s, percentage: pct, role: 'modifier', shift } : { ...s, percentage: pct, role: 'modifier' })
+    }
+
+    for (const b of busboys) {
+      if (!enabledStaff[b.id]) continue
+      const isPastry = pastryBusboy === b.id
+      const busboy = isPastry ? { ...b, percentage: 20, name: `${b.name} (Pastry)` } : { ...b }
+      result.push(shift ? { ...busboy, shift } : busboy)
+    }
+
+    for (const o of others) {
+      if (!enabledStaff[o.id]) continue
+      result.push(shift ? { ...o, shift } : { ...o })
+    }
+
+    return result
   }
 
   const calculate = () => {
     const tips = parseFloat(totalTips)
     if (!tips || tips <= 0) return
-    const staff = buildStaffArray(enabledStaff, davidPercent, paolaUdon, pastryBusboy)
-    if (!staff.length) return
-    const result = calculateTips(tips, staff)
+    const staffArr = buildStaffArray()
+    if (!staffArr.length) return
+    const result = calculateTips(tips, staffArr)
     setBreakdown(result.breakdown)
     setRemainder(result.remainder)
 
@@ -198,13 +238,13 @@ export default function Calculator({ onSaveHistory, history }) {
       remainder,
       breakdown: breakdown.map(g => ({ label: g.label, role: g.role, percentage: g.percentage, count: g.count, perPerson: g.perPerson, groupTotal: g.groupTotal })),
       enabledStaff: { ...enabledStaff },
-      davidPercent,
-      paolaUdon,
+      traineePercents: { ...traineePercents },
+      modifierToggles: { ...modifierToggles },
       pastryBusboy,
     }
 
     if (splitMode !== 'none') {
-      entry.shift = splitMode // 'lunch' or 'dinner'
+      entry.shift = splitMode
     }
 
     onSaveHistory(entry)
@@ -233,7 +273,7 @@ export default function Calculator({ onSaveHistory, history }) {
           <div className={`overflow-hidden transition-all duration-300 ${showLoadSetup ? 'max-h-[400px] opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
             <div className="fun-card rounded-2xl border overflow-hidden divide-y"
               style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)', maxHeight: '350px', overflowY: 'auto' }}>
-              {history.map((h) => (
+              {(showAllHistory ? history : history.slice(0, 10)).map((h) => (
                 <button
                   key={h.id}
                   onClick={() => loadSetup(h)}
@@ -250,6 +290,15 @@ export default function Calculator({ onSaveHistory, history }) {
                   </div>
                 </button>
               ))}
+              {!showAllHistory && history.length > 10 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowAllHistory(true) }}
+                  className="w-full px-4 py-2.5 text-center text-xs font-semibold transition-colors"
+                  style={{ color: 'var(--accent-light)', borderColor: 'var(--border)' }}
+                >
+                  Show {history.length - 10} more
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -261,7 +310,7 @@ export default function Calculator({ onSaveHistory, history }) {
         <div className="flex items-center justify-between mb-3">
           <label className="text-xs font-semibold uppercase tracking-wider"
             style={{ color: 'var(--text-secondary)' }}>
-            {isFun ? '💰 Total Tips 💰' : 'Total Tips'}
+            Total Tips
             {splitMode === 'lunch' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>LUNCH</span>}
             {splitMode === 'dinner' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>DINNER</span>}
           </label>
@@ -280,11 +329,13 @@ export default function Calculator({ onSaveHistory, history }) {
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-3xl font-bold"
             style={{ color: 'color-mix(in srgb, var(--accent-light) 50%, transparent)' }}>$</span>
           <input
+            ref={tipsInputRef}
             type="text"
             inputMode="decimal"
             pattern="[0-9]*\.?[0-9]*"
             value={totalTips}
             onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setTotalTips(v) }}
+            onKeyDown={e => { if (e.key === 'Enter') calculate() }}
             placeholder="0"
             className={`w-full pl-12 pr-4 py-4 text-4xl font-bold rounded-xl border transition-all duration-200 focus:outline-none ${isFun ? 'fun-float' : ''}`}
             style={{
@@ -298,56 +349,119 @@ export default function Calculator({ onSaveHistory, history }) {
         </div>
       </div>
 
-      {/* Servers */}
-      <SectionCard title={isFun ? '⭐ Servers (100%)' : 'Servers (100%)'}>
-        {SERVERS.map(s => (
-          <StaffRow key={s.id} name={s.name} enabled={!!enabledStaff[s.id]} onToggle={() => toggle(s.id)} />
-        ))}
-        <StaffRow
-          name="David" enabled={!!enabledStaff['david']} onToggle={() => toggle('david')}
-          badge="Trainee" badgeColor="var(--amber)" detail={`${davidPercent}%`}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Tip %</span>
-            <select value={davidPercent} onChange={e => setDavidPercent(Number(e.target.value))}
-              className="rounded-lg px-2 py-1 text-sm border focus:outline-none"
-              style={{ background: 'var(--surface-lighter)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
-              {[50, 60, 70, 80, 90, 100].map(p => <option key={p} value={p}>{p}%</option>)}
-            </select>
-          </div>
-        </StaffRow>
-        <StaffRow
-          name="Paola" enabled={!!enabledStaff['paola']} onToggle={() => toggle('paola')}
-          detail={paolaUdon ? '20%' : '40%'}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Udon (20%)</span>
-            <Toggle small on={paolaUdon} onToggle={() => setPaolaUdon(!paolaUdon)} />
-          </div>
-        </StaffRow>
-      </SectionCard>
-
-      {/* Busboys */}
-      <SectionCard title={isFun ? '🧹 Busboys' : 'Busboys'}>
-        {BUSBOYS.map(b => (
-          <StaffRow
-            key={b.id} name={b.name} enabled={!!enabledStaff[b.id]} onToggle={() => toggle(b.id)}
-            badge={pastryBusboy === b.id ? 'Pastry' : null} badgeColor="var(--amber)"
-            detail={pastryBusboy === b.id ? '20%' : `${b.percentage}%`}
+      {/* Servers card (full servers + trainees below divider) */}
+      <div className="fun-card rounded-2xl border overflow-hidden transition-all duration-400"
+        style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
+        <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+          <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Servers</h3>
+          <button
+            onClick={toggleAllServers}
+            className="text-[10px] font-semibold px-2 py-0.5 rounded-md transition-all active:scale-95"
+            style={{ color: 'var(--accent-light)', background: 'color-mix(in srgb, var(--accent) 10%, transparent)' }}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Pastry (20%)</span>
-              <Toggle small on={pastryBusboy === b.id} onToggle={() => setPastryBusboy(pastryBusboy === b.id ? null : b.id)} />
-            </div>
-          </StaffRow>
-        ))}
-      </SectionCard>
+            {fullServers.every(s => enabledStaff[s.id]) ? 'None' : 'All'}
+          </button>
+        </div>
+        <div className="px-4 pb-2">
+          <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
+            {fullServers.map(s => (
+              <StaffRow key={s.id} name={s.name} enabled={!!enabledStaff[s.id]} onToggle={() => toggle(s.id)} />
+            ))}
+          </div>
+          {allTrainees.length > 0 && (
+            <>
+              <div className="my-1 flex items-center gap-2">
+                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Trainees</span>
+                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+              </div>
+              <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
+                {allTrainees.map(t => (
+                  <StaffRow
+                    key={t.id} name={t.name} enabled={!!enabledStaff[t.id]} onToggle={() => toggle(t.id)}
+                    badge="Trainee" badgeColor="var(--amber)" detail={`${traineePercents[t.id] ?? t.percentage}%`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Tip %</span>
+                      <select value={traineePercents[t.id] ?? t.percentage}
+                        onChange={e => setTraineePercents(prev => ({ ...prev, [t.id]: Number(e.target.value) }))}
+                        className="rounded-lg px-2 py-1 text-sm border focus:outline-none"
+                        style={{ background: 'var(--surface-lighter)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
+                        {[50, 60, 70, 80, 90, 100].map(p => <option key={p} value={p}>{p}%</option>)}
+                      </select>
+                    </div>
+                  </StaffRow>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
-      {/* Other */}
-      <SectionCard title={isFun ? '🍜 Other' : 'Other'}>
-        <StaffRow name="Maria" enabled={!!enabledStaff['maria']} onToggle={() => toggle('maria')}
-          badge="Udon" badgeColor="var(--accent)" detail="20%" />
-      </SectionCard>
+      {/* Bussers card (modifier servers + busboys + other, with dividers) */}
+      {(modifierServers.length > 0 || busboys.length > 0 || others.length > 0) && (
+        <div className="fun-card rounded-2xl border overflow-hidden transition-all duration-400"
+          style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
+          <div className="px-4 pt-3 pb-1">
+            <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Bussers</h3>
+          </div>
+          <div className="px-4 pb-2">
+            {modifierServers.length > 0 && (
+              <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
+                {modifierServers.map(s => (
+                  <StaffRow
+                    key={s.id} name={s.name} enabled={!!enabledStaff[s.id]} onToggle={() => toggle(s.id)}
+                    detail={modifierToggles[s.id] ? `${s.modifiers.altPercentage}%` : `${s.percentage}%`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{s.modifiers.altLabel} ({s.modifiers.altPercentage}%)</span>
+                      <Toggle small on={!!modifierToggles[s.id]} onToggle={() => setModifierToggles(prev => ({ ...prev, [s.id]: !prev[s.id] }))} />
+                    </div>
+                  </StaffRow>
+                ))}
+              </div>
+            )}
+            {busboys.length > 0 && modifierServers.length > 0 && (
+              <div className="my-1 flex items-center gap-2">
+                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Busboys</span>
+                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+              </div>
+            )}
+            {busboys.length > 0 && (
+              <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
+                {busboys.map(b => (
+                  <StaffRow
+                    key={b.id} name={b.name} enabled={!!enabledStaff[b.id]} onToggle={() => toggle(b.id)}
+                    badge={pastryBusboy === b.id ? 'Pastry' : null} badgeColor="var(--amber)"
+                    detail={pastryBusboy === b.id ? '20%' : `${b.percentage}%`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Pastry (20%)</span>
+                      <Toggle small on={pastryBusboy === b.id} onToggle={() => setPastryBusboy(pastryBusboy === b.id ? null : b.id)} />
+                    </div>
+                  </StaffRow>
+                ))}
+              </div>
+            )}
+            {others.length > 0 && (busboys.length > 0 || modifierServers.length > 0) && (
+              <div className="my-1 flex items-center gap-2">
+                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Other</span>
+                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+              </div>
+            )}
+            {others.length > 0 && (
+              <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
+                {others.map(o => (
+                  <StaffRow key={o.id} name={o.name} enabled={!!enabledStaff[o.id]} onToggle={() => toggle(o.id)}
+                    detail={`${o.percentage}%`} />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Calculate button */}
       <button
@@ -361,7 +475,7 @@ export default function Calculator({ onSaveHistory, history }) {
           transform: calcFlash ? 'scale(1.02)' : undefined,
         }}
       >
-        {calcFlash ? '✓' : (isFun ? '✨ Calculate ✨' : 'Calculate')}
+        {calcFlash ? '✓' : 'Calculate'}
       </button>
 
       <div ref={resultsRef}>

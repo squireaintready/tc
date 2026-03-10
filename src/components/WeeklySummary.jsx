@@ -1,84 +1,29 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useTheme } from '../ThemeContext'
-import { SERVERS, TRAINEE, BUSBOYS, PAOLA, MARIA } from '../staff'
+import { useStaffContext } from '../StaffContext'
+import { getEmployeePay } from '../utils/staffHelpers'
+import { getWeekRange, formatRange } from '../utils/dates'
+import { DAYS, mondayIndex } from '../utils/constants'
 import { db } from '../firebase'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const TARGET_EMPLOYEES = [
-  ...BUSBOYS.map(b => ({ id: b.id, name: b.name })),
-  { id: 'maria', name: 'Maria' },
-  { id: 'paola', name: 'Paola' },
-]
-const ALL_EMPLOYEES = [
-  ...SERVERS.map(s => ({ id: s.id, name: s.name })),
-  { id: TRAINEE.id, name: TRAINEE.name },
-  ...BUSBOYS.map(b => ({ id: b.id, name: b.name })),
-  { id: 'paola', name: 'Paola' },
-  { id: 'maria', name: 'Maria' },
-]
-
-function getWeekRange(refDate) {
-  // Use midnight local time to avoid timezone drift
-  const d = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate())
-  const day = d.getDay() // 0=Sun
-  const sun = new Date(d.getFullYear(), d.getMonth(), d.getDate() - day, 0, 0, 0, 0)
-  const sat = new Date(sun.getFullYear(), sun.getMonth(), sun.getDate() + 6, 23, 59, 59, 999)
-  return { start: sun, end: sat }
-}
-
-function formatRange(start, end) {
-  const opts = { month: 'short', day: 'numeric' }
-  return `${start.toLocaleDateString('en-US', opts)} – ${end.toLocaleDateString('en-US', opts)}, ${end.getFullYear()}`
-}
-
-function getEmployeePay(entry, employeeId) {
-  if (!entry.enabledStaff?.[employeeId]) return null
-
-  // Determine the effective percentage for this employee in this entry
-  let effectivePct
-  const server = SERVERS.find(s => s.id === employeeId)
-  const busboy = BUSBOYS.find(b => b.id === employeeId)
-
-  if (server) {
-    effectivePct = server.percentage // 100
-  } else if (employeeId === TRAINEE.id) {
-    effectivePct = entry.davidPercent || TRAINEE.percentage // adjustable, defaults to 90
-  } else if (busboy) {
-    effectivePct = entry.pastryBusboy === employeeId ? 20 : busboy.percentage
-  } else if (employeeId === 'maria') {
-    effectivePct = MARIA.percentage // 20
-  } else if (employeeId === 'paola') {
-    effectivePct = entry.paolaUdon ? 20 : PAOLA.percentage // 20 or 40
-  }
-
-  if (effectivePct == null) return null
-
-  // Find the breakdown group matching this percentage
-  const group = entry.breakdown?.find(g => g.percentage === effectivePct)
-  return group ? group.perPerson : null
-}
-
-export function buildWeeklyGrid(history, weekStart, weekEnd) {
-  // Filter entries to this week
+export function buildWeeklyGrid(history, weekStart, weekEnd, targetEmployees, staffRoster) {
   const weekEntries = history.filter(h => {
     const d = new Date(h.date)
     return d >= weekStart && d <= weekEnd
   })
 
   const grid = {}
-  for (const emp of TARGET_EMPLOYEES) {
+  for (const emp of targetEmployees) {
     grid[emp.id] = { name: emp.name, days: Array(7).fill(null), total: 0 }
   }
 
   for (const entry of weekEntries) {
-    const dayIdx = new Date(entry.date).getDay() // 0=Sun
-    for (const emp of TARGET_EMPLOYEES) {
-      const pay = getEmployeePay(entry, emp.id)
+    const dayIdx = mondayIndex(new Date(entry.date).getDay())
+    for (const emp of targetEmployees) {
+      const pay = getEmployeePay(entry, emp.id, staffRoster)
       if (pay != null) {
-        // If multiple entries on same day, sum them
         grid[emp.id].days[dayIdx] = (grid[emp.id].days[dayIdx] || 0) + pay
         grid[emp.id].total += pay
       }
@@ -88,30 +33,46 @@ export function buildWeeklyGrid(history, weekStart, weekEnd) {
   return grid
 }
 
-export function formatGridAsText(grid, weekLabel) {
+export function formatGridAsText(grid, weekLabel, targetEmployees) {
   const pad = (s, n) => String(s).padStart(n)
   const lines = [`Weekly Tips: ${weekLabel}`, '']
   const header = ['Name    ', ...DAYS.map(d => pad(d, 5)), pad('Total', 6)].join(' ')
   lines.push(header)
   lines.push('-'.repeat(header.length))
-  for (const emp of TARGET_EMPLOYEES) {
+  for (const emp of targetEmployees) {
     const row = grid[emp.id]
     const cells = row.days.map(d => pad(d != null ? `$${d}` : '-', 5))
     lines.push([row.name.padEnd(8), ...cells, pad(`$${row.total}`, 6)].join(' '))
   }
   lines.push('-'.repeat(header.length))
   const dayTotals = DAYS.map((_, di) => {
-    const t = TARGET_EMPLOYEES.reduce((s, e) => s + (grid[e.id].days[di] || 0), 0)
+    const t = targetEmployees.reduce((s, e) => s + (grid[e.id].days[di] || 0), 0)
     return pad(t > 0 ? `$${t}` : '-', 5)
   })
-  const grandTotal = TARGET_EMPLOYEES.reduce((s, e) => s + grid[e.id].total, 0)
+  const grandTotal = targetEmployees.reduce((s, e) => s + grid[e.id].total, 0)
   lines.push(['Total   ', ...dayTotals, pad(`$${grandTotal}`, 6)].join(' '))
   return lines.join('\n')
 }
 
 export default function WeeklySummary({ history }) {
-  const { theme } = useTheme()
-  const isFun = theme === 'fun'
+  const { staff } = useStaffContext()
+  const todayIdx = mondayIndex(new Date().getDay())
+
+  // Derive employee lists from dynamic staff
+  const targetEmployees = useMemo(() => {
+    return staff
+      .filter(s => s.active !== false && (s.id === 'sam' || s.role === 'busboy' || s.role === 'other' || s.modifiers?.altPercentage))
+      .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+      .map(s => ({ id: s.id, name: s.name }))
+  }, [staff])
+
+  const allEmployees = useMemo(() => {
+    return staff
+      .filter(s => s.active !== false)
+      .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+      .map(s => ({ id: s.id, name: s.name }))
+  }, [staff])
+
   const [weekOffset, setWeekOffset] = useState(() => {
     try {
       const saved = localStorage.getItem('tc-weekOffset')
@@ -124,7 +85,7 @@ export default function WeeklySummary({ history }) {
   const [shared, setShared] = useState(false)
   const [emailSaved, setEmailSaved] = useState(false)
   const [emailError, setEmailError] = useState('')
-  const [viewMode, setViewMode] = useState('weekly') // 'weekly' or 'employee'
+  const [viewMode, setViewMode] = useState('weekly')
   const [periodType, setPeriodType] = useState(() => {
     try {
       const saved = localStorage.getItem('tc-periodType')
@@ -145,9 +106,8 @@ export default function WeeklySummary({ history }) {
   })
   const [selectedEmployee, setSelectedEmployee] = useState('all')
   const [searchEmployee, setSearchEmployee] = useState('')
-  const [classFilter, setClassFilter] = useState('all') // 'all', 'servers', 'support'
+  const [classFilter, setClassFilter] = useState('all')
 
-  // Load email from Firestore on mount
   useEffect(() => {
     getDoc(doc(db, 'settings', 'weekly-email'))
       .then(snap => {
@@ -159,7 +119,6 @@ export default function WeeklySummary({ history }) {
       .finally(() => setEmailLoaded(true))
   }, [])
 
-  // Persist time period settings to localStorage
   useEffect(() => {
     try { localStorage.setItem('tc-weekOffset', weekOffset.toString()) } catch {}
   }, [weekOffset])
@@ -183,9 +142,8 @@ export default function WeeklySummary({ history }) {
   }, [weekOffset])
 
   const weekLabel = formatRange(start, end)
-  const grid = useMemo(() => buildWeeklyGrid(history, start, end), [history, start, end])
+  const grid = useMemo(() => buildWeeklyGrid(history, start, end, targetEmployees, staff), [history, start, end, targetEmployees, staff])
 
-  // Employee summary period calculation
   const { summaryStart, summaryEnd, summaryLabel } = useMemo(() => {
     const now = new Date()
     let start, end, label
@@ -219,16 +177,15 @@ export default function WeeklySummary({ history }) {
     })
 
     const summary = {}
-    for (const emp of ALL_EMPLOYEES) {
+    for (const emp of allEmployees) {
       summary[emp.id] = { name: emp.name, total: 0, count: 0 }
     }
 
     for (const entry of periodEntries) {
-      for (const emp of ALL_EMPLOYEES) {
-        const pay = getEmployeePay(entry, emp.id)
+      for (const emp of allEmployees) {
+        const pay = getEmployeePay(entry, emp.id, staff)
         if (pay != null) {
           summary[emp.id].total += pay
-          // Lunch/Dinner = 0.5 day, Full day (no shift) = 1 day
           const dayValue = (entry.shift === 'lunch' || entry.shift === 'dinner') ? 0.5 : 1
           summary[emp.id].count += dayValue
         }
@@ -236,23 +193,42 @@ export default function WeeklySummary({ history }) {
     }
 
     return summary
-  }, [history, summaryStart, summaryEnd])
+  }, [history, summaryStart, summaryEnd, allEmployees, staff])
+
+  const isServerOrTrainee = (empId) => {
+    const emp = staff.find(s => s.id === empId)
+    return emp && (emp.role === 'server' || emp.role === 'trainee') && !emp.modifiers?.altPercentage
+  }
+
+  const isSupportStaff = (empId) => {
+    const emp = staff.find(s => s.id === empId)
+    return emp && (emp.role === 'busboy' || emp.role === 'other' || emp.modifiers?.altPercentage)
+  }
+
+  const filterEmployees = (employees) => {
+    return employees.filter(emp => {
+      if (searchEmployee) {
+        return emp.name.toLowerCase().includes(searchEmployee.toLowerCase())
+      }
+      if (classFilter === 'servers') return isServerOrTrainee(emp.id)
+      if (classFilter === 'support') return isSupportStaff(emp.id)
+      return true
+    })
+  }
 
   const handleShareEmployeeSummary = async () => {
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' })
 
-    // Determine which employees to show based on filters
     const filteredBySearch = searchEmployee
-      ? ALL_EMPLOYEES.filter(emp => emp.name.toLowerCase().includes(searchEmployee.toLowerCase()))
+      ? allEmployees.filter(emp => emp.name.toLowerCase().includes(searchEmployee.toLowerCase()))
       : null
 
-    // Check if sharing for a specific employee (either from dropdown or single search result)
     const specificEmployee = selectedEmployee !== 'all'
       ? selectedEmployee
       : (filteredBySearch && filteredBySearch.length === 1 ? filteredBySearch[0].id : null)
 
     if (specificEmployee) {
-      const emp = ALL_EMPLOYEES.find(e => e.id === specificEmployee)
+      const emp = allEmployees.find(e => e.id === specificEmployee)
       const empData = employeeSummary[specificEmployee]
 
       pdf.setFontSize(18)
@@ -263,7 +239,6 @@ export default function WeeklySummary({ history }) {
       pdf.setFont('helvetica', 'normal')
       pdf.text(summaryLabel, 40, 60)
 
-      // Build daily breakdown for this employee
       const periodEntries = history.filter(h => {
         const d = new Date(h.date)
         return d >= summaryStart && d <= summaryEnd
@@ -271,7 +246,7 @@ export default function WeeklySummary({ history }) {
 
       const dailyPay = {}
       for (const entry of periodEntries) {
-        const pay = getEmployeePay(entry, specificEmployee)
+        const pay = getEmployeePay(entry, specificEmployee, staff)
         if (pay != null) {
           const date = new Date(entry.date)
           const dateKey = date.toISOString().split('T')[0]
@@ -279,23 +254,20 @@ export default function WeeklySummary({ history }) {
         }
       }
 
-      // Build weekly grid (Sun-Sat weeks)
       const weeks = []
       let currentDate = new Date(summaryStart)
 
       while (currentDate <= summaryEnd) {
-        // Find Sunday of this week
         const weekStart = new Date(currentDate)
-        weekStart.setDate(currentDate.getDate() - currentDate.getDay())
+        const daysSinceMon = (currentDate.getDay() + 6) % 7
+        weekStart.setDate(currentDate.getDate() - daysSinceMon)
 
-        // Build 7 days for this week
         const weekDays = []
         let weekTotal = 0
         for (let i = 0; i < 7; i++) {
           const day = new Date(weekStart)
           day.setDate(weekStart.getDate() + i)
 
-          // Only include if within period
           if (day >= summaryStart && day <= summaryEnd) {
             const dateKey = day.toISOString().split('T')[0]
             const amount = dailyPay[dateKey] || 0
@@ -306,25 +278,22 @@ export default function WeeklySummary({ history }) {
           }
         }
 
-        // Add week if it has any data
         if (weekTotal > 0) {
           const weekLabel = `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
           weeks.push({ label: weekLabel, days: weekDays, total: weekTotal })
         }
 
-        // Move to next week
-        currentDate.setDate(currentDate.getDate() + (7 - currentDate.getDay()))
+        const daysUntilNextMon = (8 - currentDate.getDay()) % 7 || 7
+        currentDate.setDate(currentDate.getDate() + daysUntilNextMon)
       }
 
-      // Create weekly grid table
-      const head = [['Week', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Total']]
+      const head = [['Week', ...DAYS, 'Total']]
       const body = weeks.map(week => [
         week.label,
         ...week.days.map(v => v != null ? (v > 0 ? `$${v}` : '-') : '-'),
         `$${week.total}`
       ])
 
-      // Add totals row
       const dayTotals = []
       for (let i = 0; i < 7; i++) {
         const total = weeks.reduce((sum, week) => sum + (week.days[i] || 0), 0)
@@ -378,7 +347,6 @@ export default function WeeklySummary({ history }) {
       return
     }
 
-    // All employees or class summary (table format)
     const classTitle = classFilter === 'servers' ? 'Servers Summary' :
                        classFilter === 'support' ? 'Support Summary' :
                        'Employee Summary'
@@ -392,24 +360,7 @@ export default function WeeklySummary({ history }) {
     pdf.text(summaryLabel, 40, 60)
 
     const head = [['Employee', 'Days Worked', 'Total Tips']]
-    const filteredEmployees = ALL_EMPLOYEES.filter(emp => {
-      // Search filter takes priority
-      if (searchEmployee) {
-        if (!emp.name.toLowerCase().includes(searchEmployee.toLowerCase())) return false
-      } else {
-        // Class filter only applies when not searching
-        if (classFilter === 'servers') {
-          const isServer = SERVERS.some(s => s.id === emp.id)
-          const isTrainee = emp.id === TRAINEE.id
-          if (!isServer && !isTrainee) return false
-        } else if (classFilter === 'support') {
-          const isBusboy = BUSBOYS.some(b => b.id === emp.id)
-          if (!isBusboy && emp.id !== 'paola' && emp.id !== 'maria') return false
-        }
-      }
-      // Only include if they have tips
-      return employeeSummary[emp.id].total > 0
-    })
+    const filteredEmployees = filterEmployees(allEmployees).filter(emp => employeeSummary[emp.id]?.total > 0)
 
     const body = filteredEmployees.map(emp => {
       const data = employeeSummary[emp.id]
@@ -469,7 +420,7 @@ export default function WeeklySummary({ history }) {
     pdf.text(`Weekly Tips: ${weekLabel}`, 40, 40)
 
     const head = [['Name', ...DAYS, 'Total']]
-    const body = TARGET_EMPLOYEES.map(emp => {
+    const body = targetEmployees.map(emp => {
       const row = grid[emp.id]
       return [
         row.name,
@@ -478,12 +429,11 @@ export default function WeeklySummary({ history }) {
       ]
     })
 
-    // Totals row
     const dayTotals = DAYS.map((_, di) => {
-      const t = TARGET_EMPLOYEES.reduce((s, e) => s + (grid[e.id].days[di] || 0), 0)
+      const t = targetEmployees.reduce((s, e) => s + (grid[e.id].days[di] || 0), 0)
       return t > 0 ? `$${t}` : '-'
     })
-    const grandTotal = TARGET_EMPLOYEES.reduce((s, e) => s + grid[e.id].total, 0)
+    const grandTotal = targetEmployees.reduce((s, e) => s + grid[e.id].total, 0)
     const foot = [['Total', ...dayTotals, grandTotal > 0 ? `$${grandTotal}` : '-']]
 
     autoTable(pdf, {
@@ -512,7 +462,6 @@ export default function WeeklySummary({ history }) {
       } catch {}
     }
 
-    // Fallback: download
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -549,13 +498,13 @@ export default function WeeklySummary({ history }) {
     }
   }
 
-  const hasData = TARGET_EMPLOYEES.some(e => grid[e.id].total > 0)
+  const hasData = targetEmployees.some(e => grid[e.id]?.total > 0)
 
   return (
     <div className="space-y-4">
       <h2 className="text-xs font-semibold uppercase tracking-wider px-1"
         style={{ color: 'var(--text-secondary)' }}>
-        {isFun ? '📊 Weekly Summary' : 'Weekly Summary'}
+        Weekly Summary
       </h2>
 
       {/* View Toggle */}
@@ -626,9 +575,12 @@ export default function WeeklySummary({ history }) {
                   style={{ color: 'var(--text-secondary)', background: 'var(--surface-flat, var(--surface))' }}>
                   Name
                 </th>
-                {DAYS.map(d => (
+                {DAYS.map((d, di) => (
                   <th key={d} className="px-2 py-2.5 text-xs font-semibold uppercase tracking-wider text-center"
-                    style={{ color: 'var(--text-secondary)' }}>
+                    style={{
+                      color: weekOffset === 0 && di === todayIdx ? 'var(--accent-light)' : 'var(--text-secondary)',
+                      background: weekOffset === 0 && di === todayIdx ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : undefined,
+                    }}>
                     {d}
                   </th>
                 ))}
@@ -639,8 +591,9 @@ export default function WeeklySummary({ history }) {
               </tr>
             </thead>
             <tbody>
-              {TARGET_EMPLOYEES.map((emp, i) => {
+              {targetEmployees.map((emp) => {
                 const row = grid[emp.id]
+                if (!row) return null
                 return (
                   <tr key={emp.id}
                     style={{ borderBottom: '1px solid var(--border)' }}>
@@ -650,7 +603,10 @@ export default function WeeklySummary({ history }) {
                     </td>
                     {row.days.map((val, di) => (
                       <td key={di} className="px-2 py-2.5 text-center tabular-nums"
-                        style={{ color: val != null ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                        style={{
+                          color: val != null ? 'var(--text-primary)' : 'var(--text-muted)',
+                          background: weekOffset === 0 && di === todayIdx ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : undefined,
+                        }}>
                         {val != null ? `$${val}` : '-'}
                       </td>
                     ))}
@@ -669,16 +625,19 @@ export default function WeeklySummary({ history }) {
                   Total
                 </td>
                 {DAYS.map((_, di) => {
-                  const dayTotal = TARGET_EMPLOYEES.reduce((sum, emp) => sum + (grid[emp.id].days[di] || 0), 0)
+                  const dayTotal = targetEmployees.reduce((sum, emp) => sum + (grid[emp.id]?.days[di] || 0), 0)
                   return (
                     <td key={di} className="px-2 py-2.5 text-center font-bold tabular-nums"
-                      style={{ color: dayTotal > 0 ? 'var(--accent-light)' : 'var(--text-muted)' }}>
+                      style={{
+                        color: dayTotal > 0 ? 'var(--accent-light)' : 'var(--text-muted)',
+                        background: weekOffset === 0 && di === todayIdx ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : undefined,
+                      }}>
                       {dayTotal > 0 ? `$${dayTotal}` : '-'}
                     </td>
                   )
                 })}
                 {(() => {
-                  const grandTotal = TARGET_EMPLOYEES.reduce((sum, emp) => sum + grid[emp.id].total, 0)
+                  const grandTotal = targetEmployees.reduce((sum, emp) => sum + (grid[emp.id]?.total || 0), 0)
                   return (
                     <td className="px-3 py-2.5 text-right font-bold tabular-nums"
                       style={{ color: grandTotal > 0 ? 'var(--green)' : 'var(--text-muted)' }}>
@@ -831,7 +790,7 @@ export default function WeeklySummary({ history }) {
                   }}
                 >
                   <option value="all">All</option>
-                  {ALL_EMPLOYEES.map(emp => (
+                  {allEmployees.map(emp => (
                     <option key={emp.id} value={emp.id}>{emp.name}</option>
                   ))}
                 </select>
@@ -856,18 +815,17 @@ export default function WeeklySummary({ history }) {
 
           {/* Employee list or calendar */}
           {selectedEmployee !== 'all' ? (
-            // Calendar view for specific employee
             <div className="fun-card rounded-2xl border overflow-hidden"
               style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
               <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
                 <div className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
-                  {ALL_EMPLOYEES.find(e => e.id === selectedEmployee)?.name}
+                  {allEmployees.find(e => e.id === selectedEmployee)?.name}
                 </div>
                 <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                  {employeeSummary[selectedEmployee].count} {employeeSummary[selectedEmployee].count === 1 ? 'day' : 'days'} worked
+                  {employeeSummary[selectedEmployee]?.count || 0} {(employeeSummary[selectedEmployee]?.count || 0) === 1 ? 'day' : 'days'} worked
                 </div>
                 <div className="text-2xl font-bold mt-1 tabular-nums" style={{ color: 'var(--green)' }}>
-                  ${employeeSummary[selectedEmployee].total}
+                  ${employeeSummary[selectedEmployee]?.total || 0}
                 </div>
               </div>
               <div className="overflow-x-auto">
@@ -896,7 +854,7 @@ export default function WeeklySummary({ history }) {
                       })
                       const dailyPay = {}
                       for (const entry of periodEntries) {
-                        const pay = getEmployeePay(entry, selectedEmployee)
+                        const pay = getEmployeePay(entry, selectedEmployee, staff)
                         if (pay != null) {
                           const date = new Date(entry.date)
                           const dateKey = date.toISOString().split('T')[0]
@@ -934,27 +892,12 @@ export default function WeeklySummary({ history }) {
               </div>
             </div>
           ) : (
-            // Card grid view for all/filtered employees
             <div className="fun-card rounded-2xl border p-3"
               style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
               <div className={`grid gap-2 ${classFilter === 'all' || searchEmployee ? 'grid-cols-4' : 'grid-cols-3'}`}>
-                {ALL_EMPLOYEES.filter(emp => {
-                  // Search filter takes priority - if searching, ignore class filter
-                  if (searchEmployee) {
-                    return emp.name.toLowerCase().includes(searchEmployee.toLowerCase())
-                  }
-                  // Class filter only applies when not searching
-                  if (classFilter === 'servers') {
-                    const isServer = SERVERS.some(s => s.id === emp.id)
-                    const isTrainee = emp.id === TRAINEE.id
-                    if (!isServer && !isTrainee) return false
-                  } else if (classFilter === 'support') {
-                    const isBusboy = BUSBOYS.some(b => b.id === emp.id)
-                    if (!isBusboy && emp.id !== 'paola' && emp.id !== 'maria') return false
-                  }
-                  return true
-                }).map(emp => {
+                {filterEmployees(allEmployees).map(emp => {
                   const data = employeeSummary[emp.id]
+                  if (!data) return null
                   return (
                     <div key={emp.id} className="rounded-lg border p-2"
                       style={{
@@ -980,26 +923,10 @@ export default function WeeklySummary({ history }) {
 
           {/* Period total */}
           {(() => {
-            const periodTotal = ALL_EMPLOYEES
-              .filter(e => {
-                // Specific employee filter
-                if (selectedEmployee !== 'all' && e.id !== selectedEmployee) return false
-                // Search filter takes priority - if searching, ignore class filter
-                if (searchEmployee) {
-                  return e.name.toLowerCase().includes(searchEmployee.toLowerCase())
-                }
-                // Class filter only applies when not searching
-                if (classFilter === 'servers') {
-                  const isServer = SERVERS.some(s => s.id === e.id)
-                  const isTrainee = e.id === TRAINEE.id
-                  if (!isServer && !isTrainee) return false
-                } else if (classFilter === 'support') {
-                  const isBusboy = BUSBOYS.some(b => b.id === e.id)
-                  if (!isBusboy && e.id !== 'paola' && e.id !== 'maria') return false
-                }
-                return true
-              })
-              .reduce((s, e) => s + employeeSummary[e.id].total, 0)
+            const filtered = filterEmployees(allEmployees).filter(e =>
+              selectedEmployee === 'all' || e.id === selectedEmployee
+            )
+            const periodTotal = filtered.reduce((s, e) => s + (employeeSummary[e.id]?.total || 0), 0)
             return periodTotal > 0 ? (
               <div className="fun-card rounded-2xl border p-4 flex justify-between items-center"
                 style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
