@@ -308,11 +308,12 @@ export default function Calculator({ onSaveHistory, history }) {
       <div className="fun-card rounded-2xl border p-5 transition-all duration-400"
         style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
         <div className="flex items-center justify-between mb-3">
-          <label className="text-xs font-semibold uppercase tracking-wider"
+          <label className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5"
             style={{ color: 'var(--text-secondary)' }}>
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             Total Tips
-            {splitMode === 'lunch' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>LUNCH</span>}
-            {splitMode === 'dinner' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>DINNER</span>}
+            {splitMode === 'lunch' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold inline-flex items-center gap-0.5" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}><svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>LUNCH</span>}
+            {splitMode === 'dinner' && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold inline-flex items-center gap-0.5" style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}><svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>DINNER</span>}
           </label>
           <button
             onClick={cycleSplitMode}
@@ -353,7 +354,10 @@ export default function Calculator({ onSaveHistory, history }) {
       <div className="fun-card rounded-2xl border overflow-hidden transition-all duration-400"
         style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
         <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-          <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Servers</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            Servers
+          </h3>
           <button
             onClick={toggleAllServers}
             className="text-[10px] font-semibold px-2 py-0.5 rounded-md transition-all active:scale-95"
@@ -403,7 +407,10 @@ export default function Calculator({ onSaveHistory, history }) {
         <div className="fun-card rounded-2xl border overflow-hidden transition-all duration-400"
           style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
           <div className="px-4 pt-3 pb-1">
-            <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Bussers</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Bussers
+            </h3>
           </div>
           <div className="px-4 pb-2">
             {modifierServers.length > 0 && (
