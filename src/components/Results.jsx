@@ -62,11 +62,13 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
                 </div>
                 <div className="flex items-center gap-1.5 mt-1">
                   <button onClick={() => adjustGroup(i, -1)}
-                    className="px-2 py-0.5 rounded text-sm font-bold active:scale-95 transition-all"
-                    style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}>-$1</button>
+                    className="w-6 h-6 rounded flex items-center justify-center active:scale-95 transition-all"
+                    style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}>
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M5 12h14" /></svg></button>
                   <button onClick={() => adjustGroup(i, 1)}
-                    className="px-2 py-0.5 rounded text-sm font-bold active:scale-95 transition-all"
-                    style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}>+$1</button>
+                    className="w-6 h-6 rounded flex items-center justify-center active:scale-95 transition-all"
+                    style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}>
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M5 12h14M12 5v14" /></svg></button>
                   {g.count > 1 && (
                     <span className="text-sm ml-0.5" style={{ color: 'var(--text-secondary)' }}>(${g.groupTotal} total)</span>
                   )}
