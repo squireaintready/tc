@@ -202,41 +202,38 @@ function PasswordGate({ password, onUnlock, title }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 space-y-6"
-      style={{ background: 'var(--bg)' }}>
-      <div className="w-16 h-16 rounded-full border flex items-center justify-center"
-        style={{ background: 'var(--surface-lighter)', borderColor: 'var(--border)' }}>
-        <svg className="w-7 h-7" style={{ color: 'var(--text-secondary)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <div className="flex flex-col items-center justify-center px-6 max-w-lg mx-auto"
+      style={{ height: '100svh', background: 'var(--bg)' }}>
+      <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
+        style={{ background: 'var(--surface-lighter)' }}>
+        <svg className="w-5 h-5" style={{ color: 'var(--text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
       </div>
-      <h2 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{title}</h2>
-      <form onSubmit={submit} className="flex gap-2 w-full max-w-xs">
+      <h2 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-secondary)' }}>{title}</h2>
+      <form onSubmit={submit} className="flex gap-2 w-full">
         <input
           type="password"
           value={pw}
           onChange={e => { setPw(e.target.value); setError(false) }}
           placeholder="Password"
           disabled={lockSeconds > 0}
-          className="flex-1 px-4 py-3 rounded-lg focus:outline-none text-sm transition-all duration-200"
+          className="flex-1 px-3 py-2.5 rounded-lg focus:outline-none text-sm transition-all duration-200"
           style={{
-            background: 'var(--input-bg)',
-            borderColor: 'var(--border)',
+            background: 'var(--surface-lighter)',
             color: 'var(--text-primary)',
             opacity: lockSeconds > 0 ? 0.5 : 1,
           }}
-          onFocus={e => { e.target.style.borderColor = 'var(--border-focus)' }}
-          onBlur={e => { e.target.style.borderColor = 'var(--border)' }}
           autoFocus
         />
         <button type="submit"
           disabled={lockSeconds > 0}
-          className="px-5 py-3 active:scale-95 rounded-xl font-semibold transition-all duration-150"
+          className="px-4 py-2.5 active:scale-95 rounded-lg font-semibold text-sm transition-all duration-150"
           style={{ background: 'var(--accent)', color: 'var(--btn-text)', opacity: lockSeconds > 0 ? 0.5 : 1 }}>
           {lockSeconds > 0 ? lockSeconds : 'Go'}
         </button>
       </form>
-      <div className="text-sm font-medium transition-all duration-300"
+      <div className="text-xs font-medium mt-3 transition-all duration-300"
         style={{ color: 'var(--red)', opacity: (error || lockSeconds > 0) ? 1 : 0 }}>
         {lockSeconds > 0 ? `Too many attempts. Try again in ${lockSeconds}s` : 'Wrong password'}
       </div>
