@@ -328,18 +328,14 @@ export default function Calculator({ onSaveHistory, history }) {
 
             {/* Servers */}
             <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
-                <span className={`${T.label} font-semibold uppercase tracking-wider`} style={{ color: 'var(--text-muted)' }}>Servers</span>
-                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
+              <Divider label="Servers" />
+              <div className={`flex flex-wrap ${T.gap} items-center`}>
+                {fullServers.map(s => <Chip key={s.id} label={s.name} selected={!!enabledStaff[s.id]} onTap={() => toggle(s.id)} />)}
                 <button onClick={toggleAllServers}
                   className={`${T.label} font-semibold px-1.5 py-0.5 rounded transition-all active:scale-95`}
                   style={{ color: 'var(--accent-light)' }}>
                   {fullServers.every(s => enabledStaff[s.id]) ? 'None' : 'All'}
                 </button>
-              </div>
-              <div className={`flex flex-wrap ${T.gap}`}>
-                {fullServers.map(s => <Chip key={s.id} label={s.name} selected={!!enabledStaff[s.id]} onTap={() => toggle(s.id)} />)}
               </div>
               {allTrainees.length > 0 && (
                 <>
