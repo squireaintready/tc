@@ -290,6 +290,19 @@ export default function History({ history, onDelete, onEdit }) {
                     )}
                   </div>
                 ))}
+                {(() => {
+                  const bd = editingId === h.id ? editData.breakdown : h.breakdown
+                  const bt = bd.filter(g => g.role === 'busboy' || g.role === 'other' || g.role === 'modifier')
+                    .reduce((s, g) => s + (g.groupTotal || ((g.perPerson || g.amount || 0) * (g.count || 1))), 0)
+                  if (bt <= 0) return null
+                  return (
+                    <div className="flex justify-between items-center py-2"
+                      style={{ background: bd.length % 2 === 1 ? 'var(--surface-light)' : undefined }}>
+                      <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Bussers Total</span>
+                      <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--green)' }}>${bt}</span>
+                    </div>
+                  )
+                })()}
                 {h.remainder > 0 && (
                   <div className="flex justify-between items-center py-2"
                     style={{ borderTop: '1px solid var(--surface-light)' }}>
