@@ -76,9 +76,6 @@ export default function Calculator({ onSaveHistory, history }) {
     try { return JSON.parse(localStorage.getItem('tc-enabled-staff')) || {} } catch { return {} }
   })
   const [traineePercents, setTraineePercents] = useState({})
-  const [modifierToggles, setModifierToggles] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('tc-modifier-toggles')) || {} } catch { return {} }
-  })
   const [pastryBusboy, setPastryBusboy] = useState(() => {
     try { return localStorage.getItem('tc-pastry-busboy') || null } catch { return null }
   })
@@ -97,7 +94,6 @@ export default function Calculator({ onSaveHistory, history }) {
 
   // Persist state
   useEffect(() => { try { localStorage.setItem('tc-enabled-staff', JSON.stringify(enabledStaff)) } catch {} }, [enabledStaff])
-  useEffect(() => { try { localStorage.setItem('tc-modifier-toggles', JSON.stringify(modifierToggles)) } catch {} }, [modifierToggles])
   useEffect(() => { try { localStorage.setItem('tc-pastry-busboy', pastryBusboy || '') } catch {} }, [pastryBusboy])
   useEffect(() => { try { localStorage.setItem('tc-split-mode', splitMode) } catch {} }, [splitMode])
   useEffect(() => { tipsInputRef.current?.focus() }, [])
@@ -106,10 +102,9 @@ export default function Calculator({ onSaveHistory, history }) {
   const trainees = getTrainees(staff)
   const busboys = getBusboys(staff)
   const others = getOthers(staff)
-  const fullServers = servers.filter(s => !s.modifiers?.altPercentage && s.percentage >= 100)
-  const subServers = servers.filter(s => !s.modifiers?.altPercentage && s.percentage < 100)
+  const fullServers = servers.filter(s => s.percentage >= 100)
+  const subServers = servers.filter(s => s.percentage < 100)
   const allTrainees = [...trainees, ...subServers]
-  const modifierServers = servers.filter(s => s.modifiers?.altPercentage)
 
   useEffect(() => {
     setTraineePercents(prev => {
@@ -146,12 +141,6 @@ export default function Calculator({ onSaveHistory, history }) {
       if (h.davidPercent != null) tp['david'] = h.davidPercent
       setTraineePercents(tp)
     }
-    if (h.modifierToggles) { setModifierToggles(h.modifierToggles) }
-    else {
-      const mt = {}
-      if (h.paolaUdon) mt['paola'] = true
-      setModifierToggles(mt)
-    }
     setPastryBusboy(h.pastryBusboy || null)
     setBreakdown([])
     setRemainder(0)
@@ -175,7 +164,6 @@ export default function Calculator({ onSaveHistory, history }) {
     const shift = splitMode !== 'none' ? splitMode : null
     for (const s of fullServers) { if (enabledStaff[s.id]) result.push(shift ? { ...s, shift } : { ...s }) }
     for (const t of allTrainees) { if (enabledStaff[t.id]) { const p = traineePercents[t.id] ?? t.percentage; result.push(shift ? { ...t, percentage: p, shift } : { ...t, percentage: p }) } }
-    for (const s of modifierServers) { if (enabledStaff[s.id]) { const p = modifierToggles[s.id] ? s.modifiers.altPercentage : s.percentage; result.push(shift ? { ...s, percentage: p, role: 'modifier', shift } : { ...s, percentage: p, role: 'modifier' }) } }
     for (const b of busboys) { if (enabledStaff[b.id]) { const isPastry = pastryBusboy === b.id; const bb = isPastry ? { ...b, percentage: 20, name: `${b.name} (Pastry)` } : { ...b }; result.push(shift ? { ...bb, shift } : bb) } }
     for (const o of others) { if (enabledStaff[o.id]) result.push(shift ? { ...o, shift } : { ...o }) }
     return result
@@ -206,7 +194,7 @@ export default function Calculator({ onSaveHistory, history }) {
       date: dateISO, totalTips: parseFloat(totalTips), remainder,
       breakdown: breakdown.map(g => ({ label: g.label, role: g.role, percentage: g.percentage, count: g.count, perPerson: g.perPerson, groupTotal: g.groupTotal })),
       enabledStaff: { ...enabledStaff }, traineePercents: { ...traineePercents },
-      modifierToggles: { ...modifierToggles }, pastryBusboy,
+      pastryBusboy,
     }
     if (splitMode !== 'none') entry.shift = splitMode
     onSaveHistory(entry)
@@ -364,27 +352,9 @@ export default function Calculator({ onSaveHistory, history }) {
             </div>
 
             {/* Bussers */}
-            {(modifierServers.length > 0 || busboys.length > 0 || others.length > 0) && (
+            {(busboys.length > 0 || others.length > 0) && (
               <div>
                 <Divider label="Bussers" />
-                {modifierServers.length > 0 && (
-                  <>
-                    <div className={`flex flex-wrap ${T.gap}`}>
-                      {modifierServers.map(s => (
-                        <Chip key={s.id} label={s.name}
-                          detail={modifierToggles[s.id] ? `${s.modifiers.altPercentage}%` : `${s.percentage}%`}
-                          selected={!!enabledStaff[s.id]} onTap={() => toggle(s.id)} />
-                      ))}
-                    </div>
-                    {modifierServers.filter(s => enabledStaff[s.id]).map(s => (
-                      <div key={s.id} className={`mt-1 flex items-center ${T.gap}`}>
-                        <PillOption label={`${s.modifiers.altLabel} ${s.modifiers.altPercentage}%`} active={!!modifierToggles[s.id]}
-                          onTap={() => setModifierToggles(prev => ({ ...prev, [s.id]: !prev[s.id] }))} />
-                      </div>
-                    ))}
-                  </>
-                )}
-                {busboys.length > 0 && modifierServers.length > 0 && <Divider label="Busboys" />}
                 {busboys.length > 0 && (
                   <>
                     <div className={`flex flex-wrap ${T.gap}`}>
@@ -421,7 +391,7 @@ export default function Calculator({ onSaveHistory, history }) {
                     )}
                   </>
                 )}
-                {others.length > 0 && (busboys.length > 0 || modifierServers.length > 0) && <Divider label="Other" />}
+                {others.length > 0 && busboys.length > 0 && <Divider label="Other" />}
                 {others.length > 0 && (
                   <div className={`flex flex-wrap ${T.gap}`}>
                     {others.map(o => (

@@ -11,13 +11,14 @@ export const DEFAULT_STAFF = [
   { id: 'janet', name: 'Janet', percentage: 100, role: 'server', order: 8, active: true },
   { id: 'johnny', name: 'Johnny', percentage: 100, role: 'server', order: 9, active: true },
   { id: 'david', name: 'David', percentage: 90, role: 'trainee', order: 10, active: true },
-  { id: 'paola', name: 'Paola', percentage: 40, role: 'server', order: 11, active: true, modifiers: { altPercentage: 20, altLabel: 'Udon' } },
+  { id: 'paola', name: 'Paola', percentage: 40, role: 'busboy', order: 11, active: true },
   { id: 'seb', name: 'Seb', percentage: 35, role: 'busboy', order: 12, active: true },
   { id: 'victor', name: 'Victor', percentage: 30, role: 'busboy', order: 13, active: true },
   { id: 'alex', name: 'Alex', percentage: 30, role: 'busboy', order: 14, active: true },
   { id: 'hugo', name: 'Hugo', percentage: 30, role: 'busboy', order: 15, active: true },
   { id: 'moises', name: 'Moises', percentage: 30, role: 'busboy', order: 16, active: true },
-  { id: 'maria', name: 'Maria', percentage: 20, role: 'other', order: 17, active: true },
+  { id: 'paola-udon', name: 'Paola (Udon)', percentage: 20, role: 'other', order: 17, active: true },
+  { id: 'maria', name: 'Maria', percentage: 20, role: 'other', order: 18, active: true },
 ]
 
 export function getServers(staff) {
