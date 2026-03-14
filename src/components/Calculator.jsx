@@ -249,7 +249,7 @@ export default function Calculator({ onSaveHistory, history }) {
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${T.input} font-bold`}
-                  style={{ color: 'var(--text-muted)' }}>$</span>
+                  style={{ color: 'var(--text-secondary)' }}>$</span>
                 <input
                   ref={tipsInputRef}
                   type="text"
