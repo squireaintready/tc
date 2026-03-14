@@ -44,35 +44,44 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
         {(() => {
           let rowIdx = 0
           const rows = []
+          const serversTotal = breakdown.filter(g => g.role === 'server' || g.role === 'trainee')
+            .reduce((s, g) => s + g.groupTotal, 0)
+
           for (let i = 0; i < breakdown.length; i++) {
             const g = breakdown[i]
             const bg = rowIdx % 2 === 1 ? 'var(--surface-light)' : undefined
             rows.push(
-              <div key={i} className="px-3 py-2" style={{ background: bg }}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{g.label}</span>
-                    {g.count > 1 && <span className="text-sm font-bold" style={{ color: 'var(--accent-light)' }}>x{g.count}</span>}
-                    <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{g.percentage}%</span>
-                  </div>
-                  <span className="text-sm font-bold tabular-nums shrink-0 ml-2"
-                    style={{ color: 'var(--green)' }}>
+              <div key={i} className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{g.label}</span>
+                  {g.count > 1 && <span className="text-sm font-bold" style={{ color: 'var(--accent-light)' }}>x{g.count}</span>}
+                  <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{g.percentage}%</span>
+                </div>
+                <div className="flex items-center gap-1 shrink-0 ml-2">
+                  <button onClick={() => adjustGroup(i, -1)}
+                    className="w-5 h-5 rounded flex items-center justify-center active:scale-95 transition-all"
+                    style={{ background: 'var(--surface-light)', color: 'var(--text-secondary)' }}>
+                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M5 12h14" /></svg>
+                  </button>
+                  <span className="text-sm font-bold tabular-nums min-w-[3rem] text-right" style={{ color: 'var(--green)' }}>
                     ${g.perPerson}
                   </span>
-                </div>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <button onClick={() => adjustGroup(i, -1)}
-                    className="w-6 h-6 rounded flex items-center justify-center active:scale-95 transition-all"
-                    style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}>
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M5 12h14" /></svg></button>
                   <button onClick={() => adjustGroup(i, 1)}
-                    className="w-6 h-6 rounded flex items-center justify-center active:scale-95 transition-all"
-                    style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}>
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M5 12h14M12 5v14" /></svg></button>
-                  {g.count > 1 && (
-                    <span className="text-sm ml-0.5" style={{ color: 'var(--text-secondary)' }}>(${g.groupTotal} total)</span>
-                  )}
+                    className="w-5 h-5 rounded flex items-center justify-center active:scale-95 transition-all"
+                    style={{ background: 'var(--surface-light)', color: 'var(--text-secondary)' }}>
+                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M5 12h14M12 5v14" /></svg>
+                  </button>
                 </div>
+              </div>
+            )
+            rowIdx++
+          }
+          if (serversTotal > 0) {
+            const bg = rowIdx % 2 === 1 ? 'var(--surface-light)' : undefined
+            rows.push(
+              <div key="servers-total" className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Servers Total</span>
+                <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--green)' }}>${serversTotal}</span>
               </div>
             )
             rowIdx++
