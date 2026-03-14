@@ -133,19 +133,19 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
         <div className="h-full overflow-y-auto p-4 pb-20" style={{ display: tab === 'Weekly' ? 'block' : 'none' }}>
           {historyUnlocked
             ? <WeeklySummary history={history} />
-            : <HistoryLock onUnlock={onUnlockHistory} />
+            : <HistoryLock onUnlock={onUnlockHistory} title="Weekly Password" />
           }
         </div>
         <div className="h-full overflow-y-auto p-4 pb-20" style={{ display: tab === 'History' ? 'block' : 'none' }}>
           {historyUnlocked
             ? <History history={history} onDelete={deleteHistory} onEdit={editHistory} />
-            : <HistoryLock onUnlock={onUnlockHistory} />
+            : <HistoryLock onUnlock={onUnlockHistory} title="History Password" />
           }
         </div>
         <div className="h-full overflow-y-auto p-4 pb-20" style={{ display: tab === 'Staff' ? 'block' : 'none' }}>
           {historyUnlocked
             ? <StaffManager />
-            : <HistoryLock onUnlock={onUnlockHistory} />
+            : <HistoryLock onUnlock={onUnlockHistory} title="Staff Password" />
           }
         </div>
       </main>
@@ -245,6 +245,6 @@ function SiteLock({ onUnlock }) {
   return <PasswordGate password={import.meta.env.VITE_SITE_PASSWORD} onUnlock={onUnlock} title="Enter Password" fullScreen />
 }
 
-function HistoryLock({ onUnlock }) {
-  return <PasswordGate password={import.meta.env.VITE_HISTORY_PASSWORD} onUnlock={onUnlock} title="History Password" />
+function HistoryLock({ onUnlock, title = 'Password' }) {
+  return <PasswordGate password={import.meta.env.VITE_HISTORY_PASSWORD} onUnlock={onUnlock} title={title} />
 }
