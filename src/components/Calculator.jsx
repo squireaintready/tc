@@ -235,7 +235,7 @@ export default function Calculator({ onSaveHistory, history }) {
       >
         {/* Page 1: Input */}
         <div className="snap-start shrink-0 w-full h-full overflow-y-auto" style={{ scrollbarWidth: 'none', overscrollBehaviorY: 'none' }}>
-          <div className={`${T.pad} py-3 ${T.sectionGap} pb-24`}>
+          <div className={`${T.pad} py-3 ${T.sectionGap} pb-2`}>
             {/* Page header */}
             <div className={`${T.label} font-semibold uppercase tracking-wider flex items-center gap-1.5`}
               style={{ color: 'var(--text-secondary)' }}>
@@ -442,7 +442,7 @@ export default function Calculator({ onSaveHistory, history }) {
 
         {/* Page 2: Results */}
         <div className="snap-start shrink-0 w-full h-full overflow-y-auto" style={{ scrollbarWidth: 'none', overscrollBehaviorY: 'none' }}>
-          <div className={`${T.pad} py-3 pb-24`}>
+          <div className={`${T.pad} py-3 pb-2`}>
             {hasResults ? (
               <Results breakdown={breakdown} remainder={remainder} totalTips={parseFloat(totalTips) || 0}
                 onBreakdownChange={setBreakdown} onRemainderChange={setRemainder} onSave={handleSave} />
