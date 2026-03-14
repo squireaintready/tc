@@ -41,48 +41,61 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
 
       {/* Rows */}
       <div className="rounded-lg overflow-hidden" style={{ background: 'var(--surface-lighter)' }}>
-        {breakdown.map((g, i) => (
-          <div key={i} className="px-3 py-2" style={{ background: i % 2 === 1 ? 'var(--surface-light)' : undefined }}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{g.label}</span>
-                {g.count > 1 && <span className="text-xs font-bold" style={{ color: 'var(--accent-light)' }}>x{g.count}</span>}
-                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{g.percentage}%</span>
+        {(() => {
+          let rowIdx = 0
+          const rows = []
+          for (let i = 0; i < breakdown.length; i++) {
+            const g = breakdown[i]
+            const bg = rowIdx % 2 === 1 ? 'var(--surface-light)' : undefined
+            rows.push(
+              <div key={i} className="px-3 py-2" style={{ background: bg }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{g.label}</span>
+                    {g.count > 1 && <span className="text-sm font-bold" style={{ color: 'var(--accent-light)' }}>x{g.count}</span>}
+                    <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{g.percentage}%</span>
+                  </div>
+                  <span className="text-sm font-bold tabular-nums shrink-0 ml-2"
+                    style={{ color: 'var(--green)' }}>
+                    ${g.perPerson}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <button onClick={() => adjustGroup(i, -1)}
+                    className="px-2 py-0.5 rounded text-sm font-bold active:scale-95 transition-all"
+                    style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}>-$1</button>
+                  <button onClick={() => adjustGroup(i, 1)}
+                    className="px-2 py-0.5 rounded text-sm font-bold active:scale-95 transition-all"
+                    style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}>+$1</button>
+                  {g.count > 1 && (
+                    <span className="text-sm ml-0.5" style={{ color: 'var(--text-secondary)' }}>(${g.groupTotal} total)</span>
+                  )}
+                </div>
               </div>
-              <span className="text-sm font-bold tabular-nums shrink-0 ml-2"
-                style={{ color: 'var(--green)' }}>
-                ${g.perPerson}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 mt-1">
-              <button onClick={() => adjustGroup(i, -1)}
-                className="px-2 py-0.5 rounded text-xs font-bold active:scale-95 transition-all"
-                style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}>-$1</button>
-              <button onClick={() => adjustGroup(i, 1)}
-                className="px-2 py-0.5 rounded text-xs font-bold active:scale-95 transition-all"
-                style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}>+$1</button>
-              {g.count > 1 && (
-                <span className="text-xs ml-0.5" style={{ color: 'var(--text-secondary)' }}>(${g.groupTotal} total)</span>
-              )}
-            </div>
-          </div>
-        ))}
-
-        {bussersTotal > 0 && (
-          <div className="px-3 py-2 flex items-center justify-between"
-            style={{ borderTop: '1px solid var(--surface-light)' }}>
-            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Bussers Total</span>
-            <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--green)' }}>${bussersTotal}</span>
-          </div>
-        )}
-
-        {remainder !== 0 && (
-          <div className="px-3 py-2 flex items-center justify-between"
-            style={{ borderTop: '1px solid var(--surface-light)' }}>
-            <span className="text-sm font-medium" style={{ color: 'var(--amber)' }}>Remainder</span>
-            <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--amber)' }}>${remainder}</span>
-          </div>
-        )}
+            )
+            rowIdx++
+          }
+          if (bussersTotal > 0) {
+            const bg = rowIdx % 2 === 1 ? 'var(--surface-light)' : undefined
+            rows.push(
+              <div key="bussers-total" className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Bussers Total</span>
+                <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--green)' }}>${bussersTotal}</span>
+              </div>
+            )
+            rowIdx++
+          }
+          if (remainder !== 0) {
+            const bg = rowIdx % 2 === 1 ? 'var(--surface-light)' : undefined
+            rows.push(
+              <div key="remainder" className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
+                <span className="text-sm font-semibold" style={{ color: 'var(--amber)' }}>Remainder</span>
+                <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--amber)' }}>${remainder}</span>
+              </div>
+            )
+          }
+          return rows
+        })()}
       </div>
 
       {/* Date picker */}
