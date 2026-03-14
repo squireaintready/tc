@@ -115,58 +115,59 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col max-w-lg mx-auto">
-      <header className="border-b px-5 pt-3 pb-0"
-        style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
-        <div className="flex items-center justify-between mb-3">
-          <h1 className={`text-lg font-bold tracking-tight ${isFun ? 'fun-rainbow' : ''}`}
-            style={{ color: isFun ? undefined : 'var(--text-primary)' }}>
-            Tips Calculator
-          </h1>
-          <ThemeToggle />
-        </div>
-        <nav className="flex -mx-1">
-          {TABS.map(t => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`flex-1 py-2.5 text-sm font-semibold transition-all duration-200 relative flex flex-col items-center gap-0.5`}
-              style={{ color: tab === t ? 'var(--accent-light)' : 'var(--text-secondary)' }}
-            >
-              <TabIcon name={t} active={tab === t} />
-              {t}
-              {tab === t && (
-                <div className="absolute bottom-0 left-1/4 right-1/4 h-0.5 rounded-full"
-                  style={{ background: 'var(--accent)', boxShadow: `0 0 8px var(--accent-glow)` }} />
-              )}
-            </button>
-          ))}
-        </nav>
+    <div className="flex flex-col max-w-lg mx-auto" style={{ height: '100svh' }}>
+      {/* Minimal header */}
+      <header className="shrink-0 px-4 py-2 flex items-center justify-between">
+        <h1 className={`text-sm font-bold tracking-tight ${isFun ? 'fun-rainbow' : ''}`}
+          style={{ color: isFun ? undefined : 'var(--text-primary)' }}>
+          Mizumi
+        </h1>
+        <ThemeToggle />
       </header>
 
-      <main className="flex-1 p-4 pb-8">
-        <div style={{ display: tab === 'Calculator' ? 'block' : 'none' }}>
+      {/* Content */}
+      <main className="flex-1 min-h-0">
+        <div className="h-full" style={{ display: tab === 'Calculator' ? 'block' : 'none' }}>
           <Calculator onSaveHistory={saveHistory} history={history} />
         </div>
-        <div style={{ display: tab === 'Weekly' ? 'block' : 'none' }}>
+        <div className="h-full overflow-y-auto p-4 pb-20" style={{ display: tab === 'Weekly' ? 'block' : 'none' }}>
           {historyUnlocked
             ? <WeeklySummary history={history} />
             : <HistoryLock onUnlock={onUnlockHistory} />
           }
         </div>
-        <div style={{ display: tab === 'History' ? 'block' : 'none' }}>
+        <div className="h-full overflow-y-auto p-4 pb-20" style={{ display: tab === 'History' ? 'block' : 'none' }}>
           {historyUnlocked
             ? <History history={history} onDelete={deleteHistory} onEdit={editHistory} />
             : <HistoryLock onUnlock={onUnlockHistory} />
           }
         </div>
-        <div style={{ display: tab === 'Staff' ? 'block' : 'none' }}>
+        <div className="h-full overflow-y-auto p-4 pb-20" style={{ display: tab === 'Staff' ? 'block' : 'none' }}>
           {historyUnlocked
             ? <StaffManager />
             : <HistoryLock onUnlock={onUnlockHistory} />
           }
         </div>
       </main>
+
+      {/* Bottom tab bar */}
+      <nav className="shrink-0 flex" style={{ background: 'var(--surface-flat, var(--surface))', borderTop: '1px solid var(--border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        {TABS.map(t => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className="flex-1 py-2.5 text-[10px] font-semibold transition-all duration-200 relative flex flex-col items-center gap-0.5"
+            style={{ color: tab === t ? 'var(--accent-light)' : 'var(--text-secondary)' }}
+          >
+            {tab === t && (
+              <div className="absolute top-0 left-1/4 right-1/4 h-0.5 rounded-full"
+                style={{ background: 'var(--accent)' }} />
+            )}
+            <TabIcon name={t} active={tab === t} />
+            {t}
+          </button>
+        ))}
+      </nav>
     </div>
   )
 }
@@ -224,8 +225,8 @@ function PasswordGate({ password, onUnlock, title }) {
             color: 'var(--text-primary)',
             opacity: lockSeconds > 0 ? 0.5 : 1,
           }}
-          onFocus={e => { e.target.style.borderColor = 'var(--border-focus)'; e.target.style.boxShadow = `0 0 0 2px var(--accent-glow)` }}
-          onBlur={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.boxShadow = 'none' }}
+          onFocus={e => { e.target.style.borderColor = 'var(--border-focus)' }}
+          onBlur={e => { e.target.style.borderColor = 'var(--border)' }}
           autoFocus
         />
         <button type="submit"

@@ -56,12 +56,11 @@ export function ThemeToggle() {
   return (
     <button
       onClick={cycle}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 active:scale-95
-        ${isFun ? 'bg-[var(--accent)]/20 text-[var(--accent-light)] fun-float' : 'bg-[var(--surface-lighter)] text-[var(--text-secondary)]'}
-        border border-[var(--border)]`}
+      className="p-1.5 rounded-lg transition-all duration-300 active:scale-95"
+      style={{ color: 'var(--text-muted)' }}
+      title={THEME_LABELS[theme]}
     >
       <ThemeIcon theme={theme} />
-      <span>{THEME_LABELS[theme]}</span>
     </button>
   )
 }

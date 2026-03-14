@@ -183,11 +183,11 @@ export default function StaffManager() {
           {traineeMembers.length > 0 && (
             <>
               <div className="my-1 flex items-center gap-2">
-                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
                 <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Trainees
                 </span>
-                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
               </div>
               <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
                 {traineeMembers.map(renderRow)}
@@ -215,11 +215,11 @@ export default function StaffManager() {
             )}
             {busboyMembers.length > 0 && modifierMembers.length > 0 && (
               <div className="my-1 flex items-center gap-2">
-                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
                 <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Busboys
                 </span>
-                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
               </div>
             )}
             {busboyMembers.length > 0 && (
@@ -229,11 +229,11 @@ export default function StaffManager() {
             )}
             {otherMembers.length > 0 && (busboyMembers.length > 0 || modifierMembers.length > 0) && (
               <div className="my-1 flex items-center gap-2">
-                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
                 <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                   Other
                 </span>
-                <div className="flex-1 h-px" style={{ background: 'var(--accent-glow)' }} />
+                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
               </div>
             )}
             {otherMembers.length > 0 && (
