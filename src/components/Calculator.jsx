@@ -234,7 +234,7 @@ export default function Calculator({ onSaveHistory, history }) {
         style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
       >
         {/* Page 1: Input */}
-        <div className="snap-start shrink-0 w-full h-full overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+        <div className="snap-start shrink-0 w-full h-full overflow-y-auto" style={{ scrollbarWidth: 'none', overscrollBehaviorY: 'none' }}>
           <div className={`${T.pad} py-3 ${T.sectionGap} pb-24`}>
             {/* Page header */}
             <div className={`${T.label} font-semibold uppercase tracking-wider flex items-center gap-1.5`}
@@ -436,7 +436,7 @@ export default function Calculator({ onSaveHistory, history }) {
         </div>
 
         {/* Page 2: Results */}
-        <div className="snap-start shrink-0 w-full h-full overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+        <div className="snap-start shrink-0 w-full h-full overflow-y-auto" style={{ scrollbarWidth: 'none', overscrollBehaviorY: 'none' }}>
           <div className={`${T.pad} py-3 pb-24`}>
             {hasResults ? (
               <Results breakdown={breakdown} remainder={remainder} totalTips={parseFloat(totalTips) || 0}

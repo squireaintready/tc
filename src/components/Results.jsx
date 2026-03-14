@@ -47,7 +47,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{g.label}</span>
                 {g.count > 1 && <span className="text-xs font-bold" style={{ color: 'var(--accent-light)' }}>x{g.count}</span>}
-                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{g.percentage}%</span>
+                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{g.percentage}%</span>
               </div>
               <span className="text-sm font-bold tabular-nums shrink-0 ml-2"
                 style={{ color: 'var(--green)' }}>
@@ -62,7 +62,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
                 className="px-2 py-0.5 rounded text-xs font-bold active:scale-95 transition-all"
                 style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}>+$1</button>
               {g.count > 1 && (
-                <span className="text-xs ml-0.5" style={{ color: 'var(--text-muted)' }}>(${g.groupTotal} total)</span>
+                <span className="text-xs ml-0.5" style={{ color: 'var(--text-secondary)' }}>(${g.groupTotal} total)</span>
               )}
             </div>
           </div>
