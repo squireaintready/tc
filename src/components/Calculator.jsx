@@ -377,9 +377,14 @@ export default function Calculator({ onSaveHistory, history }) {
                       ))}
                     </div>
                     {modifierServers.filter(s => enabledStaff[s.id]).map(s => (
-                      <div key={s.id} className={`mt-1 flex items-center ${T.gap}`}>
-                        <PillOption label={`${s.modifiers.altLabel} ${s.modifiers.altPercentage}%`} active={!!modifierToggles[s.id]}
-                          onTap={() => setModifierToggles(prev => ({ ...prev, [s.id]: !prev[s.id] }))} />
+                      <div key={s.id} className="mt-1">
+                        <button
+                          onClick={() => setModifierToggles(prev => ({ ...prev, [s.id]: !prev[s.id] }))}
+                          className={`${T.label} font-medium`}
+                          style={{ color: modifierToggles[s.id] ? 'var(--accent-light)' : 'var(--text-muted)' }}
+                        >
+                          {modifierToggles[s.id] ? `${s.modifiers.altLabel} ${s.modifiers.altPercentage}%` : s.modifiers.altLabel?.toLowerCase()}
+                        </button>
                       </div>
                     ))}
                   </>
