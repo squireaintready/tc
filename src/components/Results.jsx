@@ -57,17 +57,17 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
                   {g.count > 1 && <span className="text-sm font-bold" style={{ color: 'var(--accent-light)' }}>x{g.count}</span>}
                   <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>{g.percentage}%</span>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 ml-2">
+                <div className="flex items-center shrink-0 ml-2">
                   <button onClick={() => adjustGroup(i, -1)}
-                    className="w-5 h-5 rounded flex items-center justify-center active:scale-95 transition-all"
+                    className="w-5 h-5 rounded flex items-center justify-center active:scale-95 transition-all mr-1"
                     style={{ background: 'var(--surface-light)', color: 'var(--text-secondary)' }}>
                     <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M5 12h14" /></svg>
                   </button>
-                  <span className="text-sm font-bold tabular-nums min-w-[3rem] text-right" style={{ color: 'var(--green)' }}>
+                  <span className="text-sm font-bold tabular-nums w-[4.5rem] text-right" style={{ color: 'var(--green)' }}>
                     ${g.perPerson}
                   </span>
                   <button onClick={() => adjustGroup(i, 1)}
-                    className="w-5 h-5 rounded flex items-center justify-center active:scale-95 transition-all"
+                    className="w-5 h-5 rounded flex items-center justify-center active:scale-95 transition-all ml-1"
                     style={{ background: 'var(--surface-light)', color: 'var(--text-secondary)' }}>
                     <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M5 12h14M12 5v14" /></svg>
                   </button>
@@ -81,7 +81,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
             rows.push(
               <div key="servers-total" className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
                 <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Servers Total</span>
-                <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--green)' }}>${serversTotal}</span>
+                <span className="text-sm font-bold tabular-nums w-[4.5rem] text-right mr-[1.5rem]" style={{ color: 'var(--green)' }}>${serversTotal}</span>
               </div>
             )
             rowIdx++
@@ -91,7 +91,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
             rows.push(
               <div key="bussers-total" className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
                 <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Bussers Total</span>
-                <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--green)' }}>${bussersTotal}</span>
+                <span className="text-sm font-bold tabular-nums w-[4.5rem] text-right mr-[1.5rem]" style={{ color: 'var(--green)' }}>${bussersTotal}</span>
               </div>
             )
             rowIdx++
@@ -101,7 +101,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
             rows.push(
               <div key="remainder" className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
                 <span className="text-sm font-semibold" style={{ color: 'var(--amber)' }}>Remainder</span>
-                <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--amber)' }}>${remainder}</span>
+                <span className="text-sm font-bold tabular-nums w-[4.5rem] text-right mr-[1.5rem]" style={{ color: 'var(--amber)' }}>${remainder}</span>
               </div>
             )
           }
