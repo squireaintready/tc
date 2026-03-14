@@ -69,7 +69,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
                       <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M5 12h14" /></svg>
                     </button>
                   )}
-                  <span className="text-sm font-bold tabular-nums w-[4.5rem] text-right" style={{ color: 'var(--green)' }}>
+                  <span className={`text-sm font-bold tabular-nums w-[4.5rem] ${isActive ? 'text-center' : 'text-right'}`} style={{ color: 'var(--green)' }}>
                     ${g.perPerson}
                   </span>
                   {isActive && (
