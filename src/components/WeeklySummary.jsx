@@ -509,13 +509,13 @@ export default function WeeklySummary({ history }) {
       </h2>
 
       {/* View Toggle */}
-      <div className="fun-card rounded-2xl border p-1 flex gap-1"
-        style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
+      <div className="rounded-lg p-1 flex gap-1"
+        style={{ background: 'var(--surface-lighter)' }}>
         <button
           onClick={() => setViewMode('weekly')}
-          className="flex-1 py-2 rounded-xl text-sm font-semibold transition-all"
+          className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
           style={{
-            background: viewMode === 'weekly' ? 'var(--accent)' : 'transparent',
+            background: viewMode === 'weekly' ? 'var(--accent)' : 'var(--surface-lighter)',
             color: viewMode === 'weekly' ? 'var(--btn-text)' : 'var(--text-secondary)',
           }}
         >
@@ -523,9 +523,9 @@ export default function WeeklySummary({ history }) {
         </button>
         <button
           onClick={() => setViewMode('employee')}
-          className="flex-1 py-2 rounded-xl text-sm font-semibold transition-all"
+          className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
           style={{
-            background: viewMode === 'employee' ? 'var(--accent)' : 'transparent',
+            background: viewMode === 'employee' ? 'var(--accent)' : 'var(--surface-lighter)',
             color: viewMode === 'employee' ? 'var(--btn-text)' : 'var(--text-secondary)',
           }}
         >
@@ -536,8 +536,8 @@ export default function WeeklySummary({ history }) {
       {viewMode === 'weekly' ? (
         <>
           {/* Week picker */}
-      <div className="fun-card rounded-2xl border p-4 flex items-center justify-between"
-        style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
+      <div className="rounded-lg px-3 py-2 flex items-center justify-between"
+        style={{ background: 'var(--surface-lighter)' }}>
         <button onClick={() => setWeekOffset(w => w - 1)}
           className="w-9 h-9 flex items-center justify-center rounded-lg active:scale-90 transition-all"
           style={{ background: 'var(--surface-lighter)', color: 'var(--text-primary)' }}>
@@ -566,27 +566,27 @@ export default function WeeklySummary({ history }) {
       </div>
 
       {/* Grid */}
-      <div className="fun-card rounded-2xl border overflow-hidden"
-        style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
+      <div className="rounded-lg overflow-hidden"
+        style={{ background: 'var(--surface-lighter)' }}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                <th className="text-left px-3 py-2.5 text-xs font-semibold uppercase tracking-wider sticky left-0"
-                  style={{ color: 'var(--text-secondary)', background: 'var(--surface-flat, var(--surface))' }}>
+              <tr style={{ borderBottom: '1px solid var(--surface-light)' }}>
+                <th className="text-left px-3 py-1.5 text-xs font-semibold uppercase tracking-wider sticky left-0"
+                  style={{ color: 'var(--text-muted)', background: 'var(--surface-lighter)' }}>
                   Name
                 </th>
                 {DAYS.map((d, di) => (
-                  <th key={d} className="px-2 py-2.5 text-xs font-semibold uppercase tracking-wider text-center"
+                  <th key={d} className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-center"
                     style={{
-                      color: weekOffset === 0 && di === todayIdx ? 'var(--accent-light)' : 'var(--text-secondary)',
+                      color: weekOffset === 0 && di === todayIdx ? 'var(--accent-light)' : 'var(--text-muted)',
                       background: weekOffset === 0 && di === todayIdx ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : undefined,
                     }}>
                     {d}
                   </th>
                 ))}
-                <th className="px-3 py-2.5 text-xs font-semibold uppercase tracking-wider text-right"
-                  style={{ color: 'var(--accent-light)' }}>
+                <th className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-right"
+                  style={{ color: 'var(--text-muted)' }}>
                   Total
                 </th>
               </tr>
@@ -597,13 +597,13 @@ export default function WeeklySummary({ history }) {
                 if (!row) return null
                 return (
                   <tr key={emp.id}
-                    style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td className="px-3 py-2.5 font-medium whitespace-nowrap sticky left-0"
-                      style={{ color: 'var(--text-primary)', background: 'var(--surface-flat, var(--surface))' }}>
+                    style={{ borderTop: '1px solid var(--surface-light)' }}>
+                    <td className="px-3 py-1.5 text-sm font-medium whitespace-nowrap sticky left-0"
+                      style={{ color: 'var(--text-primary)', background: 'var(--surface-lighter)' }}>
                       {row.name}
                     </td>
                     {row.days.map((val, di) => (
-                      <td key={di} className="px-2 py-2.5 text-center tabular-nums"
+                      <td key={di} className="px-2 py-1.5 text-sm text-center tabular-nums"
                         style={{
                           color: val != null ? 'var(--text-primary)' : 'var(--text-muted)',
                           background: weekOffset === 0 && di === todayIdx ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : undefined,
@@ -611,7 +611,7 @@ export default function WeeklySummary({ history }) {
                         {val != null ? `$${val}` : '-'}
                       </td>
                     ))}
-                    <td className="px-3 py-2.5 text-right font-bold tabular-nums"
+                    <td className="px-3 py-1.5 text-sm text-right font-bold tabular-nums"
                       style={{ color: row.total > 0 ? 'var(--green)' : 'var(--text-muted)' }}>
                       {row.total > 0 ? `$${row.total}` : '-'}
                     </td>
@@ -620,17 +620,17 @@ export default function WeeklySummary({ history }) {
               })}
             </tbody>
             <tfoot>
-              <tr style={{ borderTop: '2px solid var(--accent)' }}>
-                <td className="px-3 py-2.5 font-bold text-xs uppercase tracking-wider sticky left-0"
-                  style={{ color: 'var(--accent-light)', background: 'var(--surface-flat, var(--surface))' }}>
+              <tr style={{ borderTop: '1px solid var(--surface-light)' }}>
+                <td className="px-3 py-1.5 text-sm font-bold uppercase tracking-wider sticky left-0"
+                  style={{ color: 'var(--text-primary)', background: 'var(--surface-lighter)' }}>
                   Total
                 </td>
                 {DAYS.map((_, di) => {
                   const dayTotal = targetEmployees.reduce((sum, emp) => sum + (grid[emp.id]?.days[di] || 0), 0)
                   return (
-                    <td key={di} className="px-2 py-2.5 text-center font-bold tabular-nums"
+                    <td key={di} className="px-2 py-1.5 text-sm text-center font-bold tabular-nums"
                       style={{
-                        color: dayTotal > 0 ? 'var(--accent-light)' : 'var(--text-muted)',
+                        color: dayTotal > 0 ? 'var(--green)' : 'var(--text-muted)',
                         background: weekOffset === 0 && di === todayIdx ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : undefined,
                       }}>
                       {dayTotal > 0 ? `$${dayTotal}` : '-'}
@@ -640,7 +640,7 @@ export default function WeeklySummary({ history }) {
                 {(() => {
                   const grandTotal = targetEmployees.reduce((sum, emp) => sum + (grid[emp.id]?.total || 0), 0)
                   return (
-                    <td className="px-3 py-2.5 text-right font-bold tabular-nums"
+                    <td className="px-3 py-1.5 text-sm text-right font-bold tabular-nums"
                       style={{ color: grandTotal > 0 ? 'var(--green)' : 'var(--text-muted)' }}>
                       {grandTotal > 0 ? `$${grandTotal}` : '-'}
                     </td>
@@ -654,11 +654,10 @@ export default function WeeklySummary({ history }) {
 
       {/* Share button */}
       <button onClick={handleShare}
-        className="w-full py-3.5 active:scale-[0.98] rounded-2xl font-semibold text-base transition-all duration-200"
+        className="w-full py-3.5 active:scale-[0.98] rounded-lg font-semibold text-sm transition-all duration-200"
         style={{
           background: shared ? 'var(--green)' : 'var(--accent)',
           color: 'var(--btn-text)',
-          boxShadow: `0 4px 20px var(--accent-glow)`,
         }}>
         {shared ? 'Copied!' : 'Share Weekly Summary'}
       </button>
@@ -666,82 +665,99 @@ export default function WeeklySummary({ history }) {
       ) : (
         <>
           {/* Period selector */}
-          <div className="fun-card rounded-2xl border p-4"
-            style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
+          <div className="rounded-lg px-3 py-2"
+            style={{ background: 'var(--surface-lighter)' }}>
             <label className="text-xs font-semibold uppercase tracking-wider mb-2 block"
-              style={{ color: 'var(--text-secondary)' }}>
+              style={{ color: 'var(--text-muted)' }}>
               Time Period
             </label>
-            <select
-              value={periodType}
-              onChange={(e) => setPeriodType(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none"
-              style={{
-                background: 'var(--input-bg)',
-                borderColor: 'var(--border)',
-                color: 'var(--text-primary)',
-              }}
-            >
-              <option value="month">This Month</option>
-              <option value="week">This Week</option>
-              <option value="custom">Custom Range</option>
-            </select>
+            <div className="flex gap-1 mb-3">
+              <button
+                onClick={() => setPeriodType('month')}
+                className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+                style={{
+                  background: periodType === 'month' ? 'var(--accent)' : 'var(--surface-lighter)',
+                  color: periodType === 'month' ? 'var(--btn-text)' : 'var(--text-secondary)',
+                }}
+              >
+                This Month
+              </button>
+              <button
+                onClick={() => setPeriodType('week')}
+                className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+                style={{
+                  background: periodType === 'week' ? 'var(--accent)' : 'var(--surface-lighter)',
+                  color: periodType === 'week' ? 'var(--btn-text)' : 'var(--text-secondary)',
+                }}
+              >
+                This Week
+              </button>
+              <button
+                onClick={() => setPeriodType('custom')}
+                className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+                style={{
+                  background: periodType === 'custom' ? 'var(--accent)' : 'var(--surface-lighter)',
+                  color: periodType === 'custom' ? 'var(--btn-text)' : 'var(--text-secondary)',
+                }}
+              >
+                Custom
+              </button>
+            </div>
             {periodType === 'custom' && (
               <div className="grid grid-cols-2 gap-2 mt-3">
                 <div>
                   <label className="text-xs font-semibold mb-1 block"
-                    style={{ color: 'var(--text-secondary)' }}>Start</label>
+                    style={{ color: 'var(--text-muted)' }}>Start</label>
                   <input
                     type="date"
                     value={customStart}
                     onChange={(e) => setCustomStart(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none"
                     style={{
-                      background: 'var(--input-bg)',
-                      borderColor: 'var(--border)',
+                      background: 'var(--surface-light)',
                       color: 'var(--text-primary)',
+                      border: 'none',
                     }}
                   />
                 </div>
                 <div>
                   <label className="text-xs font-semibold mb-1 block"
-                    style={{ color: 'var(--text-secondary)' }}>End</label>
+                    style={{ color: 'var(--text-muted)' }}>End</label>
                   <input
                     type="date"
                     value={customEnd}
                     onChange={(e) => setCustomEnd(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none"
                     style={{
-                      background: 'var(--input-bg)',
-                      borderColor: 'var(--border)',
+                      background: 'var(--surface-light)',
                       color: 'var(--text-primary)',
+                      border: 'none',
                     }}
                   />
                 </div>
               </div>
             )}
             <div className="mt-3 text-sm font-semibold text-center py-2 rounded-lg"
-              style={{ background: 'var(--surface-lighter)', color: 'var(--accent-light)' }}>
+              style={{ background: 'var(--surface-light)', color: 'var(--accent-light)' }}>
               {summaryLabel}
             </div>
           </div>
 
           {/* Employee filter */}
-          <div className="fun-card rounded-2xl border p-4 space-y-3"
-            style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
+          <div className="rounded-lg px-3 py-2 space-y-3"
+            style={{ background: 'var(--surface-lighter)' }}>
             <div>
               <label className="text-xs font-semibold uppercase tracking-wider mb-2 block"
-                style={{ color: 'var(--text-secondary)' }}>
+                style={{ color: 'var(--text-muted)' }}>
                 Class Filter
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <button
                   onClick={() => { setClassFilter('all'); setSelectedEmployee('all'); setSearchEmployee('') }}
                   className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all"
                   style={{
-                    background: classFilter === 'all' ? 'var(--accent)' : 'transparent',
+                    background: classFilter === 'all' ? 'var(--accent)' : 'var(--surface-lighter)',
                     color: classFilter === 'all' ? 'var(--btn-text)' : 'var(--text-secondary)',
-                    border: `1px solid ${classFilter === 'all' ? 'var(--accent)' : 'var(--border)'}`,
                   }}
                 >
                   All
@@ -750,9 +766,8 @@ export default function WeeklySummary({ history }) {
                   onClick={() => { setClassFilter('servers'); setSelectedEmployee('all'); setSearchEmployee('') }}
                   className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all"
                   style={{
-                    background: classFilter === 'servers' ? 'var(--accent)' : 'transparent',
+                    background: classFilter === 'servers' ? 'var(--accent)' : 'var(--surface-lighter)',
                     color: classFilter === 'servers' ? 'var(--btn-text)' : 'var(--text-secondary)',
-                    border: `1px solid ${classFilter === 'servers' ? 'var(--accent)' : 'var(--border)'}`,
                   }}
                 >
                   Servers
@@ -761,9 +776,8 @@ export default function WeeklySummary({ history }) {
                   onClick={() => { setClassFilter('support'); setSelectedEmployee('all'); setSearchEmployee('') }}
                   className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all"
                   style={{
-                    background: classFilter === 'support' ? 'var(--accent)' : 'transparent',
+                    background: classFilter === 'support' ? 'var(--accent)' : 'var(--surface-lighter)',
                     color: classFilter === 'support' ? 'var(--btn-text)' : 'var(--text-secondary)',
-                    border: `1px solid ${classFilter === 'support' ? 'var(--accent)' : 'var(--border)'}`,
                   }}
                 >
                   Support
@@ -772,7 +786,7 @@ export default function WeeklySummary({ history }) {
             </div>
             <div>
               <label className="text-xs font-semibold uppercase tracking-wider mb-2 block"
-                style={{ color: 'var(--text-secondary)' }}>
+                style={{ color: 'var(--text-muted)' }}>
                 Specific Employee
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -783,11 +797,11 @@ export default function WeeklySummary({ history }) {
                     setSelectedEmployee(val)
                     if (val !== 'all') setClassFilter('all')
                   }}
-                  className="px-3 py-2.5 rounded-xl border text-sm focus:outline-none"
+                  className="px-3 py-2 rounded-lg text-sm focus:outline-none"
                   style={{
-                    background: 'var(--input-bg)',
-                    borderColor: 'var(--border)',
+                    background: 'var(--surface-light)',
                     color: 'var(--text-primary)',
+                    border: 'none',
                   }}
                 >
                   <option value="all">All</option>
@@ -803,11 +817,11 @@ export default function WeeklySummary({ history }) {
                     if (e.target.value) setClassFilter('all')
                   }}
                   placeholder="Search..."
-                  className="px-3 py-2.5 rounded-xl border text-sm focus:outline-none"
+                  className="px-3 py-2 rounded-lg text-sm focus:outline-none"
                   style={{
-                    background: 'var(--input-bg)',
-                    borderColor: 'var(--border)',
+                    background: 'var(--surface-light)',
                     color: 'var(--text-primary)',
+                    border: 'none',
                   }}
                 />
               </div>
@@ -816,33 +830,33 @@ export default function WeeklySummary({ history }) {
 
           {/* Employee list or calendar */}
           {selectedEmployee !== 'all' ? (
-            <div className="fun-card rounded-2xl border overflow-hidden"
-              style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
-              <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
-                <div className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>
+            <div className="rounded-lg overflow-hidden"
+              style={{ background: 'var(--surface-lighter)' }}>
+              <div className="px-3 py-2" style={{ borderBottom: '1px solid var(--surface-light)' }}>
+                <div className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
                   {allEmployees.find(e => e.id === selectedEmployee)?.name}
                 </div>
                 <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                   {employeeSummary[selectedEmployee]?.count || 0} {(employeeSummary[selectedEmployee]?.count || 0) === 1 ? 'day' : 'days'} worked
                 </div>
-                <div className="text-2xl font-bold mt-1 tabular-nums" style={{ color: 'var(--green)' }}>
+                <div className="text-sm font-bold mt-1 tabular-nums" style={{ color: 'var(--green)' }}>
                   ${employeeSummary[selectedEmployee]?.total || 0}
                 </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      <th className="text-left px-3 py-2 text-xs font-semibold uppercase tracking-wider"
-                        style={{ color: 'var(--text-secondary)', background: 'var(--surface-flat, var(--surface))' }}>
+                    <tr style={{ borderBottom: '1px solid var(--surface-light)' }}>
+                      <th className="text-left px-3 py-1.5 text-xs font-semibold uppercase tracking-wider"
+                        style={{ color: 'var(--text-muted)', background: 'var(--surface-lighter)' }}>
                         Date
                       </th>
-                      <th className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-center"
-                        style={{ color: 'var(--text-secondary)' }}>
+                      <th className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-center"
+                        style={{ color: 'var(--text-muted)' }}>
                         Day
                       </th>
-                      <th className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-right"
-                        style={{ color: 'var(--text-secondary)' }}>
+                      <th className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-right"
+                        style={{ color: 'var(--text-muted)' }}>
                         Tips
                       </th>
                     </tr>
@@ -868,14 +882,14 @@ export default function WeeklySummary({ history }) {
                         const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                         const dayStr = date.toLocaleDateString('en-US', { weekday: 'short' })
                         return (
-                          <tr key={dateKey} style={{ borderBottom: '1px solid var(--border)' }}>
-                            <td className="px-3 py-2.5 font-medium" style={{ color: 'var(--text-primary)' }}>
+                          <tr key={dateKey} style={{ borderTop: '1px solid var(--surface-light)' }}>
+                            <td className="px-3 py-1.5 text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                               {dateStr}
                             </td>
-                            <td className="px-3 py-2.5 text-center" style={{ color: 'var(--text-secondary)' }}>
+                            <td className="px-3 py-1.5 text-sm text-center" style={{ color: 'var(--text-secondary)' }}>
                               {dayStr}
                             </td>
-                            <td className="px-3 py-2.5 text-right font-bold tabular-nums" style={{ color: 'var(--green)' }}>
+                            <td className="px-3 py-1.5 text-sm text-right font-bold tabular-nums" style={{ color: 'var(--green)' }}>
                               ${dailyPay[dateKey]}
                             </td>
                           </tr>
@@ -893,17 +907,16 @@ export default function WeeklySummary({ history }) {
               </div>
             </div>
           ) : (
-            <div className="fun-card rounded-2xl border p-3"
-              style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
+            <div className="rounded-lg px-3 py-2"
+              style={{ background: 'var(--surface-lighter)' }}>
               <div className={`grid gap-2 ${classFilter === 'all' || searchEmployee ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 {filterEmployees(allEmployees).map(emp => {
                   const data = employeeSummary[emp.id]
                   if (!data) return null
                   return (
-                    <div key={emp.id} className="rounded-lg border p-2"
+                    <div key={emp.id} className="rounded-lg p-2"
                       style={{
-                        background: data.total > 0 ? 'var(--surface-lighter)' : 'transparent',
-                        borderColor: 'var(--border)'
+                        background: data.total > 0 ? 'var(--surface-light)' : 'transparent',
                       }}>
                       <div className="font-semibold text-xs" style={{ color: 'var(--text-primary)' }}>
                         {data.name}
@@ -929,13 +942,13 @@ export default function WeeklySummary({ history }) {
             )
             const periodTotal = filtered.reduce((s, e) => s + (employeeSummary[e.id]?.total || 0), 0)
             return periodTotal > 0 ? (
-              <div className="fun-card rounded-2xl border p-4 flex justify-between items-center"
-                style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
-                <span className="text-sm font-semibold uppercase tracking-wider"
+              <div className="rounded-lg px-3 py-2 flex justify-between items-center"
+                style={{ background: 'var(--surface-lighter)' }}>
+                <span className="text-xs font-semibold uppercase tracking-wider"
                   style={{ color: 'var(--text-secondary)' }}>
                   Period Total
                 </span>
-                <span className="text-2xl font-bold tabular-nums" style={{ color: 'var(--green)' }}>
+                <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--green)' }}>
                   ${periodTotal}
                 </span>
               </div>
@@ -944,11 +957,10 @@ export default function WeeklySummary({ history }) {
 
           {/* Share employee summary button */}
           <button onClick={handleShareEmployeeSummary}
-            className="w-full py-3.5 active:scale-[0.98] rounded-2xl font-semibold text-base transition-all duration-200"
+            className="w-full py-3.5 active:scale-[0.98] rounded-lg font-semibold text-sm transition-all duration-200"
             style={{
               background: shared ? 'var(--green)' : 'var(--accent)',
               color: 'var(--btn-text)',
-              boxShadow: `0 4px 20px var(--accent-glow)`,
             }}>
             {shared ? 'Copied!' : 'Share Employee Summary'}
           </button>
@@ -957,8 +969,8 @@ export default function WeeklySummary({ history }) {
 
       {/* Email settings */}
       <button onClick={() => setShowSettings(!showSettings)}
-        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl border text-sm font-semibold transition-all active:scale-[0.98]"
-        style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)', color: 'var(--text-secondary)' }}>
+        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all active:scale-[0.98]"
+        style={{ background: 'var(--surface-lighter)', color: 'var(--text-secondary)' }}>
         Email Settings
         <svg className={`w-4 h-4 transition-transform duration-200 ${showSettings ? 'rotate-180' : ''}`}
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -966,9 +978,9 @@ export default function WeeklySummary({ history }) {
         </svg>
       </button>
       <div className={`overflow-hidden transition-all duration-300 ${showSettings ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div className="fun-card rounded-2xl border p-4 space-y-2"
-          style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
-          <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+        <div className="rounded-lg px-3 py-2 space-y-2"
+          style={{ background: 'var(--surface-lighter)' }}>
+          <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
             Recipient Email
           </label>
           <input
@@ -976,23 +988,22 @@ export default function WeeklySummary({ history }) {
             value={email}
             onChange={e => saveEmail(e.target.value)}
             placeholder="your@email.com"
-            className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none"
+            className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none"
             style={{
-              background: 'var(--input-bg)',
-              borderColor: emailError ? 'var(--red)' : emailSaved ? 'var(--green)' : 'var(--border)',
+              background: 'var(--surface-light)',
               color: 'var(--text-primary)',
+              border: 'none',
+              borderBottom: emailError ? '2px solid var(--red)' : emailSaved ? '2px solid var(--green)' : '2px solid transparent',
             }}
             onFocus={e => {
               if (!emailError && !emailSaved) {
-                e.target.style.borderColor = 'var(--border-focus)'
-                e.target.style.boxShadow = `0 0 0 2px var(--accent-glow)`
+                e.target.style.borderBottom = '2px solid var(--accent)'
               }
             }}
             onBlur={e => {
               if (!emailError && !emailSaved) {
-                e.target.style.borderColor = 'var(--border)'
+                e.target.style.borderBottom = '2px solid transparent'
               }
-              e.target.style.boxShadow = 'none'
             }}
           />
           {emailError && (

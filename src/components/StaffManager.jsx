@@ -2,6 +2,35 @@ import { useState } from 'react'
 import { useStaffContext } from '../StaffContext'
 import { DEFAULT_PERCENTAGES } from '../utils/constants'
 
+function Divider({ label }) {
+  return (
+    <div className="my-1.5 flex items-center gap-2">
+      <div className="flex-1 h-px" style={{ background: 'var(--surface-light)' }} />
+      <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>{label}</span>
+      <div className="flex-1 h-px" style={{ background: 'var(--surface-light)' }} />
+    </div>
+  )
+}
+
+function StaffChip({ emp, selected, onTap }) {
+  return (
+    <button
+      onClick={onTap}
+      className="px-2.5 py-1 rounded-lg text-sm font-medium transition-all duration-150 active:scale-95 select-none"
+      style={{
+        background: selected ? 'var(--accent)' : 'var(--surface-lighter)',
+        color: selected ? 'var(--btn-text)' : 'var(--text-secondary)',
+      }}
+    >
+      {emp.name}
+      <span className="ml-1 text-xs opacity-70">{emp.percentage}%</span>
+      {emp.modifiers?.altLabel && (
+        <span className="ml-1 text-xs opacity-70">{emp.modifiers.altLabel}</span>
+      )}
+    </button>
+  )
+}
+
 export default function StaffManager() {
   const { staff, addEmployee, removeEmployee, updateEmployee, graduateTrainee } = useStaffContext()
 
@@ -9,10 +38,12 @@ export default function StaffManager() {
   const [newName, setNewName] = useState('')
   const [newRole, setNewRole] = useState('server')
   const [newPercent, setNewPercent] = useState(DEFAULT_PERCENTAGES.server)
+  const [selectedId, setSelectedId] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [editData, setEditData] = useState({})
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const [confirmGraduateId, setConfirmGraduateId] = useState(null)
+  const [confirmSaveId, setConfirmSaveId] = useState(null)
 
   const handleRoleChange = (role) => {
     setNewRole(role)
@@ -34,6 +65,7 @@ export default function StaffManager() {
     if (confirmDeleteId === id) {
       removeEmployee(id)
       setConfirmDeleteId(null)
+      setSelectedId(null)
     } else {
       setConfirmDeleteId(id)
       setTimeout(() => setConfirmDeleteId(prev => prev === id ? null : prev), 3000)
@@ -44,6 +76,7 @@ export default function StaffManager() {
     if (confirmGraduateId === id) {
       graduateTrainee(id)
       setConfirmGraduateId(null)
+      setSelectedId(null)
     } else {
       setConfirmGraduateId(id)
       setTimeout(() => setConfirmGraduateId(prev => prev === id ? null : prev), 3000)
@@ -56,22 +89,26 @@ export default function StaffManager() {
   }
 
   const saveEdit = (id) => {
-    if (editData.name?.trim() && editData.percentage > 0) {
-      updateEmployee(id, { name: editData.name.trim(), percentage: editData.percentage })
+    if (confirmSaveId === id) {
+      if (editData.name?.trim() && editData.percentage > 0) {
+        updateEmployee(id, { name: editData.name.trim(), percentage: editData.percentage })
+      }
+      setConfirmSaveId(null)
+      setEditingId(null)
+      setEditData({})
+      setSelectedId(null)
+    } else {
+      setConfirmSaveId(id)
+      setTimeout(() => setConfirmSaveId(prev => prev === id ? null : prev), 3000)
     }
-    setEditingId(null)
-    setEditData({})
   }
 
   const isTraineelike = (s) => s.role === 'trainee' || (s.role === 'server' && s.percentage < 100 && !s.modifiers?.altPercentage)
 
-  // Servers card: full servers + trainees (sub-100%)
   const fullServers = staff.filter(s => s.role === 'server' && s.active !== false && s.percentage >= 100 && !s.modifiers?.altPercentage)
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
   const traineeMembers = staff.filter(s => s.active !== false && isTraineelike(s))
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
-
-  // Bussers card: modifier servers (Paola) + busboys + other (Maria)
   const modifierMembers = staff.filter(s => s.active !== false && s.role === 'server' && s.modifiers?.altPercentage)
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
   const busboyMembers = staff.filter(s => s.active !== false && s.role === 'busboy')
@@ -79,198 +116,162 @@ export default function StaffManager() {
   const otherMembers = staff.filter(s => s.active !== false && s.role === 'other')
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
 
-  const renderRow = (emp) => (
-    <div key={emp.id} className="py-3 flex items-center justify-between gap-2" style={{ borderColor: 'var(--border)' }}>
-      {editingId === emp.id ? (
-        <div className="flex-1 flex items-center gap-2">
-          <input
-            type="text"
-            value={editData.name}
-            onChange={e => setEditData(d => ({ ...d, name: e.target.value }))}
-            className="flex-1 px-2 py-1 rounded-lg border text-sm focus:outline-none"
-            style={{ background: 'var(--input-bg)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-            autoFocus
-          />
-          <input
-            type="number"
-            value={editData.percentage}
-            onChange={e => setEditData(d => ({ ...d, percentage: Number(e.target.value) }))}
-            className="w-16 px-2 py-1 rounded-lg border text-sm text-center focus:outline-none"
-            style={{ background: 'var(--input-bg)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
-            min={1} max={100}
-          />
-          <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>%</span>
-        </div>
-      ) : (
-        <div className="flex items-center gap-2">
-          <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{emp.name}</span>
-          <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{emp.percentage}%</span>
-          {emp.modifiers?.altLabel && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase"
-              style={{ background: 'color-mix(in srgb, var(--accent) 20%, transparent)', color: 'var(--accent-light)' }}>
-              {emp.modifiers.altLabel} {emp.modifiers.altPercentage}%
-            </span>
-          )}
-        </div>
-      )}
-      <div className="flex gap-1.5 shrink-0">
-        {isTraineelike(emp) && editingId !== emp.id && (
-          <button
-            onClick={() => handleGraduate(emp.id)}
-            className="text-[10px] font-semibold px-2 py-1 rounded-lg border transition-all active:scale-95"
-            style={{
-              color: confirmGraduateId === emp.id ? 'var(--btn-text)' : 'var(--green)',
-              background: confirmGraduateId === emp.id ? 'var(--green)' : 'transparent',
-              borderColor: confirmGraduateId === emp.id ? 'var(--green)' : 'color-mix(in srgb, var(--green) 30%, transparent)',
-            }}
-          >
-            {confirmGraduateId === emp.id ? 'Confirm?' : 'Graduate'}
-          </button>
-        )}
-        {editingId === emp.id ? (
-          <button
-            onClick={() => saveEdit(emp.id)}
-            className="text-[10px] font-semibold px-2 py-1 rounded-lg border transition-all active:scale-95"
-            style={{ color: 'var(--green)', background: 'color-mix(in srgb, var(--green) 15%, transparent)', borderColor: 'color-mix(in srgb, var(--green) 30%, transparent)' }}
-          >
-            Save
-          </button>
-        ) : (
-          <button
-            onClick={() => startEdit(emp)}
-            className="text-[10px] font-semibold px-2 py-1 rounded-lg border transition-all active:scale-95"
-            style={{ color: 'var(--accent-light)', background: 'transparent', borderColor: 'color-mix(in srgb, var(--accent) 30%, transparent)' }}
-          >
-            Edit
-          </button>
-        )}
-        <button
-          onClick={() => handleDelete(emp.id)}
-          className="text-[10px] font-semibold px-2 py-1 rounded-lg border transition-all active:scale-95"
-          style={{
-            color: confirmDeleteId === emp.id ? 'var(--btn-text)' : 'var(--red)',
-            background: confirmDeleteId === emp.id ? 'var(--red)' : 'transparent',
-            borderColor: confirmDeleteId === emp.id ? 'var(--red)' : 'color-mix(in srgb, var(--red) 30%, transparent)',
-          }}
-        >
-          {confirmDeleteId === emp.id ? 'Confirm?' : 'Delete'}
-        </button>
-      </div>
+  const allStaff = [...fullServers, ...traineeMembers, ...modifierMembers, ...busboyMembers, ...otherMembers]
+  const selectedEmp = allStaff.find(s => s.id === selectedId)
+
+  const handleChipTap = (id) => {
+    if (selectedId === id) {
+      setSelectedId(null)
+      setEditingId(null)
+    } else {
+      setSelectedId(id)
+      setEditingId(null)
+      setConfirmDeleteId(null)
+      setConfirmGraduateId(null)
+    }
+  }
+
+  const renderChips = (members) => (
+    <div className="flex flex-wrap gap-1.5">
+      {members.map(emp => (
+        <StaffChip key={emp.id} emp={emp} selected={selectedId === emp.id} onTap={() => handleChipTap(emp.id)} />
+      ))}
     </div>
   )
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xs font-semibold uppercase tracking-wider px-1 flex items-center gap-1.5"
-        style={{ color: 'var(--text-secondary)' }}>
-        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-        Staff Management
-      </h2>
+    <div className="space-y-3">
+      {/* Servers */}
+      <Divider label={`Servers (${fullServers.length})`} />
+      {renderChips(fullServers)}
 
-      {/* Servers card */}
-      <div className="fun-card rounded-2xl border overflow-hidden transition-all duration-400"
-        style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
-        <div className="px-4 pt-3 pb-1">
-          <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-            Servers ({fullServers.length + traineeMembers.length})
-          </h3>
-        </div>
-        <div className="px-4 pb-2">
-          <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
-            {fullServers.map(renderRow)}
-          </div>
-          {traineeMembers.length > 0 && (
-            <>
-              <div className="my-1 flex items-center gap-2">
-                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
-                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
-                  Trainees
-                </span>
-                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
-              </div>
-              <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
-                {traineeMembers.map(renderRow)}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      {traineeMembers.length > 0 && (
+        <>
+          <Divider label="Trainees" />
+          {renderChips(traineeMembers)}
+        </>
+      )}
 
-      {/* Bussers card */}
+      {/* Bussers */}
       {(modifierMembers.length > 0 || busboyMembers.length > 0 || otherMembers.length > 0) && (
-        <div className="fun-card rounded-2xl border overflow-hidden transition-all duration-400"
-          style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
-          <div className="px-4 pt-3 pb-1">
-            <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-              Bussers ({modifierMembers.length + busboyMembers.length + otherMembers.length})
-            </h3>
+        <>
+          <Divider label="Bussers" />
+          {modifierMembers.length > 0 && renderChips(modifierMembers)}
+          {busboyMembers.length > 0 && modifierMembers.length > 0 && <Divider label="Busboys" />}
+          {busboyMembers.length > 0 && renderChips(busboyMembers)}
+          {otherMembers.length > 0 && (busboyMembers.length > 0 || modifierMembers.length > 0) && <Divider label="Other" />}
+          {otherMembers.length > 0 && renderChips(otherMembers)}
+        </>
+      )}
+
+      {/* Selected employee actions */}
+      {selectedEmp && !editingId && (
+        <div className="rounded-lg px-3 py-2 space-y-2" style={{ background: 'var(--surface-lighter)' }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{selectedEmp.name}</span>
+              <span className="text-xs ml-1.5" style={{ color: 'var(--text-secondary)' }}>{selectedEmp.percentage}%</span>
+              {selectedEmp.modifiers?.altLabel && (
+                <span className="text-xs ml-1.5 px-1 py-0.5 rounded font-bold uppercase"
+                  style={{ background: 'color-mix(in srgb, var(--accent) 15%, transparent)', color: 'var(--accent-light)' }}>
+                  {selectedEmp.modifiers.altLabel} {selectedEmp.modifiers.altPercentage}%
+                </span>
+              )}
+            </div>
           </div>
-          <div className="px-4 pb-2">
-            {modifierMembers.length > 0 && (
-              <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
-                {modifierMembers.map(renderRow)}
-              </div>
+          <div className="flex gap-1.5">
+            <button onClick={() => startEdit(selectedEmp)}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+              style={{ color: 'var(--accent-light)', background: 'var(--surface-light)' }}>
+              Edit
+            </button>
+            <button onClick={() => handleDelete(selectedEmp.id)}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+              style={{
+                color: confirmDeleteId === selectedEmp.id ? 'var(--btn-text)' : 'var(--red)',
+                background: confirmDeleteId === selectedEmp.id ? 'var(--red)' : 'var(--surface-light)',
+              }}>
+              {confirmDeleteId === selectedEmp.id ? 'Confirm?' : 'Delete'}
+            </button>
+            {isTraineelike(selectedEmp) && (
+              <button onClick={() => handleGraduate(selectedEmp.id)}
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+                style={{
+                  color: confirmGraduateId === selectedEmp.id ? 'var(--btn-text)' : 'var(--green)',
+                  background: confirmGraduateId === selectedEmp.id ? 'var(--green)' : 'var(--surface-light)',
+                }}>
+                {confirmGraduateId === selectedEmp.id ? 'Confirm?' : 'Graduate'}
+              </button>
             )}
-            {busboyMembers.length > 0 && modifierMembers.length > 0 && (
-              <div className="my-1 flex items-center gap-2">
-                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
-                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
-                  Busboys
-                </span>
-                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
-              </div>
-            )}
-            {busboyMembers.length > 0 && (
-              <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
-                {busboyMembers.map(renderRow)}
-              </div>
-            )}
-            {otherMembers.length > 0 && (busboyMembers.length > 0 || modifierMembers.length > 0) && (
-              <div className="my-1 flex items-center gap-2">
-                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
-                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
-                  Other
-                </span>
-                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
-              </div>
-            )}
-            {otherMembers.length > 0 && (
-              <div className="divide-y" style={{ borderColor: 'var(--border)' }}>
-                {otherMembers.map(renderRow)}
-              </div>
-            )}
+          </div>
+        </div>
+      )}
+
+      {/* Edit form */}
+      {editingId && (
+        <div className="rounded-lg px-3 py-2 space-y-2" style={{ background: 'var(--surface-lighter)' }}>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={editData.name}
+              onChange={e => setEditData(d => ({ ...d, name: e.target.value }))}
+              className="flex-1 px-2 py-1.5 rounded-lg text-sm focus:outline-none"
+              style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}
+              autoFocus
+            />
+            <input
+              type="number"
+              value={editData.percentage}
+              onChange={e => setEditData(d => ({ ...d, percentage: Number(e.target.value) }))}
+              className="w-16 px-2 py-1.5 rounded-lg text-sm text-center focus:outline-none"
+              style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}
+              min={1} max={100}
+            />
+            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>%</span>
+          </div>
+          <div className="flex gap-1.5">
+            <button onClick={() => saveEdit(editingId)}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+              style={{
+                color: confirmSaveId === editingId ? 'var(--btn-text)' : 'var(--green)',
+                background: confirmSaveId === editingId ? 'var(--green)' : 'var(--surface-light)',
+              }}>
+              {confirmSaveId === editingId ? 'Confirm?' : 'Save'}
+            </button>
+            <button onClick={() => { setEditingId(null); setSelectedId(null) }}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+              style={{ color: 'var(--text-secondary)', background: 'var(--surface-light)' }}>
+              Cancel
+            </button>
           </div>
         </div>
       )}
 
       {/* Add Employee */}
       <button
-        onClick={() => setShowAdd(!showAdd)}
-        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl border text-sm font-semibold transition-all active:scale-[0.98]"
-        style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)', color: 'var(--accent-light)' }}
+        onClick={() => { setShowAdd(!showAdd); setSelectedId(null); setEditingId(null) }}
+        className="w-full flex items-center justify-center py-2 rounded-lg text-xs font-semibold transition-all active:scale-[0.98]"
+        style={{ background: 'var(--surface-lighter)', color: 'var(--accent-light)' }}
       >
-        {showAdd ? 'Cancel' : 'Add Employee'}
+        {showAdd ? 'Cancel' : '+ Add Employee'}
       </button>
       {showAdd && (
-        <div className="fun-card rounded-2xl border p-4 space-y-3"
-          style={{ background: 'var(--surface-flat, var(--surface))', borderColor: 'var(--border)' }}>
+        <div className="rounded-lg px-3 space-y-2 py-2" style={{ background: 'var(--surface-lighter)' }}>
           <input
             type="text"
             value={newName}
             onChange={e => setNewName(e.target.value)}
-            placeholder="Employee name"
-            className="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none"
-            style={{ background: 'var(--input-bg)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+            placeholder="Name"
+            className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none"
+            style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}
             autoFocus
           />
           <div className="grid grid-cols-2 gap-2">
             <select
               value={newRole}
               onChange={e => handleRoleChange(e.target.value)}
-              className="px-3 py-2.5 rounded-xl border text-sm focus:outline-none"
-              style={{ background: 'var(--input-bg)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+              className="px-3 py-2 rounded-lg text-sm focus:outline-none"
+              style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}
             >
               <option value="server">Server</option>
               <option value="trainee">Trainee</option>
@@ -282,17 +283,17 @@ export default function StaffManager() {
                 type="number"
                 value={newPercent}
                 onChange={e => setNewPercent(Number(e.target.value))}
-                className="flex-1 px-3 py-2.5 rounded-xl border text-sm focus:outline-none"
-                style={{ background: 'var(--input-bg)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                className="flex-1 px-3 py-2 rounded-lg text-sm focus:outline-none"
+                style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}
                 min={1} max={100}
               />
-              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>%</span>
+              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>%</span>
             </div>
           </div>
           <button
             onClick={handleAdd}
             disabled={!newName.trim()}
-            className="w-full py-3 rounded-xl font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-30"
+            className="w-full py-2 rounded-lg font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-30"
             style={{ background: 'var(--accent)', color: 'var(--btn-text)' }}
           >
             Add

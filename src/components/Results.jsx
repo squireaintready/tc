@@ -1,10 +1,7 @@
 import { useState } from 'react'
-import { useTheme } from '../ThemeContext'
 
 export default function Results({ breakdown, remainder, totalTips, onBreakdownChange, onRemainderChange, onSave }) {
   if (!breakdown.length) return null
-  const { theme } = useTheme()
-  const isFun = theme === 'fun'
   const [saved, setSaved] = useState(false)
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [selectedDate, setSelectedDate] = useState(() => new Date())
@@ -12,7 +9,6 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
   const handleSave = () => {
     onSave(selectedDate.toISOString())
     setSaved(true)
-    setTimeout(() => setSaved(false), 1500)
   }
 
   const adjustGroup = (index, delta) => {
@@ -46,15 +42,15 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
       {/* Rows */}
       <div className="rounded-lg overflow-hidden" style={{ background: 'var(--surface-lighter)' }}>
         {breakdown.map((g, i) => (
-          <div key={i} className="px-4 py-2">
+          <div key={i} className="px-3 py-2" style={i > 0 ? { borderTop: '1px solid var(--surface-light)' } : undefined}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{g.label}</span>
-                {g.count > 1 && <span className="text-xs font-bold" style={{ color: 'var(--accent)' }}>x{g.count}</span>}
+                {g.count > 1 && <span className="text-xs font-bold" style={{ color: 'var(--accent-light)' }}>x{g.count}</span>}
                 <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{g.percentage}%</span>
               </div>
-              <span className={`text-lg font-bold tabular-nums shrink-0 ml-2 ${isFun ? 'fun-amount' : ''}`}
-                style={{ color: isFun ? undefined : 'var(--green)' }}>
+              <span className="text-sm font-bold tabular-nums shrink-0 ml-2"
+                style={{ color: 'var(--green)' }}>
                 ${g.perPerson}
               </span>
             </div>
@@ -73,56 +69,55 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
         ))}
 
         {bussersTotal > 0 && (
-          <div className="px-4 py-2 flex items-center justify-between"
+          <div className="px-3 py-2 flex items-center justify-between"
             style={{ borderTop: '1px solid var(--surface-light)' }}>
             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Bussers Total</span>
-            <span className="text-lg font-bold tabular-nums" style={{ color: 'var(--green)' }}>${bussersTotal}</span>
+            <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--green)' }}>${bussersTotal}</span>
           </div>
         )}
 
         {remainder !== 0 && (
-          <div className="px-4 py-2 flex items-center justify-between"
+          <div className="px-3 py-2 flex items-center justify-between"
             style={{ borderTop: '1px solid var(--surface-light)' }}>
             <span className="text-sm font-medium" style={{ color: 'var(--amber)' }}>Remainder</span>
-            <span className="text-lg font-bold tabular-nums" style={{ color: 'var(--amber)' }}>${remainder}</span>
+            <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--amber)' }}>${remainder}</span>
           </div>
         )}
       </div>
 
-      {/* Date + Save */}
-      {!saved && (
-        <button
-          onClick={() => setShowDatePicker(!showDatePicker)}
-          className="w-full py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1"
-          style={{ background: 'var(--surface-lighter)', color: 'var(--text-secondary)' }}
-        >
-          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          {new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-        </button>
-      )}
+      {/* Date picker */}
+      <button
+        onClick={() => setShowDatePicker(!showDatePicker)}
+        className="w-full py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1"
+        style={{ background: 'var(--surface-lighter)', color: 'var(--text-secondary)' }}
+      >
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        {new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+      </button>
       {showDatePicker && (
         <input
           type="datetime-local"
           value={selectedDate.toISOString().slice(0, 16)}
           onChange={e => setSelectedDate(new Date(e.target.value))}
-          className="w-full px-4 py-2 rounded-lg text-sm"
+          className="w-full px-3 py-2 rounded-lg text-sm"
           style={{ background: 'var(--surface-lighter)', color: 'var(--text-primary)' }}
         />
       )}
 
+      {/* Save button — stays as "Saved" permanently after saving */}
       <button
         onClick={handleSave}
         disabled={saved}
-        className="w-full py-2.5 active:scale-[0.98] rounded-lg font-bold text-sm transition-all duration-300"
+        className="w-full py-2.5 active:scale-[0.98] disabled:active:scale-100 rounded-lg font-bold text-sm transition-all duration-200"
         style={{
           background: saved ? 'var(--green)' : 'color-mix(in srgb, var(--green) 15%, transparent)',
           color: saved ? 'var(--btn-text)' : 'var(--green)',
-          transform: saved ? 'scale(1.02)' : undefined,
+          opacity: saved ? 0.7 : 1,
         }}
       >
-        {saved ? '✓ Saved!' : 'Save to History'}
+        {saved ? 'Saved' : 'Save to History'}
       </button>
     </div>
   )

@@ -236,6 +236,15 @@ export default function Calculator({ onSaveHistory, history }) {
         {/* Page 1: Input */}
         <div className="snap-start shrink-0 w-full h-full overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
           <div className={`${T.pad} py-3 ${T.sectionGap} pb-24`}>
+            {/* Page header */}
+            <div className={`${T.label} font-semibold uppercase tracking-wider flex items-center gap-1.5`}
+              style={{ color: 'var(--text-secondary)' }}>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              Tip Calculator
+            </div>
+
             {/* Tips input */}
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
@@ -247,7 +256,13 @@ export default function Calculator({ onSaveHistory, history }) {
                   inputMode="decimal"
                   pattern="[0-9]*\.?[0-9]*"
                   value={totalTips}
-                  onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setTotalTips(v) }}
+                  onChange={e => {
+                    let v = e.target.value
+                    if (v !== '' && !/^\d*\.?\d*$/.test(v)) return
+                    // Strip leading zeros (but keep "0." for decimals)
+                    if (v.length > 1 && v[0] === '0' && v[1] !== '.') v = v.replace(/^0+/, '') || ''
+                    setTotalTips(v)
+                  }}
                   onKeyDown={e => { if (e.key === 'Enter') calculate() }}
                   placeholder="0"
                   className={`w-full pl-8 pr-3 py-2 ${T.input} font-bold rounded-lg focus:outline-none ${isFun ? 'fun-float' : ''}`}
@@ -266,7 +281,7 @@ export default function Calculator({ onSaveHistory, history }) {
               >
                 {splitMode === 'lunch' && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
                 {splitMode === 'dinner' && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>}
-                {splitMode === 'none' ? 'shift' : splitMode}
+                {splitMode === 'none' ? 'all day' : splitMode}
               </button>
             </div>
 
@@ -313,13 +328,16 @@ export default function Calculator({ onSaveHistory, history }) {
 
             {/* Servers */}
             <div>
-              <SectionLabel right={
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
+                <span className={`${T.label} font-semibold uppercase tracking-wider`} style={{ color: 'var(--text-muted)' }}>Servers</span>
+                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
                 <button onClick={toggleAllServers}
                   className={`${T.label} font-semibold px-1.5 py-0.5 rounded transition-all active:scale-95`}
-                  style={{ color: 'var(--accent-light)', background: 'color-mix(in srgb, var(--accent) 8%, transparent)' }}>
+                  style={{ color: 'var(--accent-light)' }}>
                   {fullServers.every(s => enabledStaff[s.id]) ? 'None' : 'All'}
                 </button>
-              }>Servers</SectionLabel>
+              </div>
               <div className={`flex flex-wrap ${T.gap}`}>
                 {fullServers.map(s => <Chip key={s.id} label={s.name} selected={!!enabledStaff[s.id]} onTap={() => toggle(s.id)} />)}
               </div>
@@ -348,7 +366,7 @@ export default function Calculator({ onSaveHistory, history }) {
             {/* Bussers */}
             {(modifierServers.length > 0 || busboys.length > 0 || others.length > 0) && (
               <div>
-                <SectionLabel>Bussers</SectionLabel>
+                <Divider label="Bussers" />
                 {modifierServers.length > 0 && (
                   <>
                     <div className={`flex flex-wrap ${T.gap}`}>
@@ -359,12 +377,9 @@ export default function Calculator({ onSaveHistory, history }) {
                       ))}
                     </div>
                     {modifierServers.filter(s => enabledStaff[s.id]).map(s => (
-                      <div key={s.id} className={`mt-1 flex items-center ${T.gap} flex-wrap`}>
-                        <span className={`${T.label} font-medium`} style={{ color: 'var(--text-muted)' }}>{s.name}:</span>
-                        <PillOption label={`Regular ${s.percentage}%`} active={!modifierToggles[s.id]}
-                          onTap={() => setModifierToggles(prev => ({ ...prev, [s.id]: false }))} />
+                      <div key={s.id} className={`mt-1 flex items-center ${T.gap}`}>
                         <PillOption label={`${s.modifiers.altLabel} ${s.modifiers.altPercentage}%`} active={!!modifierToggles[s.id]}
-                          onTap={() => setModifierToggles(prev => ({ ...prev, [s.id]: true }))} />
+                          onTap={() => setModifierToggles(prev => ({ ...prev, [s.id]: !prev[s.id] }))} />
                       </div>
                     ))}
                   </>
@@ -386,7 +401,7 @@ export default function Calculator({ onSaveHistory, history }) {
                           className={`${T.label} font-medium flex items-center gap-0.5`}
                           style={{ color: pastryBusboy ? 'var(--accent-light)' : 'var(--text-muted)' }}
                         >
-                          {pastryBusboy ? `Pastry: ${enabledBusboys.find(b => b.id === pastryBusboy)?.name || ''}` : 'pastry?'}
+                          {pastryBusboy ? `Pastry: ${enabledBusboys.find(b => b.id === pastryBusboy)?.name || ''}` : 'pastry'}
                           <svg className={`w-2.5 h-2.5 transition-transform duration-200 ${showPastry ? 'rotate-180' : ''}`}
                             fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />

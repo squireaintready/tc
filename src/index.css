@@ -4,25 +4,25 @@
 
 /* ===== THEME VARIABLES ===== */
 :root, [data-theme="dark"] {
-  --bg: #08060e;
-  --surface: #100e18;
-  --surface-light: #16141e;
-  --surface-lighter: #1c1a26;
+  --bg: #0a0a0c;
+  --surface: #111114;
+  --surface-light: #18181c;
+  --surface-lighter: #1f1f24;
   --border: rgba(255,255,255,0.03);
-  --border-focus: #3a3070;
-  --text-primary: #8088a0;
-  --text-secondary: #484860;
-  --text-muted: #28263a;
-  --accent: #3a3070;
-  --accent-light: #585090;
+  --border-focus: #404050;
+  --text-primary: #888890;
+  --text-secondary: #505058;
+  --text-muted: #2a2a30;
+  --accent: #404050;
+  --accent-light: #6a6a80;
   --accent-glow: rgba(0,0,0,0);
   --green: #2a8a58;
   --red: #a04040;
   --amber: #907020;
-  --btn-text: #c0c4d0;
-  --toggle-bg: #1c1a26;
-  --toggle-dot: #8088a0;
-  --input-bg: #16141e;
+  --btn-text: #c8c8d0;
+  --toggle-bg: #1f1f24;
+  --toggle-dot: #888890;
+  --input-bg: #18181c;
 }
 
 [data-theme="light"] {
@@ -31,12 +31,12 @@
   --surface-light: #f8f9fb;
   --surface-lighter: #eaecf0;
   --border: rgba(0,0,0,0.05);
-  --border-focus: #5048b0;
+  --border-focus: #3a8a60;
   --text-primary: #303840;
   --text-secondary: #707880;
   --text-muted: #c0c4cc;
-  --accent: #5048b0;
-  --accent-light: #5048b0;
+  --accent: #3a8a60;
+  --accent-light: #3a8a60;
   --accent-glow: rgba(0,0,0,0);
   --green: #2a8a50;
   --red: #b03535;
@@ -48,26 +48,26 @@
 }
 
 [data-theme="fun"] {
-  --bg: #060c10;
-  --surface: linear-gradient(135deg, #0a1820 0%, #061018 100%);
-  --surface-flat: #0a1820;
-  --surface-light: #0e1e28;
-  --surface-lighter: #142830;
-  --border: rgba(60,180,180,0.08);
-  --border-focus: #2898a0;
-  --text-primary: #90b8c8;
-  --text-secondary: #406878;
-  --text-muted: #1e3840;
-  --accent: #2898a0;
-  --accent-light: #48b8c0;
+  --bg: #060810;
+  --surface: linear-gradient(135deg, #0a1020 0%, #060a18 100%);
+  --surface-flat: #0a1020;
+  --surface-light: #0e1828;
+  --surface-lighter: #142030;
+  --border: rgba(48,112,192,0.08);
+  --border-focus: #3070c0;
+  --text-primary: #90a8c8;
+  --text-secondary: #405878;
+  --text-muted: #1e2840;
+  --accent: #3070c0;
+  --accent-light: #4888d8;
   --accent-glow: rgba(0,0,0,0);
   --green: #28a868;
   --red: #c04848;
   --amber: #b09020;
-  --btn-text: #d0e8ec;
-  --toggle-bg: #142830;
-  --toggle-dot: #80a0a8;
-  --input-bg: #0e1e28;
+  --btn-text: #d8e4f0;
+  --toggle-bg: #142030;
+  --toggle-dot: #8098b0;
+  --input-bg: #0e1828;
 }
 
 body {
@@ -139,12 +139,12 @@ input::placeholder {
 }
 
 [data-theme="fun"] .fun-card {
-  background: linear-gradient(135deg, #0a1820 0%, #061018 100%);
-  border-color: rgba(60,180,180,0.08);
+  background: linear-gradient(135deg, #0a1020 0%, #060a18 100%);
+  border-color: rgba(48,112,192,0.08);
   transition: all 0.3s ease;
 }
 [data-theme="fun"] .fun-card:hover {
-  border-color: rgba(60,180,180,0.15);
+  border-color: rgba(48,112,192,0.15);
 }
 [data-theme="fun"] .fun-glow-btn {
   animation: pulse-glow 2s ease-in-out infinite;
@@ -153,7 +153,7 @@ input::placeholder {
   animation: float 3s ease-in-out infinite;
 }
 [data-theme="fun"] .fun-rainbow {
-  background: linear-gradient(90deg, #2898a0, #48b8c0, #28a868, #4888b0, #2898a0);
+  background: linear-gradient(90deg, #3070c0, #4888d8, #28a868, #5078b0, #3070c0);
   background-size: 200% auto;
   animation: shimmer 5s linear infinite;
   -webkit-background-clip: text;
@@ -161,9 +161,8 @@ input::placeholder {
   background-clip: text;
 }
 [data-theme="fun"] .fun-amount {
-  background: linear-gradient(90deg, #28a868, #40b890);
+  background: linear-gradient(90deg, #28a868, #40b088);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 3px rgba(40,168,104,0.15));
 }

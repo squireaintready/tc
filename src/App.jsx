@@ -49,12 +49,12 @@ export default function App() {
 
 function TabIcon({ name, active }) {
   const stroke = active ? 'var(--accent-light)' : 'var(--text-secondary)'
-  const props = { className: 'w-4 h-4', fill: 'none', viewBox: '0 0 24 24', stroke, strokeWidth: active ? 2.2 : 1.8 }
+  const props = { className: 'w-[18px] h-[18px]', fill: 'none', viewBox: '0 0 24 24', stroke, strokeWidth: active ? 2 : 1.6 }
   switch (name) {
     case 'Calculator': return <svg {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
     case 'Weekly': return <svg {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
     case 'History': return <svg {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-    case 'Staff': return <svg {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+    case 'Staff': return <svg {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
     default: return null
   }
 }
@@ -156,7 +156,7 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className="flex-1 py-2.5 text-[10px] font-semibold transition-all duration-200 relative flex flex-col items-center gap-0.5"
+            className="flex-1 py-2.5 text-xs font-semibold transition-all duration-200 relative flex flex-col items-center gap-0.5"
             style={{ color: tab === t ? 'var(--accent-light)' : 'var(--text-secondary)' }}
           >
             {tab === t && (
@@ -210,7 +210,7 @@ function PasswordGate({ password, onUnlock, title }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
       </div>
-      <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{title}</h2>
+      <h2 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>{title}</h2>
       <form onSubmit={submit} className="flex gap-2 w-full max-w-xs">
         <input
           type="password"
@@ -218,7 +218,7 @@ function PasswordGate({ password, onUnlock, title }) {
           onChange={e => { setPw(e.target.value); setError(false) }}
           placeholder="Password"
           disabled={lockSeconds > 0}
-          className="flex-1 px-4 py-3 rounded-xl border focus:outline-none text-lg transition-all duration-200"
+          className="flex-1 px-4 py-3 rounded-lg focus:outline-none text-sm transition-all duration-200"
           style={{
             background: 'var(--input-bg)',
             borderColor: 'var(--border)',
