@@ -592,14 +592,14 @@ export default function WeeklySummary({ history }) {
               </tr>
             </thead>
             <tbody>
-              {targetEmployees.map((emp) => {
+              {targetEmployees.map((emp, empIdx) => {
                 const row = grid[emp.id]
                 if (!row) return null
                 return (
                   <tr key={emp.id}
-                    style={{ borderTop: '1px solid var(--surface-light)' }}>
+                    style={{ background: empIdx % 2 === 1 ? 'var(--surface-light)' : undefined }}>
                     <td className="px-3 py-1.5 text-sm font-medium whitespace-nowrap sticky left-0"
-                      style={{ color: 'var(--text-primary)', background: 'var(--surface-lighter)' }}>
+                      style={{ color: 'var(--text-primary)', background: empIdx % 2 === 1 ? 'var(--surface-light)' : 'var(--surface-lighter)' }}>
                       {row.name}
                     </td>
                     {row.days.map((val, di) => (

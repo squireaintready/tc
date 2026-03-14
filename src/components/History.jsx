@@ -263,7 +263,7 @@ export default function History({ history, onDelete, onEdit }) {
               <div className="text-sm">
                 {(editingId === h.id ? editData.breakdown : h.breakdown).map((g, i) => (
                   <div key={i} className="flex justify-between items-center py-2"
-                    style={i > 0 ? { borderTop: '1px solid var(--surface-light)' } : undefined}>
+                    style={{ background: i % 2 === 1 ? 'var(--surface-light)' : undefined }}>
                     <span className="text-sm" style={{ color: 'var(--text-primary)' }}>
                       {g.label || g.name}
                       {g.count > 1 && <span className="text-xs ml-1 font-bold" style={{ color: 'var(--accent)' }}>×{g.count}</span>}

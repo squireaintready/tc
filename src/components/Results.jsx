@@ -42,7 +42,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
       {/* Rows */}
       <div className="rounded-lg overflow-hidden" style={{ background: 'var(--surface-lighter)' }}>
         {breakdown.map((g, i) => (
-          <div key={i} className="px-3 py-2" style={i > 0 ? { borderTop: '1px solid var(--surface-light)' } : undefined}>
+          <div key={i} className="px-3 py-2" style={{ background: i % 2 === 1 ? 'var(--surface-light)' : undefined }}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{g.label}</span>
