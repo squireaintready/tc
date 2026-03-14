@@ -172,7 +172,7 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
   )
 }
 
-function PasswordGate({ password, onUnlock, title }) {
+function PasswordGate({ password, onUnlock, title, fullScreen }) {
   const [pw, setPw] = useState('')
   const [error, setError] = useState(false)
   const [attempts, setAttempts] = useState(0)
@@ -203,7 +203,7 @@ function PasswordGate({ password, onUnlock, title }) {
 
   return (
     <div className="flex flex-col items-center justify-center px-6 max-w-lg mx-auto"
-      style={{ height: '100svh', background: 'var(--bg)' }}>
+      style={{ height: fullScreen ? '100svh' : '100%', background: 'var(--bg)' }}>
       <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
         style={{ background: 'var(--surface-lighter)' }}>
         <svg className="w-5 h-5" style={{ color: 'var(--text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -242,7 +242,7 @@ function PasswordGate({ password, onUnlock, title }) {
 }
 
 function SiteLock({ onUnlock }) {
-  return <PasswordGate password={import.meta.env.VITE_SITE_PASSWORD} onUnlock={onUnlock} title="Enter Password" />
+  return <PasswordGate password={import.meta.env.VITE_SITE_PASSWORD} onUnlock={onUnlock} title="Enter Password" fullScreen />
 }
 
 function HistoryLock({ onUnlock }) {
