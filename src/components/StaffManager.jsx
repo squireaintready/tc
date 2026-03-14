@@ -24,6 +24,9 @@ function StaffChip({ emp, selected, onTap }) {
     >
       {emp.name}
       <span className="ml-1 text-xs opacity-70">{emp.percentage}%</span>
+      {emp.modifiers?.altLabel && (
+        <span className="ml-1 text-xs opacity-70">{emp.modifiers.altLabel}</span>
+      )}
     </button>
   )
 }
@@ -100,18 +103,20 @@ export default function StaffManager() {
     }
   }
 
-  const isTraineelike = (s) => s.role === 'trainee' || (s.role === 'server' && s.percentage < 100)
+  const isTraineelike = (s) => s.role === 'trainee' || (s.role === 'server' && s.percentage < 100 && !s.modifiers?.altPercentage)
 
-  const fullServers = staff.filter(s => s.role === 'server' && s.active !== false && s.percentage >= 100)
+  const fullServers = staff.filter(s => s.role === 'server' && s.active !== false && s.percentage >= 100 && !s.modifiers?.altPercentage)
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
   const traineeMembers = staff.filter(s => s.active !== false && isTraineelike(s))
+    .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+  const modifierMembers = staff.filter(s => s.active !== false && s.role === 'server' && s.modifiers?.altPercentage)
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
   const busboyMembers = staff.filter(s => s.active !== false && s.role === 'busboy')
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
   const otherMembers = staff.filter(s => s.active !== false && s.role === 'other')
     .sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
 
-  const allStaff = [...fullServers, ...traineeMembers, ...busboyMembers, ...otherMembers]
+  const allStaff = [...fullServers, ...traineeMembers, ...modifierMembers, ...busboyMembers, ...otherMembers]
   const selectedEmp = allStaff.find(s => s.id === selectedId)
 
   const handleChipTap = (id) => {
@@ -148,11 +153,13 @@ export default function StaffManager() {
       )}
 
       {/* Bussers */}
-      {(busboyMembers.length > 0 || otherMembers.length > 0) && (
+      {(modifierMembers.length > 0 || busboyMembers.length > 0 || otherMembers.length > 0) && (
         <>
           <Divider label="Bussers" />
+          {modifierMembers.length > 0 && renderChips(modifierMembers)}
+          {busboyMembers.length > 0 && modifierMembers.length > 0 && <Divider label="Busboys" />}
           {busboyMembers.length > 0 && renderChips(busboyMembers)}
-          {otherMembers.length > 0 && busboyMembers.length > 0 && <Divider label="Other" />}
+          {otherMembers.length > 0 && (busboyMembers.length > 0 || modifierMembers.length > 0) && <Divider label="Other" />}
           {otherMembers.length > 0 && renderChips(otherMembers)}
         </>
       )}
@@ -164,6 +171,12 @@ export default function StaffManager() {
             <div>
               <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{selectedEmp.name}</span>
               <span className="text-xs ml-1.5" style={{ color: 'var(--text-secondary)' }}>{selectedEmp.percentage}%</span>
+              {selectedEmp.modifiers?.altLabel && (
+                <span className="text-xs ml-1.5 px-1 py-0.5 rounded font-bold uppercase"
+                  style={{ background: 'color-mix(in srgb, var(--accent) 15%, transparent)', color: 'var(--accent-light)' }}>
+                  {selectedEmp.modifiers.altLabel} {selectedEmp.modifiers.altPercentage}%
+                </span>
+              )}
             </div>
           </div>
           <div className="flex gap-1.5">
