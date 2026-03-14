@@ -132,7 +132,7 @@ export default function Calculator({ onSaveHistory, history }) {
     const order = staff.map(s => s.id)
     return ids
       .sort((a, b) => (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 99 : order.indexOf(b)))
-      .map(id => nameMap[id] || id).join(', ')
+      .map(id => (nameMap[id] || id).slice(0, 3)).join(', ')
   }
 
   const loadSetup = (h) => {
