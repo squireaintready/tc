@@ -63,7 +63,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
                     style={{ background: 'var(--surface-light)', color: 'var(--text-secondary)' }}>
                     <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" d="M5 12h14" /></svg>
                   </button>
-                  <span className="text-sm font-bold tabular-nums w-[4.5rem] text-right" style={{ color: 'var(--green)' }}>
+                  <span className="text-sm font-bold tabular-nums w-[4.5rem] text-center" style={{ color: 'var(--green)' }}>
                     ${g.perPerson}
                   </span>
                   <button onClick={() => adjustGroup(i, 1)}
@@ -81,7 +81,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
             rows.push(
               <div key="servers-total" className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
                 <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Servers Total</span>
-                <span className="text-sm font-bold tabular-nums w-[4.5rem] text-right mr-[1.5rem]" style={{ color: 'var(--green)' }}>${serversTotal}</span>
+                <span className="text-sm font-bold tabular-nums w-[4.5rem] text-center mr-[1.5rem]" style={{ color: 'var(--green)' }}>${serversTotal}</span>
               </div>
             )
             rowIdx++
@@ -91,7 +91,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
             rows.push(
               <div key="bussers-total" className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
                 <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Bussers Total</span>
-                <span className="text-sm font-bold tabular-nums w-[4.5rem] text-right mr-[1.5rem]" style={{ color: 'var(--green)' }}>${bussersTotal}</span>
+                <span className="text-sm font-bold tabular-nums w-[4.5rem] text-center mr-[1.5rem]" style={{ color: 'var(--green)' }}>${bussersTotal}</span>
               </div>
             )
             rowIdx++
@@ -101,7 +101,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
             rows.push(
               <div key="remainder" className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
                 <span className="text-sm font-semibold" style={{ color: 'var(--amber)' }}>Remainder</span>
-                <span className="text-sm font-bold tabular-nums w-[4.5rem] text-right mr-[1.5rem]" style={{ color: 'var(--amber)' }}>${remainder}</span>
+                <span className="text-sm font-bold tabular-nums w-[4.5rem] text-center mr-[1.5rem]" style={{ color: 'var(--amber)' }}>${remainder}</span>
               </div>
             )
           }
