@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useStaffContext } from '../StaffContext'
 import { getEmployeePay } from '../utils/staffHelpers'
 import { getWeekRange, formatRange } from '../utils/dates'
@@ -568,7 +568,7 @@ export default function WeeklySummary({ history }) {
       {/* Grid */}
       <div className="rounded-lg overflow-hidden"
         style={{ background: 'var(--surface-lighter)' }}>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" ref={el => { if (el) el.scrollLeft = el.scrollWidth }}>
           <table className="w-full text-sm">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--surface-light)' }}>
