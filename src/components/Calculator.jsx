@@ -37,9 +37,10 @@ function Toggle({ label, detail, selected, onTap }) {
         }}
       >
         <div
-          className="absolute top-0.5 rounded-full transition-all duration-200"
+          className="absolute rounded-full transition-all duration-200"
           style={{
             width: 14, height: 14,
+            top: '50%', transform: 'translateY(-50%)',
             left: selected ? 15 : 3,
             background: selected ? 'var(--btn-text)' : 'var(--text-muted)',
           }}
