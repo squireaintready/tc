@@ -232,7 +232,6 @@ export default function Calculator({ onSaveHistory, history }) {
   }
 
   const enabledCount = Object.values(enabledStaff).filter(Boolean).length
-  const isFun = theme === 'fun'
   const canCalculate = parseFloat(totalTips) > 0 && enabledCount > 0
   const enabledBusboys = busboys.filter(b => enabledStaff[b.id])
   const hasResults = breakdown.length > 0
@@ -267,7 +266,7 @@ export default function Calculator({ onSaveHistory, history }) {
             {/* Tips input */}
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${T.input} font-bold`}
+                <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${T.input} font-bold z-10`}
                   style={{ color: 'var(--text-secondary)' }}>$</span>
                 <input
                   ref={tipsInputRef}
@@ -284,7 +283,7 @@ export default function Calculator({ onSaveHistory, history }) {
                   }}
                   onKeyDown={e => { if (e.key === 'Enter') calculate() }}
                   placeholder="0"
-                  className={`w-full pl-8 pr-3 py-2 ${T.input} font-bold rounded-lg focus:outline-none ${isFun ? 'fun-float' : ''}`}
+                  className={`w-full pl-8 pr-3 py-2 ${T.input} font-bold rounded-lg focus:outline-none `}
                   style={{ background: 'var(--surface-lighter)', color: 'var(--text-primary)' }}
                   onFocus={e => { e.target.style.borderColor = 'var(--border-focus)' }}
                   onBlur={e => { e.target.style.borderColor = '' }}
