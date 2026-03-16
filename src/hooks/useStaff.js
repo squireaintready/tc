@@ -46,6 +46,14 @@ export function useStaff() {
           await deleteDoc(doc(db, 'staff', 'paola-udon'))
         }
 
+        // One-time fix: reorder staff to match updated DEFAULT_STAFF order
+        const orderMap = { andrew: 0, sam: 1, eddy: 2, youngmi: 3, terrance: 4, ming: 5, jina: 6, tom: 7 }
+        for (const d of snap.docs) {
+          if (d.id in orderMap && d.data().order !== orderMap[d.id]) {
+            await updateDoc(doc(db, 'staff', d.id), { order: orderMap[d.id] })
+          }
+        }
+
         const roster = snap.docs
           .filter(d => d.id !== 'paola-udon')
           .map(d => ({ id: d.id, ...d.data() }))
