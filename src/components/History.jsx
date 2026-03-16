@@ -3,7 +3,7 @@ import { useTheme } from '../ThemeContext'
 
 export default function History({ history, onDelete, onEdit }) {
   const { theme } = useTheme()
-  const isFun = theme === 'fun'
+  const isFun = theme === 'fun' || theme === 'retro'
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [confirmEditId, setConfirmEditId] = useState(null)

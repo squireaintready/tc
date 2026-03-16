@@ -61,7 +61,7 @@ function TabIcon({ name, active }) {
 
 function AppInner({ historyUnlocked, onUnlockHistory }) {
   const { theme } = useTheme()
-  const isFun = theme === 'fun'
+  const isFun = theme === 'fun' || theme === 'retro'
   const [tab, setTab] = useState(() => {
     try {
       const saved = localStorage.getItem('tc-active-tab')
