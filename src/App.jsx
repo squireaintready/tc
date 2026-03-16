@@ -120,7 +120,7 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
       <header className="shrink-0 px-4 py-2 flex items-center justify-between">
         <h1 className={`text-sm font-bold tracking-tight ${isFun ? 'fun-rainbow' : ''}`}
           style={{ color: isFun ? undefined : 'var(--text-primary)' }}>
-          Mizumi
+          Tip Calculator
         </h1>
         <ThemeToggle />
       </header>
