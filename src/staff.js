@@ -2,9 +2,9 @@
 export const DEFAULT_STAFF = [
   { id: 'andrew', name: 'Andrew', percentage: 100, role: 'server', order: 0, active: true },
   { id: 'sam', name: 'Sam', percentage: 100, role: 'server', order: 1, active: true },
-  { id: 'terrance', name: 'Terrance', percentage: 100, role: 'server', order: 2, active: true },
+  { id: 'eddy', name: 'Eddy', percentage: 100, role: 'server', order: 2, active: true },
   { id: 'youngmi', name: 'Youngmi', percentage: 100, role: 'server', order: 3, active: true },
-  { id: 'eddy', name: 'Eddy', percentage: 100, role: 'server', order: 4, active: true },
+  { id: 'terrance', name: 'Terrance', percentage: 100, role: 'server', order: 4, active: true },
   { id: 'ming', name: 'Ming', percentage: 100, role: 'server', order: 5, active: true },
   { id: 'jina', name: 'Jina', percentage: 100, role: 'server', order: 6, active: true },
   { id: 'tom', name: 'Tom', percentage: 100, role: 'server', order: 7, active: true },
