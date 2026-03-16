@@ -15,18 +15,36 @@ const T = {
   pad: 'px-4',             // 16px — page horizontal padding
 }
 
-function Chip({ label, detail, selected, onTap }) {
+function Toggle({ label, detail, selected, onTap }) {
   return (
     <button
       onClick={onTap}
-      className={`px-2.5 py-1 rounded-lg ${T.body} font-medium transition-all duration-150 active:scale-95 select-none`}
+      className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg ${T.body} font-medium transition-all duration-150 active:scale-95 select-none w-full`}
       style={{
-        background: selected ? 'var(--accent)' : 'var(--surface-lighter)',
-        color: selected ? 'var(--btn-text)' : 'var(--text-secondary)',
-        boxShadow: 'none',
+        background: 'var(--surface-lighter)',
+        color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
       }}
     >
-      {label}{detail && <span className={`ml-1 opacity-70 ${T.label}`}>{detail}</span>}
+      <span className="truncate">
+        {label}{detail && <span className={`ml-1 opacity-70 ${T.label}`}>{detail}</span>}
+      </span>
+      <div
+        className="relative shrink-0 ml-2 rounded-full transition-colors duration-200"
+        style={{
+          width: 32, height: 18,
+          background: selected ? 'var(--accent)' : 'var(--surface-lighter)',
+          border: selected ? 'none' : '1.5px solid var(--text-muted)',
+        }}
+      >
+        <div
+          className="absolute top-0.5 rounded-full transition-all duration-200"
+          style={{
+            width: 14, height: 14,
+            left: selected ? 15 : 3,
+            background: selected ? 'var(--btn-text)' : 'var(--text-muted)',
+          }}
+        />
+      </div>
     </button>
   )
 }
@@ -285,22 +303,33 @@ export default function Calculator({ onSaveHistory, history }) {
               </button>
             </div>
 
-            {/* Load History */}
-            {history && history.length > 0 && (
-              <div>
-                <button
-                  onClick={() => setShowLoadSetup(!showLoadSetup)}
-                  className={`flex items-center gap-1 ${T.label} font-medium`}
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  {showLoadSetup ? 'hide' : 'load from history'}
-                  <svg className={`w-3 h-3 transition-transform duration-200 ${showLoadSetup ? 'rotate-180' : ''}`}
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
+            {/* Servers */}
+            <div>
+              <div className="my-1.5 flex items-center gap-2">
+                {history && history.length > 0 && (
+                  <button
+                    onClick={() => setShowLoadSetup(!showLoadSetup)}
+                    className="p-1 rounded transition-all active:scale-90"
+                    style={{ color: showLoadSetup ? 'var(--accent-light)' : 'var(--text-muted)' }}
+                  >
+                    <svg className={`w-4 h-4 transition-transform duration-200 ${showLoadSetup ? 'rotate-180' : ''}`}
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                )}
+                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
+                <span className={`${T.label} font-semibold uppercase tracking-wider`} style={{ color: 'var(--text-muted)' }}>Servers</span>
+                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
+                <button onClick={toggleAllServers}
+                  className={`${T.label} font-semibold px-1.5 py-0.5 rounded transition-all active:scale-95`}
+                  style={{ color: 'var(--accent-light)' }}>
+                  {fullServers.every(s => enabledStaff[s.id]) ? 'None' : 'All'}
                 </button>
-                <div className={`overflow-hidden transition-all duration-300 ${showLoadSetup ? 'max-h-[250px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
-                  <div className="rounded-lg overflow-hidden" style={{ background: 'var(--surface-lighter)', maxHeight: '220px', overflowY: 'auto' }}>
+              </div>
+              {history && history.length > 0 && (
+                <div className={`overflow-hidden transition-all duration-300 ${showLoadSetup ? 'max-h-[250px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="rounded-lg overflow-hidden mb-1.5" style={{ background: 'var(--surface-lighter)', maxHeight: '220px', overflowY: 'auto' }}>
                     {(showAllHistory ? history : history.slice(0, 10)).map((h) => (
                       <button key={h.id} onClick={() => loadSetup(h)}
                         className={`w-full ${T.pad} py-2 text-left active:opacity-70`}>
@@ -323,26 +352,16 @@ export default function Calculator({ onSaveHistory, history }) {
                     )}
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Servers */}
-            <div>
-              <Divider label="Servers" />
-              <div className={`flex flex-wrap ${T.gap} items-center`}>
-                {fullServers.map(s => <Chip key={s.id} label={s.name} selected={!!enabledStaff[s.id]} onTap={() => toggle(s.id)} />)}
-                <button onClick={toggleAllServers}
-                  className={`${T.label} font-semibold px-1.5 py-0.5 rounded transition-all active:scale-95`}
-                  style={{ color: 'var(--accent-light)' }}>
-                  {fullServers.every(s => enabledStaff[s.id]) ? 'None' : 'All'}
-                </button>
+              )}
+              <div className={`grid grid-cols-2 ${T.gap}`}>
+                {fullServers.map(s => <Toggle key={s.id} label={s.name} selected={!!enabledStaff[s.id]} onTap={() => toggle(s.id)} />)}
               </div>
               {allTrainees.length > 0 && (
                 <>
                   <Divider label="Trainees" />
-                  <div className={`flex flex-wrap ${T.gap}`}>
+                  <div className={`grid grid-cols-2 ${T.gap}`}>
                     {allTrainees.map(t => (
-                      <Chip key={t.id} label={t.name} detail={`${traineePercents[t.id] ?? t.percentage}%`}
+                      <Toggle key={t.id} label={t.name} detail={`${traineePercents[t.id] ?? t.percentage}%`}
                         selected={!!enabledStaff[t.id]} onTap={() => toggle(t.id)} />
                     ))}
                   </div>
@@ -365,19 +384,19 @@ export default function Calculator({ onSaveHistory, history }) {
                 <Divider label="Bussers" />
                 {modifierServers.length > 0 && (
                   <>
-                    <div className={`flex flex-wrap ${T.gap}`}>
+                    <div className={`grid grid-cols-2 ${T.gap}`}>
                       {modifierServers.map(s => (
-                        <Chip key={s.id} label={s.name}
+                        <Toggle key={s.id} label={s.name}
                           detail={modifierToggles[s.id] ? `${s.modifiers.altPercentage}%` : `${s.percentage}%`}
                           selected={!!enabledStaff[s.id]} onTap={() => toggle(s.id)} />
                       ))}
                     </div>
                     {modifierServers.filter(s => enabledStaff[s.id]).map(s => (
-                      <div key={s.id} className="mt-1">
+                      <div key={s.id} className="mt-1 pl-2.5">
                         <button
                           onClick={() => setModifierToggles(prev => ({ ...prev, [s.id]: !prev[s.id] }))}
                           className={`${T.label} font-medium`}
-                          style={{ color: modifierToggles[s.id] ? 'var(--accent-light)' : 'var(--text-muted)' }}
+                          style={{ color: modifierToggles[s.id] ? 'var(--accent-light)' : 'var(--text-secondary)' }}
                         >
                           {modifierToggles[s.id] ? `${s.modifiers.altLabel} ${s.modifiers.altPercentage}%` : s.modifiers.altLabel?.toLowerCase()}
                         </button>
@@ -388,19 +407,19 @@ export default function Calculator({ onSaveHistory, history }) {
                 {busboys.length > 0 && modifierServers.length > 0 && <Divider label="Busboys" />}
                 {busboys.length > 0 && (
                   <>
-                    <div className={`flex flex-wrap ${T.gap}`}>
+                    <div className={`grid grid-cols-2 ${T.gap}`}>
                       {busboys.map(b => (
-                        <Chip key={b.id} label={b.name}
+                        <Toggle key={b.id} label={b.name}
                           detail={pastryBusboy === b.id ? '20%' : `${b.percentage}%`}
                           selected={!!enabledStaff[b.id]} onTap={() => toggle(b.id)} />
                       ))}
                     </div>
                     {enabledBusboys.length > 0 && (
-                      <div className="mt-1">
+                      <div className="mt-1 pl-2.5">
                         <button
                           onClick={() => setShowPastry(!showPastry)}
                           className={`${T.label} font-medium flex items-center gap-0.5`}
-                          style={{ color: pastryBusboy ? 'var(--accent-light)' : 'var(--text-muted)' }}
+                          style={{ color: pastryBusboy ? 'var(--accent-light)' : 'var(--text-secondary)' }}
                         >
                           {pastryBusboy ? `Pastry: ${enabledBusboys.find(b => b.id === pastryBusboy)?.name || ''}` : 'pastry'}
                           <svg className={`w-2.5 h-2.5 transition-transform duration-200 ${showPastry ? 'rotate-180' : ''}`}
@@ -424,9 +443,9 @@ export default function Calculator({ onSaveHistory, history }) {
                 )}
                 {others.length > 0 && (busboys.length > 0 || modifierServers.length > 0) && <Divider label="Other" />}
                 {others.length > 0 && (
-                  <div className={`flex flex-wrap ${T.gap}`}>
+                  <div className={`grid grid-cols-2 ${T.gap}`}>
                     {others.map(o => (
-                      <Chip key={o.id} label={o.name} detail={`${o.percentage}%`}
+                      <Toggle key={o.id} label={o.name} detail={`${o.percentage}%`}
                         selected={!!enabledStaff[o.id]} onTap={() => toggle(o.id)} />
                     ))}
                   </div>
