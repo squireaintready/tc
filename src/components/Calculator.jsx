@@ -31,18 +31,17 @@ function Toggle({ label, detail, selected, onTap }) {
       <div
         className="relative shrink-0 ml-2 rounded-full transition-colors duration-200"
         style={{
-          width: 44, height: 24,
+          width: 38, height: 22,
           background: selected ? 'var(--accent)' : 'rgba(128,128,128,0.2)',
-          border: '2px solid transparent',
           boxSizing: 'border-box',
         }}
       >
         <div
           className="absolute rounded-full transition-all duration-200 shadow-sm"
           style={{
-            width: 18, height: 18,
-            top: 1,
-            left: selected ? 21 : 1,
+            width: 16, height: 16,
+            top: 3,
+            left: selected ? 19 : 3,
             background: selected ? '#fff' : 'rgba(128,128,128,0.5)',
           }}
         />
