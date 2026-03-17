@@ -31,18 +31,19 @@ function Toggle({ label, detail, selected, onTap }) {
       <div
         className="relative shrink-0 ml-2 rounded-full transition-colors duration-200"
         style={{
-          width: 32, height: 18,
-          background: selected ? 'var(--accent)' : 'var(--surface-lighter)',
-          border: selected ? 'none' : '1.5px solid var(--text-muted)',
+          width: 36, height: 20,
+          background: selected ? 'var(--accent)' : 'var(--toggle-bg)',
+          border: selected ? '2px solid var(--accent)' : '2px solid var(--text-muted)',
+          boxSizing: 'border-box',
         }}
       >
         <div
           className="absolute rounded-full transition-all duration-200"
           style={{
-            width: 14, height: 14,
-            top: '50%', transform: 'translateY(-50%)',
-            left: selected ? 15 : 3,
-            background: selected ? 'var(--btn-text)' : 'var(--text-muted)',
+            width: 12, height: 12,
+            top: 2,
+            left: selected ? 18 : 2,
+            background: selected ? '#fff' : 'var(--text-muted)',
           }}
         />
       </div>
