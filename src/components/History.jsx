@@ -297,7 +297,7 @@ export default function History({ history, onDelete, onEdit }) {
                   if (bt <= 0) return null
                   return (
                     <div className="flex justify-between items-center py-2"
-                      style={{ background: bd.length % 2 === 1 ? 'var(--surface-light)' : undefined }}>
+                      style={{ borderTop: '1px solid rgba(128,128,128,0.3)' }}>
                       <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Bussers Total</span>
                       <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--green)' }}>${bt}</span>
                     </div>

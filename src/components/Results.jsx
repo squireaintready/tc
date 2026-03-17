@@ -45,9 +45,6 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
         {(() => {
           let rowIdx = 0
           const rows = []
-          const serversTotal = breakdown.filter(g => g.role === 'server' || g.role === 'trainee')
-            .reduce((s, g) => s + g.groupTotal, 0)
-
           for (let i = 0; i < breakdown.length; i++) {
             const g = breakdown[i]
             const bg = rowIdx % 2 === 1 ? 'var(--surface-light)' : undefined
@@ -84,20 +81,9 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
             )
             rowIdx++
           }
-          if (serversTotal > 0) {
-            const bg = rowIdx % 2 === 1 ? 'var(--surface-light)' : undefined
-            rows.push(
-              <div key="servers-total" className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
-                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Servers Total</span>
-                <span className="text-sm font-bold tabular-nums w-[4.5rem] text-right" style={{ color: 'var(--green)' }}>${serversTotal}</span>
-              </div>
-            )
-            rowIdx++
-          }
           if (bussersTotal > 0) {
-            const bg = rowIdx % 2 === 1 ? 'var(--surface-light)' : undefined
             rows.push(
-              <div key="bussers-total" className="px-3 py-2 flex items-center justify-between" style={{ background: bg }}>
+              <div key="bussers-total" className="px-3 py-2 flex items-center justify-between" style={{ borderTop: '1px solid rgba(128,128,128,0.3)' }}>
                 <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Bussers Total</span>
                 <span className="text-sm font-bold tabular-nums w-[4.5rem] text-right" style={{ color: 'var(--green)' }}>${bussersTotal}</span>
               </div>
