@@ -31,7 +31,7 @@ function Toggle({ label, detail, selected, onTap }) {
       <div
         className="relative shrink-0 ml-2 rounded-full transition-colors duration-200"
         style={{
-          width: 40, height: 22,
+          width: 44, height: 24,
           background: selected ? 'var(--accent)' : 'transparent',
           border: selected ? '2px solid var(--accent)' : '2px solid var(--border-focus, var(--text-muted))',
           opacity: selected ? 1 : 0.4,
@@ -39,11 +39,11 @@ function Toggle({ label, detail, selected, onTap }) {
         }}
       >
         <div
-          className="absolute rounded-full transition-all duration-200"
+          className="absolute rounded-full transition-all duration-200 shadow-sm"
           style={{
-            width: 16, height: 16,
+            width: 18, height: 18,
             top: 1,
-            left: selected ? 19 : 1,
+            left: selected ? 21 : 1,
             background: selected ? '#fff' : 'var(--text-secondary)',
           }}
         />
