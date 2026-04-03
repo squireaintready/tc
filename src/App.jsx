@@ -25,6 +25,15 @@ function useLocalStorage(key, initial) {
   return [data, setData]
 }
 
+let startupSoundPlayed = false
+function playStartupSound() {
+  if (startupSoundPlayed) return
+  startupSoundPlayed = true
+  const a = new Audio('/bgm.mp3')
+  a.volume = 0.25
+  a.play().catch(() => {})
+}
+
 export default function App() {
   const [siteUnlocked, setSiteUnlocked] = useState(() => {
     try { return localStorage.getItem('tc-site-auth') === 'true' } catch { return false }
@@ -36,6 +45,7 @@ export default function App() {
   const unlockSite = () => {
     setSiteUnlocked(true)
     localStorage.setItem('tc-site-auth', 'true')
+    playStartupSound()
   }
   const unlockHistory = () => {
     setHistoryUnlocked(true)
@@ -75,12 +85,8 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
   const [history, setHistory] = useLocalStorage('tc-history', [])
   const [firebaseReady, setFirebaseReady] = useState(false)
 
-  // --- Play sound on load ---
-  useEffect(() => {
-    const audio = new Audio('/bgm.webm')
-    audio.volume = 0.25
-    audio.play().catch(() => {})
-  }, [])
+  // Play sound on load (covers return visits where site is already unlocked)
+  useEffect(() => { playStartupSound() }, [])
 
   useEffect(() => {
     try {
