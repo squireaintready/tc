@@ -75,6 +75,13 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
   const [history, setHistory] = useLocalStorage('tc-history', [])
   const [firebaseReady, setFirebaseReady] = useState(false)
 
+  // --- Play sound on load ---
+  useEffect(() => {
+    const audio = new Audio('/bgm.webm')
+    audio.volume = 0.25
+    audio.play().catch(() => {})
+  }, [])
+
   useEffect(() => {
     try {
       const q = query(collection(db, 'history'), orderBy('createdAt', 'desc'))
