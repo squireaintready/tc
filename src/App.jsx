@@ -31,7 +31,18 @@ function playStartupSound() {
   startupSoundPlayed = true
   const a = new Audio('/bgm.mp3')
   a.volume = 0.25
-  a.play().catch(() => {})
+  a.play().catch(() => {
+    // Autoplay blocked — play on first user interaction
+    function onInteract() {
+      a.play().catch(() => {})
+      document.removeEventListener('click', onInteract)
+      document.removeEventListener('touchstart', onInteract)
+      document.removeEventListener('keydown', onInteract)
+    }
+    document.addEventListener('click', onInteract)
+    document.addEventListener('touchstart', onInteract)
+    document.addEventListener('keydown', onInteract)
+  })
 }
 
 export default function App() {
