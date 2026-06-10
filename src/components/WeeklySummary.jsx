@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useStaffContext } from '../StaffContext'
 import { getEmployeePay } from '../utils/staffHelpers'
 import { getWeekRange, formatRange } from '../utils/dates'
@@ -501,21 +501,22 @@ export default function WeeklySummary({ history }) {
   const hasData = targetEmployees.some(e => grid[e.id]?.total > 0)
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xs font-semibold uppercase tracking-wider px-1 flex items-center gap-1.5"
+    <div className="space-y-[var(--gap-section)]">
+      <h2 className="text-app-xs font-semibold uppercase tracking-wider px-1 flex items-center gap-1.5"
         style={{ color: 'var(--text-secondary)' }}>
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
         Weekly Summary
       </h2>
 
       {/* View Toggle */}
-      <div className="rounded-lg p-1 flex gap-1"
+      <div className="rounded-lg p-1 flex gap-1" role="group" aria-label="View mode"
         style={{ background: 'var(--surface-lighter)' }}>
         <button
           onClick={() => setViewMode('weekly')}
-          className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+          aria-pressed={viewMode === 'weekly'}
+          className="flex-1 py-[var(--control-py)] rounded-lg text-app-base font-semibold transition-all active:scale-[0.98]"
           style={{
-            background: viewMode === 'weekly' ? 'var(--accent)' : 'var(--surface-lighter)',
+            background: viewMode === 'weekly' ? 'var(--accent)' : 'transparent',
             color: viewMode === 'weekly' ? 'var(--btn-text)' : 'var(--text-secondary)',
           }}
         >
@@ -523,9 +524,10 @@ export default function WeeklySummary({ history }) {
         </button>
         <button
           onClick={() => setViewMode('employee')}
-          className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
+          aria-pressed={viewMode === 'employee'}
+          className="flex-1 py-[var(--control-py)] rounded-lg text-app-base font-semibold transition-all active:scale-[0.98]"
           style={{
-            background: viewMode === 'employee' ? 'var(--accent)' : 'var(--surface-lighter)',
+            background: viewMode === 'employee' ? 'var(--accent)' : 'transparent',
             color: viewMode === 'employee' ? 'var(--btn-text)' : 'var(--text-secondary)',
           }}
         >
@@ -536,29 +538,31 @@ export default function WeeklySummary({ history }) {
       {viewMode === 'weekly' ? (
         <>
           {/* Week picker */}
-      <div className="rounded-lg px-3 py-2 flex items-center justify-between"
+      <div className="rounded-lg px-2 py-1.5 flex items-center justify-between"
         style={{ background: 'var(--surface-lighter)' }}>
         <button onClick={() => setWeekOffset(w => w - 1)}
-          className="w-9 h-9 flex items-center justify-center rounded-lg active:scale-90 transition-all"
-          style={{ background: 'var(--surface-lighter)', color: 'var(--text-primary)' }}>
+          aria-label="Previous week"
+          className="w-10 h-10 flex items-center justify-center rounded-lg active:scale-90 transition-all"
+          style={{ color: 'var(--text-primary)' }}>
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <div className="text-center">
-          <div className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>{weekLabel}</div>
+          <div className="font-semibold text-app-base" style={{ color: 'var(--text-primary)' }}>{weekLabel}</div>
           {weekOffset === 0 ? (
-            <span className="text-xs mt-0.5" style={{ color: 'var(--green)' }}>This week</span>
+            <span className="text-app-sm mt-0.5" style={{ color: 'var(--green)' }}>This week</span>
           ) : (
-            <button onClick={() => setWeekOffset(0)} className="text-xs mt-0.5"
+            <button onClick={() => setWeekOffset(0)} className="text-app-sm mt-0.5 underline-offset-2"
               style={{ color: 'var(--accent-light)' }}>
               Go to this week
             </button>
           )}
         </div>
         <button onClick={() => setWeekOffset(w => w + 1)}
-          className="w-9 h-9 flex items-center justify-center rounded-lg active:scale-90 transition-all"
-          style={{ background: 'var(--surface-lighter)', color: 'var(--text-primary)' }}>
+          aria-label="Next week"
+          className="w-10 h-10 flex items-center justify-center rounded-lg active:scale-90 transition-all"
+          style={{ color: 'var(--text-primary)' }}>
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
@@ -569,15 +573,15 @@ export default function WeeklySummary({ history }) {
       <div className="rounded-lg overflow-hidden"
         style={{ background: 'var(--surface-lighter)' }}>
         <div className="overflow-x-auto" ref={el => { if (el) el.scrollLeft = el.scrollWidth }}>
-          <table className="w-full text-sm">
+          <table className="w-full text-app-base">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--surface-light)' }}>
-                <th className="text-left px-3 py-1.5 text-xs font-semibold uppercase tracking-wider sticky left-0"
+                <th className="text-left px-3 py-[var(--cell-py)] text-app-xs font-semibold uppercase tracking-wider sticky left-0"
                   style={{ color: 'var(--text-muted)', background: 'var(--surface-lighter)' }}>
                   Name
                 </th>
                 {DAYS.map((d, di) => (
-                  <th key={d} className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-center"
+                  <th key={d} className="px-2 py-[var(--cell-py)] text-app-xs font-semibold uppercase tracking-wider text-center"
                     style={{
                       color: weekOffset === 0 && di === todayIdx ? 'var(--accent-light)' : 'var(--text-muted)',
                       background: weekOffset === 0 && di === todayIdx ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : undefined,
@@ -585,7 +589,7 @@ export default function WeeklySummary({ history }) {
                     {d}
                   </th>
                 ))}
-                <th className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-right"
+                <th className="px-3 py-[var(--cell-py)] text-app-xs font-semibold uppercase tracking-wider text-right"
                   style={{ color: 'var(--text-muted)' }}>
                   Total
                 </th>
@@ -598,12 +602,12 @@ export default function WeeklySummary({ history }) {
                 return (
                   <tr key={emp.id}
                     style={{ background: empIdx % 2 === 1 ? 'var(--surface-light)' : undefined }}>
-                    <td className="px-3 py-1.5 text-sm font-medium whitespace-nowrap sticky left-0"
+                    <td className="px-3 py-[var(--cell-py)] text-app-base font-medium whitespace-nowrap sticky left-0"
                       style={{ color: 'var(--text-primary)', background: empIdx % 2 === 1 ? 'var(--surface-light)' : 'var(--surface-lighter)' }}>
                       {row.name}
                     </td>
                     {row.days.map((val, di) => (
-                      <td key={di} className="px-2 py-1.5 text-sm text-center tabular-nums"
+                      <td key={di} className="px-2 py-[var(--cell-py)] text-app-base text-center tabular-nums"
                         style={{
                           color: val != null ? 'var(--text-primary)' : 'var(--text-muted)',
                           background: weekOffset === 0 && di === todayIdx ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : undefined,
@@ -611,7 +615,7 @@ export default function WeeklySummary({ history }) {
                         {val != null ? `$${val}` : '-'}
                       </td>
                     ))}
-                    <td className="px-3 py-1.5 text-sm text-right font-bold tabular-nums"
+                    <td className="px-3 py-[var(--cell-py)] text-app-base text-right font-bold tabular-nums"
                       style={{ color: row.total > 0 ? 'var(--green)' : 'var(--text-muted)' }}>
                       {row.total > 0 ? `$${row.total}` : '-'}
                     </td>
@@ -621,14 +625,14 @@ export default function WeeklySummary({ history }) {
             </tbody>
             <tfoot>
               <tr style={{ borderTop: '1px solid var(--surface-light)' }}>
-                <td className="px-3 py-1.5 text-sm font-bold uppercase tracking-wider sticky left-0"
+                <td className="px-3 py-[var(--cell-py)] text-app-base font-bold uppercase tracking-wider sticky left-0"
                   style={{ color: 'var(--text-primary)', background: 'var(--surface-lighter)' }}>
                   Total
                 </td>
                 {DAYS.map((_, di) => {
                   const dayTotal = targetEmployees.reduce((sum, emp) => sum + (grid[emp.id]?.days[di] || 0), 0)
                   return (
-                    <td key={di} className="px-2 py-1.5 text-sm text-center font-bold tabular-nums"
+                    <td key={di} className="px-2 py-[var(--cell-py)] text-app-base text-center font-bold tabular-nums"
                       style={{
                         color: dayTotal > 0 ? 'var(--green)' : 'var(--text-muted)',
                         background: weekOffset === 0 && di === todayIdx ? 'color-mix(in srgb, var(--accent) 8%, transparent)' : undefined,
@@ -640,7 +644,7 @@ export default function WeeklySummary({ history }) {
                 {(() => {
                   const grandTotal = targetEmployees.reduce((sum, emp) => sum + (grid[emp.id]?.total || 0), 0)
                   return (
-                    <td className="px-3 py-1.5 text-sm text-right font-bold tabular-nums"
+                    <td className="px-3 py-[var(--cell-py)] text-app-base text-right font-bold tabular-nums"
                       style={{ color: grandTotal > 0 ? 'var(--green)' : 'var(--text-muted)' }}>
                       {grandTotal > 0 ? `$${grandTotal}` : '-'}
                     </td>
@@ -654,65 +658,49 @@ export default function WeeklySummary({ history }) {
 
       {/* Share button */}
       <button onClick={handleShare}
-        className="w-full py-3.5 active:scale-[0.98] rounded-lg font-semibold text-sm transition-all duration-200"
+        className="w-full py-[var(--btn-py)] active:scale-[0.98] rounded-lg font-semibold text-app-base transition-all duration-200"
         style={{
           background: shared ? 'var(--green)' : 'var(--accent)',
           color: 'var(--btn-text)',
         }}>
-        {shared ? 'Copied!' : 'Share Weekly Summary'}
+        {shared ? '✓ Shared' : 'Share Weekly Summary'}
       </button>
         </>
       ) : (
         <>
           {/* Period selector */}
-          <div className="rounded-lg px-3 py-2"
+          <div className="rounded-lg px-[var(--card-px)] py-[var(--card-py)]"
             style={{ background: 'var(--surface-lighter)' }}>
-            <label className="text-xs font-semibold uppercase tracking-wider mb-2 block"
+            <label className="text-app-xs font-semibold uppercase tracking-wider mb-2 block"
               style={{ color: 'var(--text-muted)' }}>
               Time Period
             </label>
-            <div className="flex gap-1 mb-3">
-              <button
-                onClick={() => setPeriodType('month')}
-                className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{
-                  background: periodType === 'month' ? 'var(--accent)' : 'var(--surface-lighter)',
-                  color: periodType === 'month' ? 'var(--btn-text)' : 'var(--text-secondary)',
-                }}
-              >
-                This Month
-              </button>
-              <button
-                onClick={() => setPeriodType('week')}
-                className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{
-                  background: periodType === 'week' ? 'var(--accent)' : 'var(--surface-lighter)',
-                  color: periodType === 'week' ? 'var(--btn-text)' : 'var(--text-secondary)',
-                }}
-              >
-                This Week
-              </button>
-              <button
-                onClick={() => setPeriodType('custom')}
-                className="flex-1 py-2 rounded-lg text-sm font-semibold transition-all"
-                style={{
-                  background: periodType === 'custom' ? 'var(--accent)' : 'var(--surface-lighter)',
-                  color: periodType === 'custom' ? 'var(--btn-text)' : 'var(--text-secondary)',
-                }}
-              >
-                Custom
-              </button>
+            <div className="flex gap-1 mb-3" role="group" aria-label="Time period">
+              {[['month', 'This Month'], ['week', 'This Week'], ['custom', 'Custom']].map(([value, label]) => (
+                <button
+                  key={value}
+                  onClick={() => setPeriodType(value)}
+                  aria-pressed={periodType === value}
+                  className="flex-1 py-[var(--control-py)] rounded-lg text-app-sm font-semibold transition-all active:scale-[0.98]"
+                  style={{
+                    background: periodType === value ? 'var(--accent)' : 'var(--surface-light)',
+                    color: periodType === value ? 'var(--btn-text)' : 'var(--text-secondary)',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
             {periodType === 'custom' && (
               <div className="grid grid-cols-2 gap-2 mt-3">
                 <div>
-                  <label className="text-xs font-semibold mb-1 block"
+                  <label className="text-app-xs font-semibold mb-1 block"
                     style={{ color: 'var(--text-muted)' }}>Start</label>
                   <input
                     type="date"
                     value={customStart}
                     onChange={(e) => setCustomStart(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none"
+                    className="w-full px-3 py-[var(--control-py)] rounded-lg text-app-base focus:outline-none"
                     style={{
                       background: 'var(--surface-light)',
                       color: 'var(--text-primary)',
@@ -721,13 +709,13 @@ export default function WeeklySummary({ history }) {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold mb-1 block"
+                  <label className="text-app-xs font-semibold mb-1 block"
                     style={{ color: 'var(--text-muted)' }}>End</label>
                   <input
                     type="date"
                     value={customEnd}
                     onChange={(e) => setCustomEnd(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none"
+                    className="w-full px-3 py-[var(--control-py)] rounded-lg text-app-base focus:outline-none"
                     style={{
                       background: 'var(--surface-light)',
                       color: 'var(--text-primary)',
@@ -737,55 +725,39 @@ export default function WeeklySummary({ history }) {
                 </div>
               </div>
             )}
-            <div className="mt-3 text-sm font-semibold text-center py-2 rounded-lg"
+            <div className="mt-3 text-app-base font-semibold text-center py-[var(--control-py)] rounded-lg"
               style={{ background: 'var(--surface-light)', color: 'var(--accent-light)' }}>
               {summaryLabel}
             </div>
           </div>
 
           {/* Employee filter */}
-          <div className="rounded-lg px-3 py-2 space-y-3"
+          <div className="rounded-lg px-[var(--card-px)] py-[var(--card-py)] space-y-3"
             style={{ background: 'var(--surface-lighter)' }}>
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wider mb-2 block"
+              <label className="text-app-xs font-semibold uppercase tracking-wider mb-2 block"
                 style={{ color: 'var(--text-muted)' }}>
                 Class Filter
               </label>
-              <div className="flex gap-1">
-                <button
-                  onClick={() => { setClassFilter('all'); setSelectedEmployee('all'); setSearchEmployee('') }}
-                  className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all"
-                  style={{
-                    background: classFilter === 'all' ? 'var(--accent)' : 'var(--surface-lighter)',
-                    color: classFilter === 'all' ? 'var(--btn-text)' : 'var(--text-secondary)',
-                  }}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => { setClassFilter('servers'); setSelectedEmployee('all'); setSearchEmployee('') }}
-                  className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all"
-                  style={{
-                    background: classFilter === 'servers' ? 'var(--accent)' : 'var(--surface-lighter)',
-                    color: classFilter === 'servers' ? 'var(--btn-text)' : 'var(--text-secondary)',
-                  }}
-                >
-                  Servers
-                </button>
-                <button
-                  onClick={() => { setClassFilter('support'); setSelectedEmployee('all'); setSearchEmployee('') }}
-                  className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all"
-                  style={{
-                    background: classFilter === 'support' ? 'var(--accent)' : 'var(--surface-lighter)',
-                    color: classFilter === 'support' ? 'var(--btn-text)' : 'var(--text-secondary)',
-                  }}
-                >
-                  Support
-                </button>
+              <div className="flex gap-1" role="group" aria-label="Class filter">
+                {[['all', 'All'], ['servers', 'Servers'], ['support', 'Support']].map(([value, label]) => (
+                  <button
+                    key={value}
+                    onClick={() => { setClassFilter(value); setSelectedEmployee('all'); setSearchEmployee('') }}
+                    aria-pressed={classFilter === value}
+                    className="flex-1 py-[var(--control-py)] rounded-lg text-app-sm font-semibold transition-all active:scale-[0.98]"
+                    style={{
+                      background: classFilter === value ? 'var(--accent)' : 'var(--surface-light)',
+                      color: classFilter === value ? 'var(--btn-text)' : 'var(--text-secondary)',
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wider mb-2 block"
+              <label className="text-app-xs font-semibold uppercase tracking-wider mb-2 block"
                 style={{ color: 'var(--text-muted)' }}>
                 Specific Employee
               </label>
@@ -797,7 +769,8 @@ export default function WeeklySummary({ history }) {
                     setSelectedEmployee(val)
                     if (val !== 'all') setClassFilter('all')
                   }}
-                  className="px-3 py-2 rounded-lg text-sm focus:outline-none"
+                  aria-label="Select employee"
+                  className="px-3 py-[var(--control-py)] rounded-lg text-app-base focus:outline-none"
                   style={{
                     background: 'var(--surface-light)',
                     color: 'var(--text-primary)',
@@ -817,7 +790,8 @@ export default function WeeklySummary({ history }) {
                     if (e.target.value) setClassFilter('all')
                   }}
                   placeholder="Search..."
-                  className="px-3 py-2 rounded-lg text-sm focus:outline-none"
+                  aria-label="Search employees"
+                  className="px-3 py-[var(--control-py)] rounded-lg text-app-base focus:outline-none"
                   style={{
                     background: 'var(--surface-light)',
                     color: 'var(--text-primary)',
@@ -832,30 +806,30 @@ export default function WeeklySummary({ history }) {
           {selectedEmployee !== 'all' ? (
             <div className="rounded-lg overflow-hidden"
               style={{ background: 'var(--surface-lighter)' }}>
-              <div className="px-3 py-2" style={{ borderBottom: '1px solid var(--surface-light)' }}>
-                <div className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+              <div className="px-[var(--card-px)] py-[var(--card-py)]" style={{ borderBottom: '1px solid var(--surface-light)' }}>
+                <div className="font-bold text-app-base" style={{ color: 'var(--text-primary)' }}>
                   {allEmployees.find(e => e.id === selectedEmployee)?.name}
                 </div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                <div className="text-app-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                   {employeeSummary[selectedEmployee]?.count || 0} {(employeeSummary[selectedEmployee]?.count || 0) === 1 ? 'day' : 'days'} worked
                 </div>
-                <div className="text-sm font-bold mt-1 tabular-nums" style={{ color: 'var(--green)' }}>
+                <div className="text-app-lg font-bold mt-1 tabular-nums" style={{ color: 'var(--green)' }}>
                   ${employeeSummary[selectedEmployee]?.total || 0}
                 </div>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-app-base">
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--surface-light)' }}>
-                      <th className="text-left px-3 py-1.5 text-xs font-semibold uppercase tracking-wider"
+                      <th className="text-left px-3 py-[var(--cell-py)] text-app-xs font-semibold uppercase tracking-wider"
                         style={{ color: 'var(--text-muted)', background: 'var(--surface-lighter)' }}>
                         Date
                       </th>
-                      <th className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-center"
+                      <th className="px-3 py-[var(--cell-py)] text-app-xs font-semibold uppercase tracking-wider text-center"
                         style={{ color: 'var(--text-muted)' }}>
                         Day
                       </th>
-                      <th className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-right"
+                      <th className="px-3 py-[var(--cell-py)] text-app-xs font-semibold uppercase tracking-wider text-right"
                         style={{ color: 'var(--text-muted)' }}>
                         Tips
                       </th>
@@ -883,20 +857,20 @@ export default function WeeklySummary({ history }) {
                         const dayStr = date.toLocaleDateString('en-US', { weekday: 'short' })
                         return (
                           <tr key={dateKey} style={{ borderTop: '1px solid var(--surface-light)' }}>
-                            <td className="px-3 py-1.5 text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                            <td className="px-3 py-[var(--cell-py)] text-app-base font-medium" style={{ color: 'var(--text-primary)' }}>
                               {dateStr}
                             </td>
-                            <td className="px-3 py-1.5 text-sm text-center" style={{ color: 'var(--text-secondary)' }}>
+                            <td className="px-3 py-[var(--cell-py)] text-app-base text-center" style={{ color: 'var(--text-secondary)' }}>
                               {dayStr}
                             </td>
-                            <td className="px-3 py-1.5 text-sm text-right font-bold tabular-nums" style={{ color: 'var(--green)' }}>
+                            <td className="px-3 py-[var(--cell-py)] text-app-base text-right font-bold tabular-nums" style={{ color: 'var(--green)' }}>
                               ${dailyPay[dateKey]}
                             </td>
                           </tr>
                         )
                       }) : (
                         <tr>
-                          <td colSpan={3} className="px-3 py-12 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
+                          <td colSpan={3} className="px-3 py-12 text-center text-app-base" style={{ color: 'var(--text-muted)' }}>
                             No tips for this period
                           </td>
                         </tr>
@@ -907,9 +881,9 @@ export default function WeeklySummary({ history }) {
               </div>
             </div>
           ) : (
-            <div className="rounded-lg px-3 py-2"
+            <div className="rounded-lg px-[var(--card-px)] py-[var(--card-py)]"
               style={{ background: 'var(--surface-lighter)' }}>
-              <div className={`grid gap-2 ${classFilter === 'all' || searchEmployee ? 'grid-cols-4' : 'grid-cols-3'}`}>
+              <div className={`grid gap-[var(--gap-chip)] ${classFilter === 'all' || searchEmployee ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 {filterEmployees(allEmployees).map(emp => {
                   const data = employeeSummary[emp.id]
                   if (!data) return null
@@ -918,13 +892,13 @@ export default function WeeklySummary({ history }) {
                       style={{
                         background: data.total > 0 ? 'var(--surface-light)' : 'transparent',
                       }}>
-                      <div className="font-semibold text-xs" style={{ color: 'var(--text-primary)' }}>
+                      <div className="font-semibold text-app-sm truncate" style={{ color: 'var(--text-primary)' }}>
                         {data.name}
                       </div>
-                      <div className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                      <div className="text-app-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                         {data.count}d
                       </div>
-                      <div className="text-sm font-bold tabular-nums mt-0.5"
+                      <div className="text-app-base font-bold tabular-nums mt-0.5"
                         style={{ color: data.total > 0 ? 'var(--green)' : 'var(--text-muted)' }}>
                         ${data.total}
                       </div>
@@ -942,13 +916,13 @@ export default function WeeklySummary({ history }) {
             )
             const periodTotal = filtered.reduce((s, e) => s + (employeeSummary[e.id]?.total || 0), 0)
             return periodTotal > 0 ? (
-              <div className="rounded-lg px-3 py-2 flex justify-between items-center"
+              <div className="rounded-lg px-[var(--card-px)] py-[var(--card-py)] flex justify-between items-center"
                 style={{ background: 'var(--surface-lighter)' }}>
-                <span className="text-xs font-semibold uppercase tracking-wider"
+                <span className="text-app-xs font-semibold uppercase tracking-wider"
                   style={{ color: 'var(--text-secondary)' }}>
                   Period Total
                 </span>
-                <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--green)' }}>
+                <span className="text-app-lg font-bold tabular-nums" style={{ color: 'var(--green)' }}>
                   ${periodTotal}
                 </span>
               </div>
@@ -957,19 +931,20 @@ export default function WeeklySummary({ history }) {
 
           {/* Share employee summary button */}
           <button onClick={handleShareEmployeeSummary}
-            className="w-full py-3.5 active:scale-[0.98] rounded-lg font-semibold text-sm transition-all duration-200"
+            className="w-full py-[var(--btn-py)] active:scale-[0.98] rounded-lg font-semibold text-app-base transition-all duration-200"
             style={{
               background: shared ? 'var(--green)' : 'var(--accent)',
               color: 'var(--btn-text)',
             }}>
-            {shared ? 'Copied!' : 'Share Employee Summary'}
+            {shared ? '✓ Shared' : 'Share Employee Summary'}
           </button>
         </>
       )}
 
       {/* Email settings */}
       <button onClick={() => setShowSettings(!showSettings)}
-        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all active:scale-[0.98]"
+        aria-expanded={showSettings}
+        className="w-full flex items-center justify-center gap-2 py-[var(--control-py)] rounded-lg text-app-base font-semibold transition-all active:scale-[0.98]"
         style={{ background: 'var(--surface-lighter)', color: 'var(--text-secondary)' }}>
         Email Settings
         <svg className={`w-4 h-4 transition-transform duration-200 ${showSettings ? 'rotate-180' : ''}`}
@@ -978,9 +953,9 @@ export default function WeeklySummary({ history }) {
         </svg>
       </button>
       <div className={`overflow-hidden transition-all duration-300 ${showSettings ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div className="rounded-lg px-3 py-2 space-y-2"
+        <div className="rounded-lg px-[var(--card-px)] py-[var(--card-py)] space-y-2"
           style={{ background: 'var(--surface-lighter)' }}>
-          <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+          <label className="text-app-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
             Recipient Email
           </label>
           <input
@@ -988,7 +963,8 @@ export default function WeeklySummary({ history }) {
             value={email}
             onChange={e => saveEmail(e.target.value)}
             placeholder="your@email.com"
-            className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none"
+            aria-label="Recipient email"
+            className="w-full px-3 py-[var(--control-py)] rounded-lg text-app-base focus:outline-none"
             style={{
               background: 'var(--surface-light)',
               color: 'var(--text-primary)',
@@ -1007,24 +983,24 @@ export default function WeeklySummary({ history }) {
             }}
           />
           {emailError && (
-            <p className="text-xs font-medium" style={{ color: 'var(--red)' }}>{emailError}</p>
+            <p className="text-app-sm font-medium" style={{ color: 'var(--red)' }}>{emailError}</p>
           )}
           {emailSaved && (
-            <p className="text-xs font-medium" style={{ color: 'var(--green)' }}>
+            <p className="text-app-sm font-medium" style={{ color: 'var(--green)' }}>
               Saved — weekly summary will be sent to {email}
             </p>
           )}
           {!emailError && !emailSaved && (
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-app-sm" style={{ color: 'var(--text-muted)' }}>
               {email ? `Current: ${email}` : 'Auto-sent every Sunday at 10am EST'}
             </p>
           )}
         </div>
       </div>
 
-      {!hasData && (
-        <div className="text-center py-6 text-sm" style={{ color: 'var(--text-muted)' }}>
-          No tip data for this week
+      {!hasData && viewMode === 'weekly' && (
+        <div className="text-center py-6 text-app-base" style={{ color: 'var(--text-muted)' }}>
+          No tip data for this week — save a calculation and it shows up here
         </div>
       )}
     </div>

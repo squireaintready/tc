@@ -27,41 +27,52 @@ export function useStaff() {
   useEffect(() => {
     try {
       const unsub = onSnapshot(collection(db, 'staff'), async (snap) => {
-        if (snap.empty) {
-          for (const emp of DEFAULT_STAFF) {
-            await setDoc(doc(db, 'staff', emp.id), emp)
+        try {
+          // Cache-only empty snapshot (offline, nothing synced yet): keep the local roster,
+          // and never queue seed-writes against an unconfirmed empty collection
+          if (snap.metadata.fromCache && snap.empty) {
+            setLoading(false)
+            return
           }
-          return
-        }
-
-        // One-time fix: restore Paola as server w/ modifiers, remove paola-udon
-        const paola = snap.docs.find(d => d.id === 'paola')
-        if (paola && paola.data().role === 'busboy') {
-          await setDoc(doc(db, 'staff', 'paola'), {
-            id: 'paola', name: 'Paola', percentage: 40, role: 'server',
-            order: 11, active: true, modifiers: { altPercentage: 20, altLabel: 'Udon' }
-          })
-        }
-        if (snap.docs.find(d => d.id === 'paola-udon')) {
-          await deleteDoc(doc(db, 'staff', 'paola-udon'))
-        }
-
-        // One-time fix: reorder staff to match updated DEFAULT_STAFF order
-        const orderMap = { andrew: 0, sam: 1, eddy: 2, youngmi: 3, terrance: 4, ming: 5, jina: 6, tom: 7 }
-        for (const d of snap.docs) {
-          if (d.id in orderMap && d.data().order !== orderMap[d.id]) {
-            await updateDoc(doc(db, 'staff', d.id), { order: orderMap[d.id] })
+          if (snap.empty) {
+            for (const emp of DEFAULT_STAFF) {
+              await setDoc(doc(db, 'staff', emp.id), emp)
+            }
+            return
           }
-        }
 
-        const roster = snap.docs
-          .filter(d => d.id !== 'paola-udon')
-          .map(d => ({ id: d.id, ...d.data() }))
-        roster.sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
-        setStaff(roster)
-        setFirebaseReady(true)
-        setLoading(false)
-        try { localStorage.setItem(LOCAL_KEY, JSON.stringify(roster)) } catch {}
+          // One-time fix: restore Paola as server w/ modifiers, remove paola-udon
+          const paola = snap.docs.find(d => d.id === 'paola')
+          if (paola && paola.data().role === 'busboy') {
+            await setDoc(doc(db, 'staff', 'paola'), {
+              id: 'paola', name: 'Paola', percentage: 40, role: 'server',
+              order: 11, active: true, modifiers: { altPercentage: 20, altLabel: 'Udon' }
+            })
+          }
+          if (snap.docs.find(d => d.id === 'paola-udon')) {
+            await deleteDoc(doc(db, 'staff', 'paola-udon'))
+          }
+
+          // One-time fix: reorder staff to match updated DEFAULT_STAFF order
+          const orderMap = { andrew: 0, sam: 1, eddy: 2, youngmi: 3, terrance: 4, ming: 5, jina: 6, tom: 7 }
+          for (const d of snap.docs) {
+            if (d.id in orderMap && d.data().order !== orderMap[d.id]) {
+              await updateDoc(doc(db, 'staff', d.id), { order: orderMap[d.id] })
+            }
+          }
+
+          const roster = snap.docs
+            .filter(d => d.id !== 'paola-udon')
+            .map(d => ({ id: d.id, ...d.data() }))
+          roster.sort((a, b) => (a.order ?? 99) - (b.order ?? 99))
+          setStaff(roster)
+          setFirebaseReady(true)
+          setLoading(false)
+          try { localStorage.setItem(LOCAL_KEY, JSON.stringify(roster)) } catch {}
+        } catch {
+          if (import.meta.env.DEV) console.warn('Staff: sync failed, keeping local roster')
+          setLoading(false)
+        }
       }, () => {
         if (import.meta.env.DEV) console.warn('Staff: using localStorage (Firebase unavailable)')
         setLoading(false)

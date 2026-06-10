@@ -2,6 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== TYPE SCALE (mobile-first: 13px main body text/numbers) ===== */
+:root {
+  --fs-xs: 11px;   /* uppercase section labels, fine print */
+  --fs-sm: 12px;   /* secondary text, meta */
+  --fs-base: 13px; /* main body text, numbers, buttons */
+  --fs-lg: 15px;   /* key amounts, totals */
+  --fs-xl: 18px;   /* tip input */
+}
+@media (min-width: 640px) {
+  :root {
+    --fs-xs: 12px;
+    --fs-sm: 13px;
+    --fs-base: 14px;
+    --fs-lg: 16px;
+    --fs-xl: 20px;
+  }
+}
+
+/* ===== DENSITY: default (comfortable, ≥44px primary touch targets) ===== */
+:root {
+  --gap-chip: 8px;     /* between toggle chips / pills */
+  --gap-section: 16px; /* between sections */
+  --row-py: 11px;      /* staff toggle rows */
+  --chip-py: 8px;      /* staff chips */
+  --pill-py: 5px;      /* small option pills */
+  --list-py: 14px;     /* result/breakdown rows */
+  --cell-py: 9px;      /* table cells, history rows */
+  --control-py: 11px;  /* inputs, secondary buttons */
+  --btn-py: 15px;      /* primary action buttons */
+  --card-px: 14px;
+  --card-py: 12px;
+  --toggle-w: 40px;
+  --toggle-h: 22px;
+  --toggle-dot: 16px;
+}
+
+/* ===== DENSITY: compact (the original tight layout) ===== */
+:root[data-density="compact"] {
+  --gap-chip: 6px;
+  --gap-section: 12px;
+  --row-py: 6px;
+  --chip-py: 4px;
+  --pill-py: 2px;
+  --list-py: 12px;
+  --cell-py: 6px;
+  --control-py: 8px;
+  --btn-py: 12px;
+  --card-px: 12px;
+  --card-py: 8px;
+  --toggle-w: 34px;
+  --toggle-h: 18px;
+  --toggle-dot: 14px;
+}
+
 /* ===== THEME VARIABLES ===== */
 :root, [data-theme="dark"] {
   --bg: #060810;
@@ -127,6 +181,26 @@ input::placeholder {
 
 * {
   -webkit-font-smoothing: antialiased;
+}
+
+/* Remove 300ms tap delay / accidental double-tap zoom on controls */
+button, [role="button"], input, select, textarea, label {
+  touch-action: manipulation;
+}
+
+/* Keyboard/AT focus ring (invisible for plain taps on buttons) */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Hide scrollbars but keep scrolling */

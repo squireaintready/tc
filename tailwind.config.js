@@ -3,6 +3,13 @@ export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
   theme: {
     extend: {
+      fontSize: {
+        'app-xs': ['var(--fs-xs)', { lineHeight: '1.35' }],
+        'app-sm': ['var(--fs-sm)', { lineHeight: '1.4' }],
+        'app-base': ['var(--fs-base)', { lineHeight: '1.45' }],
+        'app-lg': ['var(--fs-lg)', { lineHeight: '1.35' }],
+        'app-xl': ['var(--fs-xl)', { lineHeight: '1.3' }],
+      },
       colors: {
         bg: 'var(--bg)',
         surface: {

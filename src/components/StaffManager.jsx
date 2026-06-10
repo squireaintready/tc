@@ -6,7 +6,7 @@ function Divider({ label }) {
   return (
     <div className="my-1.5 flex items-center gap-2">
       <div className="flex-1 h-px" style={{ background: 'var(--surface-light)' }} />
-      <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>{label}</span>
+      <span className="text-app-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>{label}</span>
       <div className="flex-1 h-px" style={{ background: 'var(--surface-light)' }} />
     </div>
   )
@@ -16,16 +16,17 @@ function StaffChip({ emp, selected, onTap }) {
   return (
     <button
       onClick={onTap}
-      className="px-2.5 py-1 rounded-lg text-sm font-medium transition-all duration-150 active:scale-95 select-none"
+      aria-pressed={selected}
+      className="px-3 py-[var(--chip-py)] rounded-lg text-app-base font-medium transition-all duration-150 active:scale-95 select-none"
       style={{
         background: selected ? 'var(--accent)' : 'var(--surface-lighter)',
         color: selected ? 'var(--btn-text)' : 'var(--text-secondary)',
       }}
     >
       {emp.name}
-      <span className="ml-1 text-xs opacity-70">{emp.percentage}%</span>
+      <span className="ml-1 text-app-xs opacity-70">{emp.percentage}%</span>
       {emp.modifiers?.altLabel && (
-        <span className="ml-1 text-xs opacity-70">{emp.modifiers.altLabel}</span>
+        <span className="ml-1 text-app-xs opacity-70">{emp.modifiers.altLabel}</span>
       )}
     </button>
   )
@@ -132,7 +133,7 @@ export default function StaffManager() {
   }
 
   const renderChips = (members) => (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap gap-[var(--gap-chip)]">
       {members.map(emp => (
         <StaffChip key={emp.id} emp={emp} selected={selectedId === emp.id} onTap={() => handleChipTap(emp.id)} />
       ))}
@@ -140,7 +141,10 @@ export default function StaffManager() {
   )
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-[var(--gap-section)]">
+      <p className="text-app-sm px-1" style={{ color: 'var(--text-muted)' }}>
+        Tap a name to edit, delete, or graduate them.
+      </p>
       {/* Servers */}
       <Divider label={`Servers (${fullServers.length})`} />
       {renderChips(fullServers)}
@@ -166,13 +170,13 @@ export default function StaffManager() {
 
       {/* Selected employee actions */}
       {selectedEmp && !editingId && (
-        <div className="rounded-lg px-3 py-2 space-y-2" style={{ background: 'var(--surface-lighter)' }}>
+        <div className="rounded-lg px-[var(--card-px)] py-[var(--card-py)] space-y-2" style={{ background: 'var(--surface-lighter)' }}>
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{selectedEmp.name}</span>
-              <span className="text-xs ml-1.5" style={{ color: 'var(--text-secondary)' }}>{selectedEmp.percentage}%</span>
+              <span className="text-app-base font-medium" style={{ color: 'var(--text-primary)' }}>{selectedEmp.name}</span>
+              <span className="text-app-sm ml-1.5" style={{ color: 'var(--text-secondary)' }}>{selectedEmp.percentage}%</span>
               {selectedEmp.modifiers?.altLabel && (
-                <span className="text-xs ml-1.5 px-1 py-0.5 rounded font-bold uppercase"
+                <span className="text-app-xs ml-1.5 px-1 py-0.5 rounded font-bold uppercase"
                   style={{ background: 'color-mix(in srgb, var(--accent) 15%, transparent)', color: 'var(--accent-light)' }}>
                   {selectedEmp.modifiers.altLabel} {selectedEmp.modifiers.altPercentage}%
                 </span>
@@ -181,12 +185,12 @@ export default function StaffManager() {
           </div>
           <div className="flex gap-1.5">
             <button onClick={() => startEdit(selectedEmp)}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+              className="text-app-sm font-semibold px-3 py-[var(--chip-py)] rounded-lg transition-all active:scale-95"
               style={{ color: 'var(--accent-light)', background: 'var(--surface-light)' }}>
               Edit
             </button>
             <button onClick={() => handleDelete(selectedEmp.id)}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+              className="text-app-sm font-semibold px-3 py-[var(--chip-py)] rounded-lg transition-all active:scale-95"
               style={{
                 color: confirmDeleteId === selectedEmp.id ? 'var(--btn-text)' : 'var(--red)',
                 background: confirmDeleteId === selectedEmp.id ? 'var(--red)' : 'var(--surface-light)',
@@ -195,7 +199,8 @@ export default function StaffManager() {
             </button>
             {isTraineelike(selectedEmp) && (
               <button onClick={() => handleGraduate(selectedEmp.id)}
-                className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+                title="Promote to full server at 100%"
+                className="text-app-sm font-semibold px-3 py-[var(--chip-py)] rounded-lg transition-all active:scale-95"
                 style={{
                   color: confirmGraduateId === selectedEmp.id ? 'var(--btn-text)' : 'var(--green)',
                   background: confirmGraduateId === selectedEmp.id ? 'var(--green)' : 'var(--surface-light)',
@@ -209,29 +214,32 @@ export default function StaffManager() {
 
       {/* Edit form */}
       {editingId && (
-        <div className="rounded-lg px-3 py-2 space-y-2" style={{ background: 'var(--surface-lighter)' }}>
+        <div className="rounded-lg px-[var(--card-px)] py-[var(--card-py)] space-y-2" style={{ background: 'var(--surface-lighter)' }}>
           <div className="flex items-center gap-2">
             <input
               type="text"
               value={editData.name}
               onChange={e => setEditData(d => ({ ...d, name: e.target.value }))}
-              className="flex-1 px-2 py-1.5 rounded-lg text-sm focus:outline-none"
+              aria-label="Employee name"
+              className="flex-1 px-3 py-[var(--control-py)] rounded-lg text-app-base focus:outline-none"
               style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}
               autoFocus
             />
             <input
               type="number"
+              inputMode="numeric"
               value={editData.percentage}
               onChange={e => setEditData(d => ({ ...d, percentage: Number(e.target.value) }))}
-              className="w-16 px-2 py-1.5 rounded-lg text-sm text-center focus:outline-none"
+              aria-label="Tip percentage"
+              className="w-16 px-2 py-[var(--control-py)] rounded-lg text-app-base text-center focus:outline-none"
               style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}
               min={1} max={100}
             />
-            <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>%</span>
+            <span className="text-app-sm" style={{ color: 'var(--text-secondary)' }}>%</span>
           </div>
           <div className="flex gap-1.5">
             <button onClick={() => saveEdit(editingId)}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+              className="text-app-sm font-semibold px-3 py-[var(--chip-py)] rounded-lg transition-all active:scale-95"
               style={{
                 color: confirmSaveId === editingId ? 'var(--btn-text)' : 'var(--green)',
                 background: confirmSaveId === editingId ? 'var(--green)' : 'var(--surface-light)',
@@ -239,7 +247,7 @@ export default function StaffManager() {
               {confirmSaveId === editingId ? 'Confirm?' : 'Save'}
             </button>
             <button onClick={() => { setEditingId(null); setSelectedId(null) }}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+              className="text-app-sm font-semibold px-3 py-[var(--chip-py)] rounded-lg transition-all active:scale-95"
               style={{ color: 'var(--text-secondary)', background: 'var(--surface-light)' }}>
               Cancel
             </button>
@@ -250,19 +258,22 @@ export default function StaffManager() {
       {/* Add Employee */}
       <button
         onClick={() => { setShowAdd(!showAdd); setSelectedId(null); setEditingId(null) }}
-        className="w-full flex items-center justify-center py-2 rounded-lg text-xs font-semibold transition-all active:scale-[0.98]"
+        aria-expanded={showAdd}
+        className="w-full flex items-center justify-center py-[var(--control-py)] rounded-lg text-app-sm font-semibold transition-all active:scale-[0.98]"
         style={{ background: 'var(--surface-lighter)', color: 'var(--accent-light)' }}
       >
         {showAdd ? 'Cancel' : '+ Add Employee'}
       </button>
       {showAdd && (
-        <div className="rounded-lg px-3 space-y-2 py-2" style={{ background: 'var(--surface-lighter)' }}>
+        <div className="rounded-lg px-[var(--card-px)] py-[var(--card-py)] space-y-2" style={{ background: 'var(--surface-lighter)' }}>
           <input
             type="text"
             value={newName}
             onChange={e => setNewName(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleAdd() }}
             placeholder="Name"
-            className="w-full px-3 py-2 rounded-lg text-sm focus:outline-none"
+            aria-label="New employee name"
+            className="w-full px-3 py-[var(--control-py)] rounded-lg text-app-base focus:outline-none"
             style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}
             autoFocus
           />
@@ -270,7 +281,8 @@ export default function StaffManager() {
             <select
               value={newRole}
               onChange={e => handleRoleChange(e.target.value)}
-              className="px-3 py-2 rounded-lg text-sm focus:outline-none"
+              aria-label="Role"
+              className="px-3 py-[var(--control-py)] rounded-lg text-app-base focus:outline-none"
               style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}
             >
               <option value="server">Server</option>
@@ -281,19 +293,21 @@ export default function StaffManager() {
             <div className="flex items-center gap-1">
               <input
                 type="number"
+                inputMode="numeric"
                 value={newPercent}
                 onChange={e => setNewPercent(Number(e.target.value))}
-                className="flex-1 px-3 py-2 rounded-lg text-sm focus:outline-none"
+                aria-label="Tip percentage"
+                className="flex-1 px-3 py-[var(--control-py)] rounded-lg text-app-base focus:outline-none"
                 style={{ background: 'var(--surface-light)', color: 'var(--text-primary)' }}
                 min={1} max={100}
               />
-              <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>%</span>
+              <span className="text-app-sm" style={{ color: 'var(--text-secondary)' }}>%</span>
             </div>
           </div>
           <button
             onClick={handleAdd}
             disabled={!newName.trim()}
-            className="w-full py-2 rounded-lg font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-30"
+            className="w-full py-[var(--control-py)] rounded-lg font-semibold text-app-base transition-all active:scale-[0.98] disabled:opacity-30"
             style={{ background: 'var(--accent)', color: 'var(--btn-text)' }}
           >
             Add

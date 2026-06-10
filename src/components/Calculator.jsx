@@ -1,25 +1,29 @@
 import { useState, useEffect, useRef } from 'react'
 import Results from './Results'
+import ShiftSelect from './ShiftSelect'
 import { calculateTips } from '../utils/calculateTips'
 import { useStaffContext } from '../StaffContext'
 import { getServers, getBusboys, getTrainees, getOthers } from '../staff'
 import { useTheme } from '../ThemeContext'
 
-/* ── Design tokens (keep all sizing here) ── */
+/* ── Design tokens (sizing lives in CSS vars; density-aware) ── */
 const T = {
-  label: 'text-xs',        // 12px — section labels, muted meta
-  body: 'text-sm',         // 14px — chips, buttons, body copy
-  input: 'text-lg',        // 18px — tip input
-  gap: 'gap-1.5',          // 6px  — between chips, pills
-  sectionGap: 'space-y-3', // 12px — between sections
-  pad: 'px-4',             // 16px — page horizontal padding
+  label: 'text-app-xs',                  // section labels, muted meta
+  meta: 'text-app-sm',                   // secondary text
+  body: 'text-app-base',                 // chips, buttons, body copy (13px on mobile)
+  input: 'text-app-xl',                  // tip input
+  gap: 'gap-[var(--gap-chip)]',          // between chips, pills
+  sectionGap: 'space-y-[var(--gap-section)]', // between sections
+  pad: 'px-4',                           // page horizontal padding
 }
 
 function Toggle({ label, detail, selected, onTap }) {
   return (
     <button
       onClick={onTap}
-      className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg ${T.body} font-medium transition-all duration-150 active:scale-95 select-none w-full`}
+      role="switch"
+      aria-checked={selected}
+      className={`flex items-center justify-between px-3 py-[var(--row-py)] rounded-lg ${T.body} font-medium transition-all duration-150 active:scale-95 select-none w-full`}
       style={{
         background: 'var(--surface-lighter)',
         color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
@@ -31,7 +35,7 @@ function Toggle({ label, detail, selected, onTap }) {
       <div
         className="relative shrink-0 ml-2 rounded-full transition-colors duration-200"
         style={{
-          width: 34, height: 18,
+          width: 'var(--toggle-w)', height: 'var(--toggle-h)',
           background: selected ? 'var(--accent)' : 'rgba(128,128,128,0.2)',
           boxSizing: 'border-box',
         }}
@@ -39,9 +43,11 @@ function Toggle({ label, detail, selected, onTap }) {
         <div
           className="absolute rounded-full transition-all duration-200 shadow-sm"
           style={{
-            width: 14, height: 14,
-            top: 2,
-            left: selected ? 17 : 2,
+            width: 'var(--toggle-dot)', height: 'var(--toggle-dot)',
+            top: 'calc((var(--toggle-h) - var(--toggle-dot)) / 2)',
+            left: selected
+              ? 'calc(var(--toggle-w) - var(--toggle-dot) - (var(--toggle-h) - var(--toggle-dot)) / 2)'
+              : 'calc((var(--toggle-h) - var(--toggle-dot)) / 2)',
             background: selected ? '#fff' : 'rgba(128,128,128,0.5)',
           }}
         />
@@ -54,7 +60,8 @@ function PillOption({ label, active, onTap }) {
   return (
     <button
       onClick={onTap}
-      className={`px-2 py-0.5 rounded ${T.label} font-semibold transition-all duration-150 active:scale-95`}
+      aria-pressed={active}
+      className={`px-2.5 py-[var(--pill-py)] rounded ${T.label} font-semibold transition-all duration-150 active:scale-95`}
       style={{
         background: active ? 'var(--accent)' : 'var(--surface-lighter)',
         color: active ? 'var(--btn-text)' : 'var(--text-secondary)',
@@ -62,18 +69,6 @@ function PillOption({ label, active, onTap }) {
     >
       {label}
     </button>
-  )
-}
-
-function SectionLabel({ children, right }) {
-  return (
-    <div className="flex items-center justify-between mb-1.5">
-      <span className={`${T.label} font-semibold uppercase tracking-wider flex items-center gap-1`}
-        style={{ color: 'var(--text-secondary)' }}>
-        {children}
-      </span>
-      {right}
-    </div>
   )
 }
 
@@ -137,12 +132,6 @@ export default function Calculator({ onSaveHistory, history }) {
       return updated
     })
   }, [staff])
-
-  const cycleSplitMode = () => {
-    if (splitMode === 'none') setSplitMode('lunch')
-    else if (splitMode === 'lunch') setSplitMode('dinner')
-    else setSplitMode('none')
-  }
 
   const formatStaffNames = (obj) => {
     const ids = Object.entries(obj || {}).filter(([, v]) => v).map(([k]) => k)
@@ -283,24 +272,12 @@ export default function Calculator({ onSaveHistory, history }) {
                   }}
                   onKeyDown={e => { if (e.key === 'Enter') calculate() }}
                   placeholder="0"
-                  className={`w-full pl-8 pr-3 py-2 ${T.input} font-bold rounded-lg focus:outline-none `}
+                  aria-label="Total tips in dollars"
+                  className={`w-full pl-8 pr-3 py-[var(--control-py)] ${T.input} font-bold rounded-lg focus:outline-none`}
                   style={{ background: 'var(--surface-lighter)', color: 'var(--text-primary)' }}
-                  onFocus={e => { e.target.style.borderColor = 'var(--border-focus)' }}
-                  onBlur={e => { e.target.style.borderColor = '' }}
                 />
               </div>
-              <button
-                onClick={cycleSplitMode}
-                className={`px-2 py-2 rounded-lg ${T.label} font-medium uppercase tracking-wide transition-all active:scale-95 shrink-0 flex items-center gap-1`}
-                style={{
-                  color: splitMode !== 'none' ? 'var(--accent-light)' : 'var(--text-muted)',
-                  background: splitMode !== 'none' ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'transparent',
-                }}
-              >
-                {splitMode === 'lunch' && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>}
-                {splitMode === 'dinner' && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>}
-                {splitMode === 'none' ? 'all day' : splitMode}
-              </button>
+              <ShiftSelect value={splitMode} onChange={setSplitMode} />
             </div>
 
             {/* Servers */}
@@ -309,11 +286,14 @@ export default function Calculator({ onSaveHistory, history }) {
                 {history && history.length > 0 && (
                   <button
                     onClick={() => setShowLoadSetup(!showLoadSetup)}
-                    className="p-1 rounded transition-all active:scale-90"
+                    aria-expanded={showLoadSetup}
+                    title="Load a recent staff setup"
+                    className={`flex items-center gap-0.5 px-1.5 py-1 rounded ${T.label} font-semibold uppercase tracking-wider transition-all active:scale-95`}
                     style={{ color: showLoadSetup ? 'var(--accent-light)' : 'var(--text-muted)' }}
                   >
-                    <svg className={`w-4 h-4 transition-transform duration-200 ${showLoadSetup ? 'rotate-180' : ''}`}
-                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    Recent
+                    <svg className={`w-3 h-3 transition-transform duration-200 ${showLoadSetup ? 'rotate-180' : ''}`}
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
@@ -322,7 +302,8 @@ export default function Calculator({ onSaveHistory, history }) {
                 <span className={`${T.label} font-semibold uppercase tracking-wider`} style={{ color: 'var(--text-muted)' }}>Servers</span>
                 <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
                 <button onClick={toggleAllServers}
-                  className={`${T.label} font-semibold px-1.5 py-0.5 rounded transition-all active:scale-95`}
+                  title="Toggle all servers on or off"
+                  className={`${T.label} font-semibold px-1.5 py-1 rounded transition-all active:scale-95`}
                   style={{ color: 'var(--accent-light)' }}>
                   {fullServers.every(s => enabledStaff[s.id]) ? 'None' : 'All'}
                 </button>
@@ -462,8 +443,12 @@ export default function Calculator({ onSaveHistory, history }) {
               <Results breakdown={breakdown} remainder={remainder} totalTips={parseFloat(totalTips) || 0}
                 onBreakdownChange={setBreakdown} onRemainderChange={setRemainder} onSave={handleSave} />
             ) : (
-              <div className="flex items-center justify-center h-40">
-                <span className={T.body} style={{ color: 'var(--text-muted)' }}>No results yet</span>
+              <div className="flex flex-col items-center justify-center h-48 gap-1.5 text-center px-6">
+                <svg className="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="var(--text-muted)" strokeWidth={1.6}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <span className={`${T.body} font-medium`} style={{ color: 'var(--text-secondary)' }}>No results yet</span>
+                <span className={T.meta} style={{ color: 'var(--text-muted)' }}>Enter the total tips, pick who worked, then tap Calculate</span>
               </div>
             )}
           </div>
@@ -473,15 +458,20 @@ export default function Calculator({ onSaveHistory, history }) {
       {/* Bottom bar: dots + button */}
       <div className="shrink-0 relative z-10" style={{ background: 'var(--bg)' }}>
         {/* Page dots */}
-        <div className="flex justify-center gap-1.5 py-1.5">
+        <div className="flex justify-center gap-1 py-0.5">
           {[0, 1].map(i => (
             <button key={i} onClick={() => goToPage(i)}
-              className="w-1.5 h-1.5 rounded-full transition-all duration-200"
-              style={{
-                background: page === i ? 'var(--accent-light)' : 'var(--surface-lighter)',
-                transform: page === i ? 'scale(1.4)' : 'scale(1)',
-              }}
-            />
+              aria-label={i === 0 ? 'Setup page' : 'Results page'}
+              aria-current={page === i ? 'true' : undefined}
+              className="p-1.5 flex items-center justify-center"
+            >
+              <span className="w-1.5 h-1.5 rounded-full transition-all duration-200"
+                style={{
+                  background: page === i ? 'var(--accent-light)' : 'var(--surface-lighter)',
+                  transform: page === i ? 'scale(1.4)' : 'scale(1)',
+                }}
+              />
+            </button>
           ))}
         </div>
         {/* Action button */}
@@ -490,22 +480,22 @@ export default function Calculator({ onSaveHistory, history }) {
             <button
               onClick={calculate}
               disabled={!canCalculate}
-              className={`w-full py-3 active:scale-[0.98] disabled:opacity-30 disabled:active:scale-100 rounded-lg font-bold ${T.body} transition-all duration-200`}
+              className={`w-full py-[var(--btn-py)] active:scale-[0.98] disabled:opacity-30 disabled:active:scale-100 rounded-lg font-bold ${T.body} transition-all duration-200`}
               style={{
                 background: calcFlash ? 'var(--green)' : 'var(--accent)',
                 color: 'var(--btn-text)',
                 transform: calcFlash ? 'scale(1.02)' : undefined,
               }}
             >
-              {calcFlash ? '✓' : 'Calculate'}
+              {calcFlash ? '✓' : enabledCount > 0 ? `Calculate · ${enabledCount} staff` : 'Calculate'}
             </button>
           ) : (
             <button
               onClick={() => goToPage(0)}
-              className={`w-full py-3 active:scale-[0.98] rounded-lg font-semibold ${T.body} transition-all duration-200`}
+              className={`w-full py-[var(--btn-py)] active:scale-[0.98] rounded-lg font-semibold ${T.body} transition-all duration-200`}
               style={{ background: 'var(--surface-lighter)', color: 'var(--text-secondary)' }}
             >
-              Back to Calculator
+              ← Back to Calculator
             </button>
           )}
         </div>

@@ -8,7 +8,7 @@ import {
   collection, addDoc, deleteDoc, doc, updateDoc,
   onSnapshot, query, orderBy, serverTimestamp
 } from 'firebase/firestore'
-import { useTheme, ThemeToggle } from './ThemeContext'
+import { useTheme, ThemeToggle, DensityToggle } from './ThemeContext'
 
 const TABS = ['Calculator', 'Weekly', 'History', 'Staff']
 
@@ -103,6 +103,8 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
     try {
       const q = query(collection(db, 'history'), orderBy('createdAt', 'desc'))
       const unsub = onSnapshot(q, (snap) => {
+        // An empty cache-only snapshot (offline, no synced data) must not wipe the local backup
+        if (snap.metadata.fromCache && snap.empty) return
         setFirebaseReady(true)
         setHistory(snap.docs.map(d => ({ id: d.id, ...d.data() })))
       }, () => {
@@ -114,11 +116,19 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
     }
   }, [])
 
+  const saveLocal = (entry) => {
+    setHistory(prev => [{ ...entry, id: `local-${Date.now()}` }, ...prev])
+  }
+
   const saveHistory = async (entry) => {
     if (firebaseReady) {
-      await addDoc(collection(db, 'history'), { ...entry, createdAt: serverTimestamp() })
+      try {
+        await addDoc(collection(db, 'history'), { ...entry, createdAt: serverTimestamp() })
+      } catch {
+        saveLocal(entry) // never lose a saved calculation
+      }
     } else {
-      setHistory(prev => [{ ...entry, id: `local-${Date.now()}` }, ...prev])
+      saveLocal(entry)
     }
   }
 
@@ -141,12 +151,16 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
   return (
     <div className="flex flex-col max-w-lg mx-auto" style={{ height: '100svh' }}>
       {/* Minimal header */}
-      <header className="shrink-0 px-4 py-2 flex items-center justify-between">
-        <h1 className={`text-sm font-bold tracking-tight ${isFun ? 'fun-rainbow' : ''}`}
+      <header className="shrink-0 px-4 pb-2 flex items-center justify-between"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 8px)' }}>
+        <h1 className={`text-app-base font-bold tracking-tight ${isFun ? 'fun-rainbow' : ''}`}
           style={{ color: isFun ? undefined : 'var(--text-primary)' }}>
           Tip Calculator
         </h1>
-        <ThemeToggle />
+        <div className="flex items-center gap-1.5">
+          <DensityToggle />
+          <ThemeToggle />
+        </div>
       </header>
 
       {/* Content */}
@@ -154,19 +168,19 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
         <div className="h-full" style={{ display: tab === 'Calculator' ? 'block' : 'none' }}>
           <Calculator onSaveHistory={saveHistory} history={history} />
         </div>
-        <div className="h-full overflow-y-auto p-4 pb-20" style={{ display: tab === 'Weekly' ? 'block' : 'none' }}>
+        <div className="h-full overflow-y-auto overscroll-contain p-4 pb-20" style={{ display: tab === 'Weekly' ? 'block' : 'none' }}>
           {historyUnlocked
             ? <WeeklySummary history={history} />
             : <HistoryLock onUnlock={onUnlockHistory} title="Weekly Password" />
           }
         </div>
-        <div className="h-full overflow-y-auto p-4 pb-20" style={{ display: tab === 'History' ? 'block' : 'none' }}>
+        <div className="h-full overflow-y-auto overscroll-contain p-4 pb-20" style={{ display: tab === 'History' ? 'block' : 'none' }}>
           {historyUnlocked
             ? <History history={history} onDelete={deleteHistory} onEdit={editHistory} />
             : <HistoryLock onUnlock={onUnlockHistory} title="History Password" />
           }
         </div>
-        <div className="h-full overflow-y-auto p-4 pb-20" style={{ display: tab === 'Staff' ? 'block' : 'none' }}>
+        <div className="h-full overflow-y-auto overscroll-contain p-4 pb-20" style={{ display: tab === 'Staff' ? 'block' : 'none' }}>
           {historyUnlocked
             ? <StaffManager />
             : <HistoryLock onUnlock={onUnlockHistory} title="Staff Password" />
@@ -175,12 +189,13 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
       </main>
 
       {/* Bottom tab bar */}
-      <nav className="shrink-0 flex" style={{ background: 'var(--surface-flat, var(--surface))', borderTop: '1px solid var(--border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav aria-label="Main" className="shrink-0 flex" style={{ background: 'var(--surface-flat, var(--surface))', borderTop: '1px solid var(--border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {TABS.map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className="flex-1 py-2.5 text-xs font-semibold transition-all duration-200 relative flex flex-col items-center gap-0.5"
+            aria-current={tab === t ? 'page' : undefined}
+            className="flex-1 py-2.5 text-app-xs font-semibold transition-all duration-200 relative flex flex-col items-center gap-0.5"
             style={{ color: tab === t ? 'var(--accent-light)' : 'var(--text-secondary)' }}
           >
             {tab === t && (
@@ -234,15 +249,16 @@ function PasswordGate({ password, onUnlock, title, fullScreen }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
       </div>
-      <h2 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-secondary)' }}>{title}</h2>
+      <h2 className="text-app-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-secondary)' }}>{title}</h2>
       <form onSubmit={submit} className="flex gap-2 w-full">
         <input
           type="password"
           value={pw}
           onChange={e => { setPw(e.target.value); setError(false) }}
           placeholder="Password"
+          aria-label="Password"
           disabled={lockSeconds > 0}
-          className="flex-1 px-3 py-2.5 rounded-lg focus:outline-none text-sm transition-all duration-200"
+          className="flex-1 px-3 py-[var(--control-py)] rounded-lg focus:outline-none text-app-base transition-all duration-200"
           style={{
             background: 'var(--surface-lighter)',
             color: 'var(--text-primary)',
@@ -252,12 +268,12 @@ function PasswordGate({ password, onUnlock, title, fullScreen }) {
         />
         <button type="submit"
           disabled={lockSeconds > 0}
-          className="px-4 py-2.5 active:scale-95 rounded-lg font-semibold text-sm transition-all duration-150"
+          className="px-5 py-[var(--control-py)] active:scale-95 rounded-lg font-semibold text-app-base transition-all duration-150"
           style={{ background: 'var(--accent)', color: 'var(--btn-text)', opacity: lockSeconds > 0 ? 0.5 : 1 }}>
           {lockSeconds > 0 ? lockSeconds : 'Go'}
         </button>
       </form>
-      <div className="text-xs font-medium mt-3 transition-all duration-300"
+      <div role="status" className="text-app-sm font-medium mt-3 transition-all duration-300"
         style={{ color: 'var(--red)', opacity: (error || lockSeconds > 0) ? 1 : 0 }}>
         {lockSeconds > 0 ? `Too many attempts. Try again in ${lockSeconds}s` : 'Wrong password'}
       </div>
