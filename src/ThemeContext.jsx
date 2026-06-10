@@ -4,6 +4,7 @@ const ThemeContext = createContext()
 
 const THEMES = ['fun', 'light', 'dark', 'retro']
 const THEME_LABELS = { dark: 'Dark', light: 'Light', fun: 'Fun', retro: 'Retro' }
+const THEME_BG = { dark: '#060810', light: '#f4f5f7', fun: '#0a0010', retro: '#0a100a' }
 const ThemeIcon = ({ theme }) => {
   const cls = "w-3.5 h-3.5"
   if (theme === 'dark') return (
@@ -39,6 +40,8 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('tc-theme', theme)
+    // Keep the browser/PWA chrome color in sync with the theme background
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_BG[theme] || '#060810')
   }, [theme])
 
   useEffect(() => {

@@ -4,7 +4,6 @@ import ShiftSelect from './ShiftSelect'
 import { calculateTips } from '../utils/calculateTips'
 import { useStaffContext } from '../StaffContext'
 import { getServers, getBusboys, getTrainees, getOthers } from '../staff'
-import { useTheme } from '../ThemeContext'
 
 /* ── Design tokens (sizing lives in CSS vars; density-aware) ── */
 const T = {
@@ -83,7 +82,6 @@ function Divider({ label }) {
 }
 
 export default function Calculator({ onSaveHistory, history }) {
-  const { theme } = useTheme()
   const { staff } = useStaffContext()
   const [totalTips, setTotalTips] = useState('')
   const [enabledStaff, setEnabledStaff] = useState(() => {
@@ -98,6 +96,7 @@ export default function Calculator({ onSaveHistory, history }) {
   })
   const [breakdown, setBreakdown] = useState([])
   const [remainder, setRemainder] = useState(0)
+  const [calcId, setCalcId] = useState(0)
   const [showLoadSetup, setShowLoadSetup] = useState(false)
   const [showPastry, setShowPastry] = useState(false)
   const [showAllHistory, setShowAllHistory] = useState(false)
@@ -204,6 +203,7 @@ export default function Calculator({ onSaveHistory, history }) {
     const r = calculateTips(tips, arr)
     setBreakdown(r.breakdown)
     setRemainder(r.remainder)
+    setCalcId(id => id + 1) // remount Results so save/adjust state resets per calculation
     setCalcFlash(true)
     setTimeout(() => setCalcFlash(false), 600)
     setTimeout(() => goToPage(1), 150)
@@ -440,7 +440,7 @@ export default function Calculator({ onSaveHistory, history }) {
         <div className="snap-start shrink-0 w-full h-full overflow-y-auto" style={{ scrollbarWidth: 'none', overscrollBehaviorY: 'contain' }}>
           <div className={`${T.pad} py-3 pb-2`}>
             {hasResults ? (
-              <Results breakdown={breakdown} remainder={remainder} totalTips={parseFloat(totalTips) || 0}
+              <Results key={calcId} breakdown={breakdown} remainder={remainder} totalTips={parseFloat(totalTips) || 0}
                 onBreakdownChange={setBreakdown} onRemainderChange={setRemainder} onSave={handleSave} />
             ) : (
               <div className="flex flex-col items-center justify-center h-48 gap-1.5 text-center px-6">
@@ -487,7 +487,10 @@ export default function Calculator({ onSaveHistory, history }) {
                 transform: calcFlash ? 'scale(1.02)' : undefined,
               }}
             >
-              {calcFlash ? '✓' : enabledCount > 0 ? `Calculate · ${enabledCount} staff` : 'Calculate'}
+              {calcFlash ? '✓'
+                : !(parseFloat(totalTips) > 0) ? 'Enter tips to calculate'
+                : enabledCount === 0 ? 'Select who worked'
+                : `Calculate · ${enabledCount} staff`}
             </button>
           ) : (
             <button

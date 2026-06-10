@@ -83,6 +83,7 @@
 [data-theme="light"] {
   --bg: #f4f5f7;
   --surface: #ffffff;
+  --surface-flat: #ffffff;
   --surface-light: #f8f9fb;
   --surface-lighter: #eaecf0;
   --border: rgba(0,0,0,0.05);

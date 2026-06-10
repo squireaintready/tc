@@ -1,12 +1,19 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useStaffContext } from '../StaffContext'
 import { getEmployeePay } from '../utils/staffHelpers'
 import { getWeekRange, formatRange } from '../utils/dates'
 import { DAYS, mondayIndex } from '../utils/constants'
 import { db } from '../firebase'
 import { doc, getDoc, setDoc } from 'firebase/firestore'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+
+// PDF libs are only needed when sharing — load them on demand to keep startup fast
+const loadPdfLibs = async () => {
+  const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+    import('jspdf'),
+    import('jspdf-autotable'),
+  ])
+  return { jsPDF, autoTable }
+}
 
 export function buildWeeklyGrid(history, weekStart, weekEnd, targetEmployees, staffRoster) {
   const weekEntries = history.filter(h => {
@@ -144,6 +151,12 @@ export default function WeeklySummary({ history }) {
   const weekLabel = formatRange(start, end)
   const grid = useMemo(() => buildWeeklyGrid(history, start, end, targetEmployees, staff), [history, start, end, targetEmployees, staff])
 
+  // Show the latest days first, but only when the week changes — not on every render
+  const gridScrollRef = useRef(null)
+  useEffect(() => {
+    if (gridScrollRef.current) gridScrollRef.current.scrollLeft = gridScrollRef.current.scrollWidth
+  }, [weekOffset, viewMode])
+
   const { summaryStart, summaryEnd, summaryLabel } = useMemo(() => {
     const now = new Date()
     let start, end, label
@@ -217,6 +230,7 @@ export default function WeeklySummary({ history }) {
   }
 
   const handleShareEmployeeSummary = async () => {
+    const { jsPDF, autoTable } = await loadPdfLibs()
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' })
 
     const filteredBySearch = searchEmployee
@@ -413,6 +427,7 @@ export default function WeeklySummary({ history }) {
   }
 
   const handleShare = async () => {
+    const { jsPDF, autoTable } = await loadPdfLibs()
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'letter' })
 
     pdf.setFontSize(16)
@@ -572,7 +587,7 @@ export default function WeeklySummary({ history }) {
       {/* Grid */}
       <div className="rounded-lg overflow-hidden"
         style={{ background: 'var(--surface-lighter)' }}>
-        <div className="overflow-x-auto" ref={el => { if (el) el.scrollLeft = el.scrollWidth }}>
+        <div className="overflow-x-auto" ref={gridScrollRef}>
           <table className="w-full text-app-base">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--surface-light)' }}>

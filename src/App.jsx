@@ -133,16 +133,16 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
   }
 
   const deleteHistory = async (id) => {
-    if (firebaseReady) {
-      await deleteDoc(doc(db, 'history', id))
+    if (firebaseReady && !String(id).startsWith('local-')) {
+      try { await deleteDoc(doc(db, 'history', id)) } catch {}
     } else {
       setHistory(prev => prev.filter(h => h.id !== id))
     }
   }
 
   const editHistory = async (id, updates) => {
-    if (firebaseReady) {
-      await updateDoc(doc(db, 'history', id), updates)
+    if (firebaseReady && !String(id).startsWith('local-')) {
+      try { await updateDoc(doc(db, 'history', id), updates) } catch {}
     } else {
       setHistory(prev => prev.map(h => h.id === id ? { ...h, ...updates } : h))
     }
