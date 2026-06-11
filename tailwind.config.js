@@ -14,7 +14,7 @@ export default {
       colors: {
         bg: 'var(--bg)',
         surface: {
-          DEFAULT: 'var(--surface-flat, var(--surface))',
+          DEFAULT: 'var(--surface-lighter)',
           light: 'var(--surface-light)',
           lighter: 'var(--surface-lighter)',
         },
