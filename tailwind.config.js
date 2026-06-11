@@ -21,12 +21,6 @@ export default {
         accent: {
           DEFAULT: 'var(--accent)',
           light: 'var(--accent-light)',
-          glow: 'var(--accent-glow)',
-        },
-        glow: {
-          green: 'var(--green)',
-          red: 'var(--red)',
-          amber: 'var(--amber)',
         },
         green: 'var(--green)',
         red: 'var(--red)',
@@ -38,10 +32,7 @@ export default {
         },
         border: 'var(--border)',
         'border-focus': 'var(--border-focus)',
-        input: 'var(--input-bg)',
         'btn-text': 'var(--btn-text)',
-        'toggle-bg': 'var(--toggle-bg)',
-        'toggle-dot': 'var(--toggle-dot)',
       },
     },
   },

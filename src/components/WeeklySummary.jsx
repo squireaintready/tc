@@ -87,7 +87,6 @@ export default function WeeklySummary({ history }) {
     } catch { return 0 }
   })
   const [email, setEmail] = useState('')
-  const [emailLoaded, setEmailLoaded] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [shared, setShared] = useState(false)
   const [emailSaved, setEmailSaved] = useState(false)
@@ -123,7 +122,6 @@ export default function WeeklySummary({ history }) {
       .catch(() => {
         try { setEmail(localStorage.getItem('tc-weekly-email') || '') } catch {}
       })
-      .finally(() => setEmailLoaded(true))
   }, [])
 
   useEffect(() => {

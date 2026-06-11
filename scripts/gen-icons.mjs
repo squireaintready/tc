@@ -89,9 +89,9 @@ const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), pa
 const lerp = (a, b, t) => a + (b - a) * t
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 
-const BG = hex('#0a0010')
-const COIN_TOP = hex('#e040fb')
-const COIN_BOTTOM = hex('#7c4dff')
+const BG = hex('#0b0214')
+const COIN_TOP = hex('#ec4899')
+const COIN_BOTTOM = hex('#8b5cf6')
 
 const drawIcon = (size, coinScale) => {
   const px = Buffer.alloc(size * size * 4)

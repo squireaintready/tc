@@ -1,21 +1,22 @@
 # TC — Tips Calculator
 
-A production tips calculator used daily at a high-volume NYC restaurant. Calculates end-of-day tip distribution for servers, hosts, and support staff based on hours worked, role, and pooling rules.
+A production tips calculator used daily at a high-volume NYC restaurant. Calculates end-of-day tip distribution for servers, trainees, and support staff based on role percentages and shift (all day / lunch / dinner).
 
 ## Features
 
-- **Role-Based Distribution** — Different tip percentages for servers, bussers, hosts, and bartenders
-- **Shift Tracking** — Calculate tips based on actual hours worked per shift
-- **Multi-Pool Support** — Handle separate tip pools (food, bar, takeout)
-- **Daily Reports** — Generate end-of-day summaries for management
-- **Mobile-Friendly** — Responsive design for quick calculations on the floor
+- **Role-Based Distribution** — Per-person percentages for servers, trainees, bussers, and other staff, with quick percent overrides and special cases (pastry, udon)
+- **Shift Tracking** — Tag a calculation as all day, lunch, or dinner; split shifts count as half days in summaries
+- **History & Editing** — Every calculation saves to Firestore (with offline/local fallback) and can be edited or reloaded as a setup
+- **Weekly & Period Reports** — Per-employee grids and totals, shareable as PDFs; weekly email summary
+- **Staff Management** — Add, edit, graduate, and remove employees from the app
+- **Mobile-First PWA** — Installable, offline-capable, with Normal/Compact density modes and four themes (light, dark, fun, retro)
 
 ## Tech Stack
 
 - **Frontend:** React, Vite, Tailwind CSS
-- **Backend:** Node.js API
+- **Backend:** Vercel serverless (weekly email)
 - **Hosting:** Vercel
-- **Database:** Firebase
+- **Database:** Firebase (Firestore with offline persistence)
 
 ## Getting Started
 
