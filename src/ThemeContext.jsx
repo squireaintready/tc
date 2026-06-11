@@ -3,8 +3,8 @@ import { createContext, useContext, useState, useEffect } from 'react'
 const ThemeContext = createContext()
 
 const THEMES = ['light', 'dark', 'fun', 'retro']
-const THEME_LABELS = { light: 'Light', dark: 'Dark', fun: 'Fun', retro: 'Retro' }
-const THEME_BG = { light: '#f4f4f5', dark: '#060912', fun: '#0b0214', retro: '#0a0f0b' }
+const THEME_LABELS = { light: 'Light', dark: 'Dark', fun: 'Fun', retro: 'Luxe' }
+const THEME_BG = { light: '#f4f4f5', dark: '#060912', fun: '#0b0214', retro: '#0c241a' }
 const ThemeIcon = ({ theme }) => {
   const cls = "w-3.5 h-3.5"
   if (theme === 'dark') return (
@@ -22,9 +22,10 @@ const ThemeIcon = ({ theme }) => {
       <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
     </svg>
   )
+  // Luxe: crown
   return (
     <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5.5 16.5h13M5.5 16.5L4.5 8l4.4 2.8L12 6.4l3.1 4.4L19.5 8l-1 8.5" />
     </svg>
   )
 }

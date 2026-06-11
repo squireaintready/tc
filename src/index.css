@@ -128,27 +128,27 @@
   --btn-text: #ffffff;
 }
 
-/* Retro — luxury finance: warm charcoal, emerald primary, champagne gold, cream text */
+/* Retro/Luxe — Rolex: deep forest green, antique gold, white wordmark text */
 [data-theme="retro"] {
-  --bg: #0a0f0b;
-  --glow-a: rgba(20,120,80,0.16);
-  --glow-b: rgba(212,175,55,0.08);
-  --surface: linear-gradient(135deg, #121a14 0%, #0c130e 100%);
-  --surface-flat: #121a14;
-  --surface-light: #18231a;
-  --surface-lighter: #1e2d22;
-  --border: rgba(212,175,55,0.14);
-  --border-focus: #d4af37;
-  --text-primary: #e9e4d0;
-  --text-secondary: #a3b39a;
-  --text-muted: #5d6f5e;
-  --accent: #177a52;
-  --accent-light: #d4af37;
-  --accent-grad: linear-gradient(135deg, #1e8e60 0%, #0d4f37 100%);
-  --green: #2eb086;
-  --red: #c4564f;
-  --amber: #d4af37;
-  --btn-text: #f3efdf;
+  --bg: #0c241a;
+  --glow-a: rgba(28,110,75,0.35);
+  --glow-b: rgba(200,169,81,0.10);
+  --surface: linear-gradient(135deg, #143425 0%, #0f2a1d 100%);
+  --surface-flat: #143425;
+  --surface-light: #183c2b;
+  --surface-lighter: #1d4632;
+  --border: rgba(200,169,81,0.16);
+  --border-focus: #c8a951;
+  --text-primary: #f4f6f1;
+  --text-secondary: #b7cdbd;
+  --text-muted: #6f9080;
+  --accent: #156a47;
+  --accent-light: #c8a951;
+  --accent-grad: linear-gradient(135deg, #1f7d56 0%, #0d4f36 100%);
+  --green: #d2ad55;
+  --red: #b3524c;
+  --amber: #c98a3e;
+  --btn-text: #f7f4e8;
 }
 
 body {
@@ -245,9 +245,9 @@ button, [role="button"], input, select, textarea, label {
   background-clip: text;
 }
 
-/* Retro: slow green-to-gold shimmer on the title */
+/* Luxe: white-to-gold shimmer on the title, like the white wordmark + gold crown */
 [data-theme="retro"] .fun-rainbow {
-  background: linear-gradient(90deg, #2eb086, #d4af37, #2eb086);
+  background: linear-gradient(90deg, #f4f6f1, #c8a951, #f4f6f1);
   background-size: 200% auto;
   animation: shimmer 6s linear infinite;
   -webkit-background-clip: text;
