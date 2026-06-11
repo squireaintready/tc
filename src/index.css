@@ -62,8 +62,8 @@
 /* Light (default) — clean neutral structure, indigo primary, emerald money, amber warnings */
 :root, [data-theme="light"] {
   --bg: #f4f4f5;
-  --glow-a: rgba(99,102,241,0.07);
-  --glow-b: rgba(16,185,129,0.05);
+  --glow-a: rgba(99,102,241,0.05);
+  --glow-b: rgba(16,185,129,0.04);
   --surface: #ffffff;
   --surface-flat: #ffffff;
   --surface-light: #f4f4f5;
@@ -82,43 +82,43 @@
   --btn-text: #ffffff;
 }
 
-/* Dark — neutral navy structure, sky-to-indigo primary, mint money, warm amber */
+/* Dark — neutral charcoal structure; blue/indigo lives in the accents only */
 [data-theme="dark"] {
-  --bg: #060912;
-  --glow-a: rgba(56,189,248,0.10);
-  --glow-b: rgba(139,92,246,0.09);
-  --surface: linear-gradient(135deg, #0d1524 0%, #080e1a 100%);
-  --surface-flat: #0d1524;
-  --surface-light: #121d31;
-  --surface-lighter: #182640;
-  --border: rgba(125,165,220,0.10);
+  --bg: #08090c;
+  --glow-a: rgba(56,140,248,0.06);
+  --glow-b: rgba(139,92,246,0.05);
+  --surface: linear-gradient(135deg, #111318 0%, #0c0e12 100%);
+  --surface-flat: #111318;
+  --surface-light: #181b22;
+  --surface-lighter: #1e222b;
+  --border: rgba(140,160,190,0.12);
   --border-focus: #38bdf8;
-  --text-primary: #dde5f0;
-  --text-secondary: #8696ad;
-  --text-muted: #4d5b73;
+  --text-primary: #e6e9ee;
+  --text-secondary: #9aa3b2;
+  --text-muted: #5b6372;
   --accent: #3d8bfd;
-  --accent-light: #5fb2f6;
+  --accent-light: #6cb0f5;
   --accent-grad: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
   --green: #34d399;
   --red: #f87171;
   --amber: #fbbf24;
-  --btn-text: #f4f9ff;
+  --btn-text: #f6f9ff;
 }
 
-/* Fun — genz party: pink primary, violet gradient, cyan secondary, teal money */
+/* Fun — neutral dark base with a violet hint; pink/violet/cyan accents carry the party */
 [data-theme="fun"] {
-  --bg: #0b0214;
-  --glow-a: rgba(236,72,153,0.16);
-  --glow-b: rgba(34,211,238,0.11);
-  --surface: linear-gradient(135deg, #170b2b 0%, #0f051c 100%);
-  --surface-flat: #170b2b;
-  --surface-light: #1f1138;
-  --surface-lighter: #281949;
-  --border: rgba(236,72,153,0.12);
+  --bg: #0c0a10;
+  --glow-a: rgba(236,72,153,0.09);
+  --glow-b: rgba(34,211,238,0.06);
+  --surface: linear-gradient(135deg, #16131c 0%, #100e15 100%);
+  --surface-flat: #16131c;
+  --surface-light: #1d1926;
+  --surface-lighter: #242031;
+  --border: rgba(200,170,230,0.12);
   --border-focus: #ec4899;
-  --text-primary: #f6eeff;
-  --text-secondary: #c9b2e6;
-  --text-muted: #7f66a4;
+  --text-primary: #efeaf6;
+  --text-secondary: #b0a6c4;
+  --text-muted: #6d6483;
   --accent: #ec4899;
   --accent-light: #22d3ee;
   --accent-grad: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
@@ -128,20 +128,20 @@
   --btn-text: #ffffff;
 }
 
-/* Retro/Luxe — Rolex: deep forest green, antique gold, white wordmark text */
+/* Luxe — Rolex: forest green identity with deeper layer contrast, antique gold, white text */
 [data-theme="retro"] {
-  --bg: #0c241a;
-  --glow-a: rgba(28,110,75,0.35);
+  --bg: #0a1f15;
+  --glow-a: rgba(31,125,86,0.20);
   --glow-b: rgba(200,169,81,0.10);
-  --surface: linear-gradient(135deg, #143425 0%, #0f2a1d 100%);
-  --surface-flat: #143425;
-  --surface-light: #183c2b;
-  --surface-lighter: #1d4632;
-  --border: rgba(200,169,81,0.16);
+  --surface: linear-gradient(135deg, #133024 0%, #0e271b 100%);
+  --surface-flat: #133024;
+  --surface-light: #173a29;
+  --surface-lighter: #1d4531;
+  --border: rgba(200,169,81,0.18);
   --border-focus: #c8a951;
-  --text-primary: #f4f6f1;
-  --text-secondary: #b7cdbd;
-  --text-muted: #6f9080;
+  --text-primary: #f6f7f3;
+  --text-secondary: #bcd0c2;
+  --text-muted: #74937f;
   --accent: #156a47;
   --accent-light: #c8a951;
   --accent-grad: linear-gradient(135deg, #1f7d56 0%, #0d4f36 100%);
@@ -159,7 +159,8 @@ body {
   transition: background 0.4s ease, color 0.4s ease;
 }
 
-/* Ambient theme glow behind everything */
+/* Ambient theme tint: an even wash from the top plus a faint glow at the
+   bottom corner — depth without a visible "spotlight" blob */
 body::before {
   content: '';
   position: fixed;
@@ -167,8 +168,8 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(50% 38% at 15% 0%, var(--glow-a), transparent 70%),
-    radial-gradient(45% 35% at 90% 100%, var(--glow-b), transparent 70%);
+    linear-gradient(to bottom, var(--glow-a), transparent 42%),
+    radial-gradient(110% 65% at 88% 102%, var(--glow-b), transparent 62%);
 }
 
 /* Hide number input spinners */
