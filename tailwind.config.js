@@ -8,6 +8,7 @@ export default {
         'app-sm': ['var(--fs-sm)', { lineHeight: '1.4' }],
         'app-base': ['var(--fs-base)', { lineHeight: '1.45' }],
         'app-lg': ['var(--fs-lg)', { lineHeight: '1.35' }],
+        'app-title': ['var(--fs-title)', { lineHeight: '1.3' }],
         'app-xl': ['var(--fs-xl)', { lineHeight: '1.3' }],
       },
       colors: {

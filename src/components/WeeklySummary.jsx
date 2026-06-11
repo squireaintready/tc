@@ -673,7 +673,7 @@ export default function WeeklySummary({ history }) {
 
       {/* Share button */}
       <button onClick={handleShare}
-        className="w-full py-[var(--btn-py)] active:scale-[0.98] rounded-lg font-semibold text-app-base transition-all duration-200"
+        className="w-full py-[var(--btn-py)] active:scale-[0.98] rounded-lg font-semibold text-app-lg transition-all duration-200"
         style={{
           background: shared ? 'var(--green)' : 'var(--accent)',
           color: 'var(--btn-text)',
@@ -946,7 +946,7 @@ export default function WeeklySummary({ history }) {
 
           {/* Share employee summary button */}
           <button onClick={handleShareEmployeeSummary}
-            className="w-full py-[var(--btn-py)] active:scale-[0.98] rounded-lg font-semibold text-app-base transition-all duration-200"
+            className="w-full py-[var(--btn-py)] active:scale-[0.98] rounded-lg font-semibold text-app-lg transition-all duration-200"
             style={{
               background: shared ? 'var(--green)' : 'var(--accent)',
               color: 'var(--btn-text)',

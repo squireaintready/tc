@@ -147,7 +147,7 @@ export default function Results({ breakdown, remainder, totalTips, onBreakdownCh
       <button
         onClick={handleSave}
         disabled={saved}
-        className="w-full py-[var(--btn-py)] active:scale-[0.98] disabled:active:scale-100 rounded-lg font-bold text-app-base transition-all duration-200"
+        className="w-full py-[var(--btn-py)] active:scale-[0.98] disabled:active:scale-100 rounded-lg font-bold text-app-lg transition-all duration-200"
         style={{
           background: saved ? 'var(--green)' : 'color-mix(in srgb, var(--green) 15%, transparent)',
           color: saved ? 'var(--btn-text)' : 'var(--green)',

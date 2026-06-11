@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import Results from './Results'
-import ShiftSelect from './ShiftSelect'
+import ShiftSelect, { SunIcon, MoonIcon } from './ShiftSelect'
 import { calculateTips } from '../utils/calculateTips'
 import { useStaffContext } from '../StaffContext'
 import { getServers, getBusboys, getTrainees, getOthers } from '../staff'
@@ -9,7 +9,8 @@ import { getServers, getBusboys, getTrainees, getOthers } from '../staff'
 const T = {
   label: 'text-app-xs',                  // section labels, muted meta
   meta: 'text-app-sm',                   // secondary text
-  body: 'text-app-base',                 // chips, buttons, body copy (13px on mobile)
+  body: 'text-app-base',                 // chips, toggles, body copy (13px on mobile)
+  btn: 'text-app-lg',                    // primary action buttons
   input: 'text-app-xl',                  // tip input
   gap: 'gap-[var(--gap-chip)]',          // between chips, pills
   sectionGap: 'space-y-[var(--gap-section)]', // between sections
@@ -107,6 +108,7 @@ export default function Calculator({ onSaveHistory, history }) {
   const [splitMode, setSplitMode] = useState(() => {
     try { return localStorage.getItem('tc-split-mode') || 'none' } catch { return 'none' }
   })
+  const [showShift, setShowShift] = useState(false)
 
   // Persist state
   useEffect(() => { try { localStorage.setItem('tc-enabled-staff', JSON.stringify(enabledStaff)) } catch {} }, [enabledStaff])
@@ -252,32 +254,57 @@ export default function Calculator({ onSaveHistory, history }) {
               Enter total tips
             </div>
 
-            {/* Tips input */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${T.input} font-bold z-10`}
-                  style={{ color: 'var(--text-secondary)' }}>$</span>
-                <input
-                  ref={tipsInputRef}
-                  type="text"
-                  inputMode="decimal"
-                  pattern="[0-9]*\.?[0-9]*"
-                  value={totalTips}
-                  onChange={e => {
-                    let v = e.target.value
-                    if (v !== '' && !/^\d*\.?\d*$/.test(v)) return
-                    // Strip leading zeros (but keep "0." for decimals)
-                    if (v.length > 1 && v[0] === '0' && v[1] !== '.') v = v.replace(/^0+/, '') || ''
-                    setTotalTips(v)
+            {/* Tips input + shift (rarely used → tucked behind a worded chip) */}
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${T.input} font-bold z-10`}
+                    style={{ color: 'var(--text-secondary)' }}>$</span>
+                  <input
+                    ref={tipsInputRef}
+                    type="text"
+                    inputMode="decimal"
+                    pattern="[0-9]*\.?[0-9]*"
+                    value={totalTips}
+                    onChange={e => {
+                      let v = e.target.value
+                      if (v !== '' && !/^\d*\.?\d*$/.test(v)) return
+                      // Strip leading zeros (but keep "0." for decimals)
+                      if (v.length > 1 && v[0] === '0' && v[1] !== '.') v = v.replace(/^0+/, '') || ''
+                      setTotalTips(v)
+                    }}
+                    onKeyDown={e => { if (e.key === 'Enter') calculate() }}
+                    placeholder="0"
+                    aria-label="Total tips in dollars"
+                    className={`w-full pl-8 pr-3 py-[var(--control-py)] ${T.input} font-bold rounded-lg focus:outline-none`}
+                    style={{ background: 'var(--surface-lighter)', color: 'var(--text-primary)' }}
+                  />
+                </div>
+                <button
+                  onClick={() => setShowShift(!showShift)}
+                  aria-expanded={showShift}
+                  aria-label="Change shift"
+                  title="Splitting the day? Choose lunch or dinner"
+                  className={`shrink-0 flex items-center gap-1 px-2.5 py-2 rounded-lg ${T.label} font-semibold uppercase tracking-wide transition-all duration-150 active:scale-95`}
+                  style={{
+                    color: splitMode !== 'none' ? 'var(--accent-light)' : 'var(--text-muted)',
+                    background: splitMode !== 'none' ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'var(--surface-lighter)',
                   }}
-                  onKeyDown={e => { if (e.key === 'Enter') calculate() }}
-                  placeholder="0"
-                  aria-label="Total tips in dollars"
-                  className={`w-full pl-8 pr-3 py-[var(--control-py)] ${T.input} font-bold rounded-lg focus:outline-none`}
-                  style={{ background: 'var(--surface-lighter)', color: 'var(--text-primary)' }}
-                />
+                >
+                  {splitMode === 'lunch' && <SunIcon />}
+                  {splitMode === 'dinner' && <MoonIcon />}
+                  {splitMode === 'lunch' ? 'Lunch' : splitMode === 'dinner' ? 'Dinner' : 'All day'}
+                  <svg className={`w-2.5 h-2.5 transition-transform duration-200 ${showShift ? 'rotate-180' : ''}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
               </div>
-              <ShiftSelect value={splitMode} onChange={setSplitMode} />
+              {showShift && (
+                <div className="mt-1.5 animate-[fadeIn_0.2s_ease-out]">
+                  <ShiftSelect value={splitMode} onChange={(m) => { setSplitMode(m); setShowShift(false) }} />
+                </div>
+              )}
             </div>
 
             {/* Servers */}
@@ -480,7 +507,7 @@ export default function Calculator({ onSaveHistory, history }) {
             <button
               onClick={calculate}
               disabled={!canCalculate}
-              className={`w-full py-[var(--btn-py)] active:scale-[0.98] disabled:opacity-30 disabled:active:scale-100 rounded-lg font-bold ${T.body} transition-all duration-200`}
+              className={`w-full py-[var(--btn-py)] active:scale-[0.98] disabled:opacity-30 disabled:active:scale-100 rounded-lg font-bold ${T.btn} transition-all duration-200`}
               style={{
                 background: calcFlash ? 'var(--green)' : 'var(--accent)',
                 color: 'var(--btn-text)',
@@ -495,7 +522,7 @@ export default function Calculator({ onSaveHistory, history }) {
           ) : (
             <button
               onClick={() => goToPage(0)}
-              className={`w-full py-[var(--btn-py)] active:scale-[0.98] rounded-lg font-semibold ${T.body} transition-all duration-200`}
+              className={`w-full py-[var(--btn-py)] active:scale-[0.98] rounded-lg font-semibold ${T.btn} transition-all duration-200`}
               style={{ background: 'var(--surface-lighter)', color: 'var(--text-secondary)' }}
             >
               ← Back to Calculator

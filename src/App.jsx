@@ -153,7 +153,7 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
       {/* Minimal header */}
       <header className="shrink-0 px-4 pb-2 flex items-center justify-between"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 8px)' }}>
-        <h1 className={`text-app-base font-bold tracking-tight ${isFun ? 'fun-rainbow' : ''}`}
+        <h1 className={`text-app-title font-bold tracking-tight ${isFun ? 'fun-rainbow' : ''}`}
           style={{ color: isFun ? undefined : 'var(--text-primary)' }}>
           Tip Calculator
         </h1>
@@ -195,7 +195,7 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
             key={t}
             onClick={() => setTab(t)}
             aria-current={tab === t ? 'page' : undefined}
-            className="flex-1 py-2.5 text-app-xs font-semibold transition-all duration-200 relative flex flex-col items-center gap-0.5"
+            className="flex-1 py-2.5 text-app-sm font-semibold transition-all duration-200 relative flex flex-col items-center gap-0.5"
             style={{ color: tab === t ? 'var(--accent-light)' : 'var(--text-secondary)' }}
           >
             {tab === t && (

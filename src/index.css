@@ -4,11 +4,12 @@
 
 /* ===== TYPE SCALE (mobile-first: 13px main body text/numbers) ===== */
 :root {
-  --fs-xs: 11px;   /* uppercase section labels, fine print */
-  --fs-sm: 12px;   /* secondary text, meta */
-  --fs-base: 13px; /* main body text, numbers, buttons */
-  --fs-lg: 15px;   /* key amounts, totals */
-  --fs-xl: 18px;   /* tip input */
+  --fs-xs: 11px;    /* uppercase section labels, fine print */
+  --fs-sm: 12px;    /* secondary text, meta, nav labels */
+  --fs-base: 13px;  /* main body text, numbers */
+  --fs-lg: 15px;    /* key amounts, totals, primary buttons */
+  --fs-title: 16px; /* app header title */
+  --fs-xl: 18px;    /* tip input */
 }
 @media (min-width: 640px) {
   :root {
@@ -16,6 +17,7 @@
     --fs-sm: 13px;
     --fs-base: 14px;
     --fs-lg: 16px;
+    --fs-title: 17px;
     --fs-xl: 20px;
   }
 }
@@ -33,9 +35,9 @@
   --btn-py: 15px;      /* primary action buttons */
   --card-px: 14px;
   --card-py: 12px;
-  --toggle-w: 40px;
-  --toggle-h: 22px;
-  --toggle-dot: 16px;
+  --toggle-w: 36px;
+  --toggle-h: 20px;
+  --toggle-dot: 14px;
 }
 
 /* ===== DENSITY: compact (the original tight layout) ===== */
