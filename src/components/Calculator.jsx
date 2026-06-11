@@ -36,7 +36,7 @@ function Toggle({ label, detail, selected, onTap }) {
         className="relative shrink-0 ml-2 rounded-full transition-colors duration-200"
         style={{
           width: 'var(--toggle-w)', height: 'var(--toggle-h)',
-          background: selected ? 'var(--accent)' : 'rgba(128,128,128,0.2)',
+          background: selected ? 'var(--accent-grad)' : 'rgba(128,128,128,0.2)',
           boxSizing: 'border-box',
         }}
       >
@@ -63,7 +63,7 @@ function PillOption({ label, active, onTap }) {
       aria-pressed={active}
       className={`px-2.5 py-[var(--pill-py)] rounded ${T.label} font-semibold transition-all duration-150 active:scale-95`}
       style={{
-        background: active ? 'var(--accent)' : 'var(--surface-lighter)',
+        background: active ? 'var(--accent-grad)' : 'var(--surface-lighter)',
         color: active ? 'var(--btn-text)' : 'var(--text-secondary)',
       }}
     >
@@ -75,9 +75,9 @@ function PillOption({ label, active, onTap }) {
 function Divider({ label }) {
   return (
     <div className="my-1.5 flex items-center gap-2">
-      <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
+      <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
       <span className={`${T.label} font-semibold uppercase tracking-wider`} style={{ color: 'var(--text-muted)' }}>{label}</span>
-      <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
+      <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
     </div>
   )
 }
@@ -256,7 +256,7 @@ export default function Calculator({ onSaveHistory, history }) {
 
             {/* Tips input + shift (rarely used → tucked behind a worded chip) */}
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-stretch gap-2">
                 <div className="relative flex-1">
                   <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${T.input} font-bold z-10`}
                     style={{ color: 'var(--text-secondary)' }}>$</span>
@@ -325,9 +325,9 @@ export default function Calculator({ onSaveHistory, history }) {
                     </svg>
                   </button>
                 )}
-                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
+                <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
                 <span className={`${T.label} font-semibold uppercase tracking-wider`} style={{ color: 'var(--text-muted)' }}>Servers</span>
-                <div className="flex-1 h-px" style={{ background: 'var(--surface-lighter)' }} />
+                <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
                 <button onClick={toggleAllServers}
                   title="Toggle all servers on or off"
                   className={`${T.label} font-semibold px-1.5 py-1 rounded transition-all active:scale-95`}
@@ -386,33 +386,10 @@ export default function Calculator({ onSaveHistory, history }) {
               )}
             </div>
 
-            {/* Bussers */}
+            {/* Bussers: busboys first, then modifiers + others sharing one 2-col grid */}
             {(modifierServers.length > 0 || busboys.length > 0 || others.length > 0) && (
               <div>
                 <Divider label="Bussers" />
-                {modifierServers.length > 0 && (
-                  <>
-                    <div className={`grid grid-cols-2 ${T.gap}`}>
-                      {modifierServers.map(s => (
-                        <Toggle key={s.id} label={s.name}
-                          detail={modifierToggles[s.id] ? `${s.modifiers.altPercentage}%` : `${s.percentage}%`}
-                          selected={!!enabledStaff[s.id]} onTap={() => toggle(s.id)} />
-                      ))}
-                    </div>
-                    {modifierServers.filter(s => enabledStaff[s.id]).map(s => (
-                      <div key={s.id} className="mt-1 pl-2.5">
-                        <button
-                          onClick={() => setModifierToggles(prev => ({ ...prev, [s.id]: !prev[s.id] }))}
-                          className={`${T.label} font-medium`}
-                          style={{ color: modifierToggles[s.id] ? 'var(--accent-light)' : 'var(--text-secondary)' }}
-                        >
-                          {modifierToggles[s.id] ? `${s.modifiers.altLabel} ${s.modifiers.altPercentage}%` : s.modifiers.altLabel?.toLowerCase()}
-                        </button>
-                      </div>
-                    ))}
-                  </>
-                )}
-                {busboys.length > 0 && modifierServers.length > 0 && <Divider label="Busboys" />}
                 {busboys.length > 0 && (
                   <>
                     <div className={`grid grid-cols-2 ${T.gap}`}>
@@ -426,10 +403,11 @@ export default function Calculator({ onSaveHistory, history }) {
                       <div className="mt-1 pl-2.5">
                         <button
                           onClick={() => setShowPastry(!showPastry)}
-                          className={`${T.label} font-medium flex items-center gap-0.5`}
+                          aria-expanded={showPastry}
+                          className={`${T.label} font-medium py-0.5 flex items-center gap-0.5 transition-all active:scale-95`}
                           style={{ color: pastryBusboy ? 'var(--accent-light)' : 'var(--text-secondary)' }}
                         >
-                          {pastryBusboy ? `Pastry: ${enabledBusboys.find(b => b.id === pastryBusboy)?.name || ''}` : 'pastry'}
+                          {pastryBusboy ? `Pastry: ${enabledBusboys.find(b => b.id === pastryBusboy)?.name || ''}` : 'Pastry'}
                           <svg className={`w-2.5 h-2.5 transition-transform duration-200 ${showPastry ? 'rotate-180' : ''}`}
                             fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -449,15 +427,31 @@ export default function Calculator({ onSaveHistory, history }) {
                     )}
                   </>
                 )}
-                {others.length > 0 && (busboys.length > 0 || modifierServers.length > 0) && <Divider label="Other" />}
-                {others.length > 0 && (
-                  <div className={`grid grid-cols-2 ${T.gap}`}>
+                {(modifierServers.length > 0 || others.length > 0) && (
+                  <div className={`grid grid-cols-2 ${T.gap} ${busboys.length > 0 ? 'mt-[var(--gap-chip)]' : ''}`}>
+                    {modifierServers.map(s => (
+                      <Toggle key={s.id} label={s.name}
+                        detail={modifierToggles[s.id] ? `${s.modifiers.altPercentage}%` : `${s.percentage}%`}
+                        selected={!!enabledStaff[s.id]} onTap={() => toggle(s.id)} />
+                    ))}
                     {others.map(o => (
                       <Toggle key={o.id} label={o.name} detail={`${o.percentage}%`}
                         selected={!!enabledStaff[o.id]} onTap={() => toggle(o.id)} />
                     ))}
                   </div>
                 )}
+                {modifierServers.filter(s => enabledStaff[s.id]).map(s => (
+                  <div key={s.id} className="mt-1 pl-2.5">
+                    <button
+                      onClick={() => setModifierToggles(prev => ({ ...prev, [s.id]: !prev[s.id] }))}
+                      aria-pressed={!!modifierToggles[s.id]}
+                      className={`${T.label} font-medium py-0.5 transition-all active:scale-95`}
+                      style={{ color: modifierToggles[s.id] ? 'var(--accent-light)' : 'var(--text-secondary)' }}
+                    >
+                      {modifierToggles[s.id] ? `${s.modifiers.altLabel} ${s.modifiers.altPercentage}%` : s.modifiers.altLabel}
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -483,7 +477,7 @@ export default function Calculator({ onSaveHistory, history }) {
       </div>
 
       {/* Bottom bar: dots + button */}
-      <div className="shrink-0 relative z-10" style={{ background: 'var(--bg)' }}>
+      <div className="shrink-0 relative z-10">
         {/* Page dots */}
         <div className="flex justify-center gap-1 py-0.5">
           {[0, 1].map(i => (
@@ -509,7 +503,7 @@ export default function Calculator({ onSaveHistory, history }) {
               disabled={!canCalculate}
               className={`w-full py-[var(--btn-py)] active:scale-[0.98] disabled:opacity-30 disabled:active:scale-100 rounded-lg font-bold ${T.btn} transition-all duration-200`}
               style={{
-                background: calcFlash ? 'var(--green)' : 'var(--accent)',
+                background: calcFlash ? 'var(--green)' : 'var(--accent-grad)',
                 color: 'var(--btn-text)',
                 transform: calcFlash ? 'scale(1.02)' : undefined,
               }}

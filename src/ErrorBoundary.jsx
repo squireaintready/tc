@@ -19,7 +19,7 @@ export default class ErrorBoundary extends Component {
     if (!this.state.hasError) return this.props.children
     return (
       <div className="flex flex-col items-center justify-center gap-3 px-6 text-center"
-        style={{ height: '100svh', background: 'var(--bg)' }}>
+        style={{ height: '100svh' }}>
         <span className="text-app-lg font-bold" style={{ color: 'var(--text-primary)' }}>
           Something went wrong
         </span>
@@ -29,7 +29,7 @@ export default class ErrorBoundary extends Component {
         <button
           onClick={() => window.location.reload()}
           className="mt-2 px-6 py-[var(--btn-py)] rounded-lg font-bold text-app-base active:scale-[0.98] transition-all"
-          style={{ background: 'var(--accent)', color: 'var(--btn-text)' }}
+          style={{ background: 'var(--accent-grad)', color: 'var(--btn-text)' }}
         >
           Reload
         </button>

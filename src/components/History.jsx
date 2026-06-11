@@ -199,7 +199,7 @@ export default function History({ history, onDelete, onEdit }) {
                           className="text-app-sm font-medium px-3 py-[var(--chip-py)] rounded-lg transition-all duration-200 active:scale-95"
                           style={{
                             color: 'var(--text-secondary)',
-                            background: 'var(--surface-lighter)',
+                            background: 'var(--surface-light)',
                           }}
                         >
                           Cancel
@@ -210,7 +210,7 @@ export default function History({ history, onDelete, onEdit }) {
                         className="text-app-sm font-medium px-3 py-[var(--chip-py)] rounded-lg transition-all duration-200 active:scale-95"
                         style={{
                           color: confirmEditId === h.id ? 'var(--btn-text)' : (hasChanges(h.id) ? (isFun ? 'color-mix(in srgb, var(--green) 80%, white)' : 'var(--green)') : 'var(--text-secondary)'),
-                          background: confirmEditId === h.id ? (isFun ? 'color-mix(in srgb, var(--green) 70%, #000)' : 'var(--green)') : (hasChanges(h.id) ? 'color-mix(in srgb, var(--green) 20%, transparent)' : 'var(--surface-lighter)'),
+                          background: confirmEditId === h.id ? (isFun ? 'color-mix(in srgb, var(--green) 70%, #000)' : 'var(--green)') : (hasChanges(h.id) ? 'color-mix(in srgb, var(--green) 20%, transparent)' : 'var(--surface-light)'),
                         }}
                       >
                         {confirmEditId === h.id ? 'Confirm?' : (hasChanges(h.id) ? 'Save' : 'Done')}
@@ -223,7 +223,7 @@ export default function History({ history, onDelete, onEdit }) {
                         className="text-app-sm font-medium px-3 py-[var(--chip-py)] rounded-lg transition-all duration-200 active:scale-95"
                         style={{
                           color: 'var(--text-secondary)',
-                          background: 'var(--surface-lighter)',
+                          background: 'var(--surface-light)',
                         }}
                       >
                         Edit
@@ -233,7 +233,7 @@ export default function History({ history, onDelete, onEdit }) {
                         className="text-app-sm font-medium px-3 py-[var(--chip-py)] rounded-lg transition-all duration-200 active:scale-95"
                         style={{
                           color: confirmDeleteId === h.id ? 'var(--btn-text)' : 'var(--red)',
-                          background: confirmDeleteId === h.id ? 'var(--red)' : 'var(--surface-lighter)',
+                          background: confirmDeleteId === h.id ? 'var(--red)' : 'var(--surface-light)',
                         }}
                       >
                         {confirmDeleteId === h.id ? 'Confirm?' : 'Delete'}

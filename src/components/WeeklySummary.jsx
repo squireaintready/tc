@@ -531,7 +531,7 @@ export default function WeeklySummary({ history }) {
           aria-pressed={viewMode === 'weekly'}
           className="flex-1 py-[var(--control-py)] rounded-lg text-app-base font-semibold transition-all active:scale-[0.98]"
           style={{
-            background: viewMode === 'weekly' ? 'var(--accent)' : 'transparent',
+            background: viewMode === 'weekly' ? 'var(--accent-grad)' : 'transparent',
             color: viewMode === 'weekly' ? 'var(--btn-text)' : 'var(--text-secondary)',
           }}
         >
@@ -542,7 +542,7 @@ export default function WeeklySummary({ history }) {
           aria-pressed={viewMode === 'employee'}
           className="flex-1 py-[var(--control-py)] rounded-lg text-app-base font-semibold transition-all active:scale-[0.98]"
           style={{
-            background: viewMode === 'employee' ? 'var(--accent)' : 'transparent',
+            background: viewMode === 'employee' ? 'var(--accent-grad)' : 'transparent',
             color: viewMode === 'employee' ? 'var(--btn-text)' : 'var(--text-secondary)',
           }}
         >
@@ -675,7 +675,7 @@ export default function WeeklySummary({ history }) {
       <button onClick={handleShare}
         className="w-full py-[var(--btn-py)] active:scale-[0.98] rounded-lg font-semibold text-app-lg transition-all duration-200"
         style={{
-          background: shared ? 'var(--green)' : 'var(--accent)',
+          background: shared ? 'var(--green)' : 'var(--accent-grad)',
           color: 'var(--btn-text)',
         }}>
         {shared ? '✓ Shared' : 'Share Weekly Summary'}
@@ -698,7 +698,7 @@ export default function WeeklySummary({ history }) {
                   aria-pressed={periodType === value}
                   className="flex-1 py-[var(--control-py)] rounded-lg text-app-sm font-semibold transition-all active:scale-[0.98]"
                   style={{
-                    background: periodType === value ? 'var(--accent)' : 'var(--surface-light)',
+                    background: periodType === value ? 'var(--accent-grad)' : 'var(--surface-light)',
                     color: periodType === value ? 'var(--btn-text)' : 'var(--text-secondary)',
                   }}
                 >
@@ -762,7 +762,7 @@ export default function WeeklySummary({ history }) {
                     aria-pressed={classFilter === value}
                     className="flex-1 py-[var(--control-py)] rounded-lg text-app-sm font-semibold transition-all active:scale-[0.98]"
                     style={{
-                      background: classFilter === value ? 'var(--accent)' : 'var(--surface-light)',
+                      background: classFilter === value ? 'var(--accent-grad)' : 'var(--surface-light)',
                       color: classFilter === value ? 'var(--btn-text)' : 'var(--text-secondary)',
                     }}
                   >
@@ -948,7 +948,7 @@ export default function WeeklySummary({ history }) {
           <button onClick={handleShareEmployeeSummary}
             className="w-full py-[var(--btn-py)] active:scale-[0.98] rounded-lg font-semibold text-app-lg transition-all duration-200"
             style={{
-              background: shared ? 'var(--green)' : 'var(--accent)',
+              background: shared ? 'var(--green)' : 'var(--accent-grad)',
               color: 'var(--btn-text)',
             }}>
             {shared ? '✓ Shared' : 'Share Employee Summary'}

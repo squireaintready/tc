@@ -59,96 +59,112 @@
 }
 
 /* ===== THEME VARIABLES ===== */
-:root, [data-theme="dark"] {
-  --bg: #060810;
-  --surface: linear-gradient(135deg, #0a1020 0%, #060a18 100%);
-  --surface-flat: #0a1020;
-  --surface-light: #0e1828;
-  --surface-lighter: #142030;
-  --border: rgba(48,112,192,0.08);
-  --border-focus: #3070c0;
-  --text-primary: #a0b8d0;
-  --text-secondary: #6880a0;
-  --text-muted: #384860;
-  --accent: #3070c0;
-  --accent-light: #4888d8;
-  --accent-glow: rgba(0,0,0,0);
-  --green: #28a868;
-  --red: #c04848;
-  --amber: #b09020;
-  --btn-text: #d8e4f0;
-  --toggle-bg: #142030;
-  --toggle-dot: #8098b0;
-  --input-bg: #0e1828;
-}
-
-[data-theme="light"] {
-  --bg: #f4f5f7;
+/* Light is the default theme — clean, neutral, crisp (Notion/Linear feel) */
+:root, [data-theme="light"] {
+  --bg: #f4f4f5;
+  --glow-a: rgba(0,0,0,0);
+  --glow-b: rgba(0,0,0,0);
   --surface: #ffffff;
   --surface-flat: #ffffff;
-  --surface-light: #f8f9fb;
-  --surface-lighter: #eaecf0;
-  --border: rgba(0,0,0,0.05);
-  --border-focus: #3a8a60;
-  --text-primary: #1a1e24;
-  --text-secondary: #606878;
-  --text-muted: #a0a4ac;
-  --accent: #3a8a60;
-  --accent-light: #3a8a60;
+  --surface-light: #f4f4f5;
+  --surface-lighter: #ffffff;
+  --border: rgba(24,24,27,0.08);
+  --border-focus: #18181b;
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
+  --accent: #18181b;
+  --accent-light: #18181b;
+  --accent-grad: linear-gradient(135deg, #3f3f46 0%, #09090b 100%);
   --accent-glow: rgba(0,0,0,0);
-  --green: #2a8a50;
-  --red: #b03535;
-  --amber: #9a7a18;
-  --btn-text: #ffffff;
-  --toggle-bg: #c8ccd4;
+  --green: #15803d;
+  --red: #dc2626;
+  --amber: #b45309;
+  --btn-text: #fafafa;
+  --toggle-bg: #e4e4e7;
   --toggle-dot: #ffffff;
   --input-bg: #ffffff;
 }
 
-[data-theme="fun"] {
-  --bg: #0a0010;
-  --surface: linear-gradient(135deg, #10081c 0%, #0a0014 100%);
-  --surface-flat: #10081c;
-  --surface-light: #180c28;
-  --surface-lighter: #201030;
-  --border: rgba(224,64,251,0.08);
-  --border-focus: #e040fb;
-  --text-primary: #f0e4ff;
-  --text-secondary: #c4a8e0;
-  --text-muted: #705888;
-  --accent: #e040fb;
-  --accent-light: #7c4dff;
-  --accent-glow: rgba(224,64,251,0.15);
-  --green: #00e5a0;
-  --red: #ff4081;
-  --amber: #ffab40;
-  --btn-text: #f0e0ff;
-  --toggle-bg: #201030;
-  --toggle-dot: #b080d0;
-  --input-bg: #180c28;
+/* Dark — deep cool navy, modern blue */
+[data-theme="dark"] {
+  --bg: #05080f;
+  --glow-a: rgba(59,130,246,0.10);
+  --glow-b: rgba(99,102,241,0.08);
+  --surface: linear-gradient(135deg, #0b1322 0%, #070d18 100%);
+  --surface-flat: #0b1322;
+  --surface-light: #101b30;
+  --surface-lighter: #15233c;
+  --border: rgba(96,156,224,0.10);
+  --border-focus: #3b82f6;
+  --text-primary: #d2deee;
+  --text-secondary: #7d93b2;
+  --text-muted: #46587a;
+  --accent: #2f7ddd;
+  --accent-light: #5ea0f2;
+  --accent-grad: linear-gradient(135deg, #3b82f6 0%, #4338ca 100%);
+  --accent-glow: rgba(59,130,246,0.12);
+  --green: #2fb380;
+  --red: #e05c5c;
+  --amber: #d4a72c;
+  --btn-text: #eef5ff;
+  --toggle-bg: #15233c;
+  --toggle-dot: #8fa9c8;
+  --input-bg: #101b30;
 }
 
+/* Fun — neon party purple/magenta */
+[data-theme="fun"] {
+  --bg: #08000f;
+  --glow-a: rgba(224,64,251,0.16);
+  --glow-b: rgba(124,77,255,0.15);
+  --surface: linear-gradient(135deg, #150a28 0%, #0d0418 100%);
+  --surface-flat: #150a28;
+  --surface-light: #1c1033;
+  --surface-lighter: #251743;
+  --border: rgba(224,64,251,0.12);
+  --border-focus: #e040fb;
+  --text-primary: #f5ecff;
+  --text-secondary: #c9b0e8;
+  --text-muted: #7e64a3;
+  --accent: #d935f0;
+  --accent-light: #c084fc;
+  --accent-grad: linear-gradient(135deg, #e040fb 0%, #7c4dff 100%);
+  --accent-glow: rgba(224,64,251,0.2);
+  --green: #00e5a0;
+  --red: #ff4081;
+  --amber: #ffb74d;
+  --btn-text: #ffffff;
+  --toggle-bg: #251743;
+  --toggle-dot: #b389dd;
+  --input-bg: #1c1033;
+}
+
+/* Retro — deep emerald + champagne gold, luxury finance */
 [data-theme="retro"] {
-  --bg: #0a100a;
-  --surface: linear-gradient(135deg, #0e180e 0%, #0a120a 100%);
-  --surface-flat: #0e180e;
-  --surface-light: #142014;
-  --surface-lighter: #1a2a1a;
-  --border: rgba(51,255,51,0.08);
-  --border-focus: #2a9a2a;
-  --text-primary: #b0d8a0;
-  --text-secondary: #78a060;
-  --text-muted: #385028;
-  --accent: #1a8a1a;
-  --accent-light: #40b840;
-  --accent-glow: rgba(51,255,51,0.08);
-  --green: #2aa82a;
-  --red: #e04040;
-  --amber: #d09020;
-  --btn-text: #e0ffe0;
-  --toggle-bg: #1a2a1a;
-  --toggle-dot: #70a860;
-  --input-bg: #142014;
+  --bg: #04130d;
+  --glow-a: rgba(22,101,72,0.22);
+  --glow-b: rgba(201,162,39,0.07);
+  --surface: linear-gradient(135deg, #0a241a 0%, #061a12 100%);
+  --surface-flat: #0a241a;
+  --surface-light: #0e2c20;
+  --surface-lighter: #143828;
+  --border: rgba(201,162,39,0.12);
+  --border-focus: #c9a227;
+  --text-primary: #e6e2cf;
+  --text-secondary: #9bb39a;
+  --text-muted: #56705c;
+  --accent: #156646;
+  --accent-light: #d6b25e;
+  --accent-grad: linear-gradient(135deg, #1d7a55 0%, #0b3d2e 100%);
+  --accent-glow: rgba(201,162,39,0.10);
+  --green: #3aa97c;
+  --red: #c75050;
+  --amber: #c9a227;
+  --btn-text: #f2eedd;
+  --toggle-bg: #143828;
+  --toggle-dot: #8aa388;
+  --input-bg: #0e2c20;
 }
 
 body {
@@ -157,6 +173,18 @@ body {
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
   transition: background 0.4s ease, color 0.4s ease;
+}
+
+/* Ambient theme glow behind everything */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(50% 38% at 15% 0%, var(--glow-a), transparent 70%),
+    radial-gradient(45% 35% at 90% 100%, var(--glow-b), transparent 70%);
 }
 
 /* Hide number input spinners */
@@ -170,13 +198,14 @@ input[type="number"] {
 }
 
 input, select {
-  color-scheme: dark;
+  color-scheme: light;
   -webkit-appearance: none;
   appearance: none;
 }
-[data-theme="light"] input,
-[data-theme="light"] select {
-  color-scheme: light;
+[data-theme="dark"] input, [data-theme="dark"] select,
+[data-theme="fun"] input, [data-theme="fun"] select,
+[data-theme="retro"] input, [data-theme="retro"] select {
+  color-scheme: dark;
 }
 input::placeholder {
   color: var(--text-muted);
@@ -217,39 +246,12 @@ button, [role="button"], input, select, textarea, label {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== FUN THEME EXTRAS ===== */
-@keyframes rainbow {
-  0% { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
-}
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(224,64,251,0.12); }
-  50% { box-shadow: 0 0 16px rgba(224,64,251,0.25), 0 0 32px rgba(124,77,255,0.1); }
-}
-@keyframes pulse-glow-retro {
-  0%, 100% { box-shadow: 0 0 8px rgba(26,138,26,0.15); }
-  50% { box-shadow: 0 0 16px rgba(26,138,26,0.25), 0 0 32px rgba(26,138,26,0.1); }
-}
+/* ===== THEME EXTRAS ===== */
 @keyframes shimmer {
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
 }
-@keyframes confetti-fall {
-  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(20px) rotate(360deg); opacity: 0; }
-}
 
-[data-theme="fun"] .fun-card {
-  background: linear-gradient(135deg, #10081c 0%, #0a0014 100%);
-  border-color: rgba(224,64,251,0.08);
-  transition: all 0.3s ease;
-}
-[data-theme="fun"] .fun-card:hover {
-  border-color: rgba(224,64,251,0.15);
-}
-[data-theme="fun"] .fun-glow-btn {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
 [data-theme="fun"] .fun-rainbow {
   background: linear-gradient(90deg, #e040fb, #7c4dff, #00e5a0, #e040fb);
   background-size: 200% auto;
@@ -258,35 +260,12 @@ button, [role="button"], input, select, textarea, label {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-[data-theme="fun"] .fun-amount {
-  background: linear-gradient(90deg, #00e5a0, #00ffbb);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
 
-/* ===== RETRO THEME EXTRAS ===== */
-[data-theme="retro"] .fun-card {
-  background: linear-gradient(135deg, #0e180e 0%, #0a120a 100%);
-  border-color: rgba(26,138,26,0.1);
-  transition: all 0.3s ease;
-}
-[data-theme="retro"] .fun-card:hover {
-  border-color: rgba(26,138,26,0.2);
-}
-[data-theme="retro"] .fun-glow-btn {
-  animation: pulse-glow-retro 2s ease-in-out infinite;
-}
+/* Retro: slow green-to-gold shimmer on the title */
 [data-theme="retro"] .fun-rainbow {
-  background: linear-gradient(90deg, #40b840, #d09020, #40b840);
+  background: linear-gradient(90deg, #3aa97c, #d6b25e, #3aa97c);
   background-size: 200% auto;
-  animation: shimmer 5s linear infinite;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-[data-theme="retro"] .fun-amount {
-  background: linear-gradient(90deg, #2aa82a, #40b840);
+  animation: shimmer 6s linear infinite;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

@@ -2,9 +2,9 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const ThemeContext = createContext()
 
-const THEMES = ['fun', 'light', 'dark', 'retro']
-const THEME_LABELS = { dark: 'Dark', light: 'Light', fun: 'Fun', retro: 'Retro' }
-const THEME_BG = { dark: '#060810', light: '#f4f5f7', fun: '#0a0010', retro: '#0a100a' }
+const THEMES = ['light', 'dark', 'fun', 'retro']
+const THEME_LABELS = { light: 'Light', dark: 'Dark', fun: 'Fun', retro: 'Retro' }
+const THEME_BG = { light: '#f4f4f5', dark: '#05080f', fun: '#08000f', retro: '#04130d' }
 const ThemeIcon = ({ theme }) => {
   const cls = "w-3.5 h-3.5"
   if (theme === 'dark') return (
@@ -31,7 +31,7 @@ const ThemeIcon = ({ theme }) => {
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
-    try { return localStorage.getItem('tc-theme') || 'fun' } catch { return 'fun' }
+    try { return localStorage.getItem('tc-theme') || 'light' } catch { return 'light' }
   })
   const [density, setDensity] = useState(() => {
     try { return localStorage.getItem('tc-density') || 'default' } catch { return 'default' }
@@ -41,7 +41,7 @@ export function ThemeProvider({ children }) {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('tc-theme', theme)
     // Keep the browser/PWA chrome color in sync with the theme background
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_BG[theme] || '#060810')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_BG[theme] || '#f4f4f5')
   }, [theme])
 
   useEffect(() => {

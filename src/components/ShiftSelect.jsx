@@ -23,7 +23,7 @@ export default function ShiftSelect({ value, onChange }) {
       role="group"
       aria-label="Shift"
       className="flex items-center gap-0.5 p-0.5 rounded-lg w-full"
-      style={{ background: 'var(--surface-lighter)' }}
+      style={{ background: 'var(--surface-light)', border: '1px solid var(--border)' }}
     >
       {SHIFTS.map(s => {
         const active = (value || 'none') === s.value
@@ -35,7 +35,7 @@ export default function ShiftSelect({ value, onChange }) {
             title={s.label}
             className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-app-xs font-semibold uppercase tracking-wide transition-all duration-150 active:scale-95"
             style={{
-              background: active ? 'var(--accent)' : 'transparent',
+              background: active ? 'var(--accent-grad)' : 'transparent',
               color: active ? 'var(--btn-text)' : 'var(--text-muted)',
             }}
           >

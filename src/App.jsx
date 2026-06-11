@@ -200,7 +200,7 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
           >
             {tab === t && (
               <div className="absolute top-0 left-1/4 right-1/4 h-0.5 rounded-full"
-                style={{ background: 'var(--accent)' }} />
+                style={{ background: 'var(--accent-grad)' }} />
             )}
             <TabIcon name={t} active={tab === t} />
             {t}
@@ -242,7 +242,7 @@ function PasswordGate({ password, onUnlock, title, fullScreen }) {
 
   return (
     <div className="flex flex-col items-center justify-center px-6 max-w-lg mx-auto"
-      style={{ height: fullScreen ? '100svh' : '100%', background: 'var(--bg)' }}>
+      style={{ height: fullScreen ? '100svh' : '100%' }}>
       <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
         style={{ background: 'var(--surface-lighter)' }}>
         <svg className="w-5 h-5" style={{ color: 'var(--text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -269,7 +269,7 @@ function PasswordGate({ password, onUnlock, title, fullScreen }) {
         <button type="submit"
           disabled={lockSeconds > 0}
           className="px-5 py-[var(--control-py)] active:scale-95 rounded-lg font-semibold text-app-base transition-all duration-150"
-          style={{ background: 'var(--accent)', color: 'var(--btn-text)', opacity: lockSeconds > 0 ? 0.5 : 1 }}>
+          style={{ background: 'var(--accent-grad)', color: 'var(--btn-text)', opacity: lockSeconds > 0 ? 0.5 : 1 }}>
           {lockSeconds > 0 ? lockSeconds : 'Go'}
         </button>
       </form>

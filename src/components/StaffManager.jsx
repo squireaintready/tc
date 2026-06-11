@@ -5,9 +5,9 @@ import { DEFAULT_PERCENTAGES } from '../utils/constants'
 function Divider({ label }) {
   return (
     <div className="my-1.5 flex items-center gap-2">
-      <div className="flex-1 h-px" style={{ background: 'var(--surface-light)' }} />
+      <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
       <span className="text-app-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>{label}</span>
-      <div className="flex-1 h-px" style={{ background: 'var(--surface-light)' }} />
+      <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
     </div>
   )
 }
@@ -19,7 +19,7 @@ function StaffChip({ emp, selected, onTap }) {
       aria-pressed={selected}
       className="px-3 py-[var(--chip-py)] rounded-lg text-app-base font-medium transition-all duration-150 active:scale-95 select-none"
       style={{
-        background: selected ? 'var(--accent)' : 'var(--surface-lighter)',
+        background: selected ? 'var(--accent-grad)' : 'var(--surface-lighter)',
         color: selected ? 'var(--btn-text)' : 'var(--text-secondary)',
       }}
     >
@@ -308,7 +308,7 @@ export default function StaffManager() {
             onClick={handleAdd}
             disabled={!newName.trim()}
             className="w-full py-[var(--control-py)] rounded-lg font-semibold text-app-base transition-all active:scale-[0.98] disabled:opacity-30"
-            style={{ background: 'var(--accent)', color: 'var(--btn-text)' }}
+            style={{ background: 'var(--accent-grad)', color: 'var(--btn-text)' }}
           >
             Add
           </button>
