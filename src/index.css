@@ -59,112 +59,112 @@
 }
 
 /* ===== THEME VARIABLES ===== */
-/* Light is the default theme — clean, neutral, crisp (Notion/Linear feel) */
+/* Light (default) — clean neutral structure, indigo primary, emerald money, amber warnings */
 :root, [data-theme="light"] {
   --bg: #f4f4f5;
-  --glow-a: rgba(0,0,0,0);
-  --glow-b: rgba(0,0,0,0);
+  --glow-a: rgba(99,102,241,0.07);
+  --glow-b: rgba(16,185,129,0.05);
   --surface: #ffffff;
   --surface-flat: #ffffff;
   --surface-light: #f4f4f5;
   --surface-lighter: #ffffff;
   --border: rgba(24,24,27,0.08);
-  --border-focus: #18181b;
-  --text-primary: #18181b;
-  --text-secondary: #52525b;
-  --text-muted: #a1a1aa;
-  --accent: #18181b;
-  --accent-light: #18181b;
-  --accent-grad: linear-gradient(135deg, #3f3f46 0%, #09090b 100%);
-  --accent-glow: rgba(0,0,0,0);
-  --green: #15803d;
+  --border-focus: #4f46e5;
+  --text-primary: #1c1c21;
+  --text-secondary: #54545e;
+  --text-muted: #a2a2ab;
+  --accent: #4f46e5;
+  --accent-light: #4f46e5;
+  --accent-grad: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  --accent-glow: rgba(99,102,241,0.10);
+  --green: #059669;
   --red: #dc2626;
-  --amber: #b45309;
-  --btn-text: #fafafa;
+  --amber: #d97706;
+  --btn-text: #ffffff;
   --toggle-bg: #e4e4e7;
   --toggle-dot: #ffffff;
   --input-bg: #ffffff;
 }
 
-/* Dark — deep cool navy, modern blue */
+/* Dark — neutral navy structure, sky-to-indigo primary, mint money, warm amber */
 [data-theme="dark"] {
-  --bg: #05080f;
-  --glow-a: rgba(59,130,246,0.10);
-  --glow-b: rgba(99,102,241,0.08);
-  --surface: linear-gradient(135deg, #0b1322 0%, #070d18 100%);
-  --surface-flat: #0b1322;
-  --surface-light: #101b30;
-  --surface-lighter: #15233c;
-  --border: rgba(96,156,224,0.10);
-  --border-focus: #3b82f6;
-  --text-primary: #d2deee;
-  --text-secondary: #7d93b2;
-  --text-muted: #46587a;
-  --accent: #2f7ddd;
-  --accent-light: #5ea0f2;
-  --accent-grad: linear-gradient(135deg, #3b82f6 0%, #4338ca 100%);
-  --accent-glow: rgba(59,130,246,0.12);
-  --green: #2fb380;
-  --red: #e05c5c;
-  --amber: #d4a72c;
-  --btn-text: #eef5ff;
-  --toggle-bg: #15233c;
-  --toggle-dot: #8fa9c8;
-  --input-bg: #101b30;
+  --bg: #060912;
+  --glow-a: rgba(56,189,248,0.10);
+  --glow-b: rgba(139,92,246,0.09);
+  --surface: linear-gradient(135deg, #0d1524 0%, #080e1a 100%);
+  --surface-flat: #0d1524;
+  --surface-light: #121d31;
+  --surface-lighter: #182640;
+  --border: rgba(125,165,220,0.10);
+  --border-focus: #38bdf8;
+  --text-primary: #dde5f0;
+  --text-secondary: #8696ad;
+  --text-muted: #4d5b73;
+  --accent: #3d8bfd;
+  --accent-light: #5fb2f6;
+  --accent-grad: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+  --accent-glow: rgba(56,189,248,0.12);
+  --green: #34d399;
+  --red: #f87171;
+  --amber: #fbbf24;
+  --btn-text: #f4f9ff;
+  --toggle-bg: #182640;
+  --toggle-dot: #93a8c4;
+  --input-bg: #121d31;
 }
 
-/* Fun — neon party purple/magenta */
+/* Fun — genz party: pink primary, violet gradient, cyan secondary, teal money */
 [data-theme="fun"] {
-  --bg: #08000f;
-  --glow-a: rgba(224,64,251,0.16);
-  --glow-b: rgba(124,77,255,0.15);
-  --surface: linear-gradient(135deg, #150a28 0%, #0d0418 100%);
-  --surface-flat: #150a28;
-  --surface-light: #1c1033;
-  --surface-lighter: #251743;
-  --border: rgba(224,64,251,0.12);
-  --border-focus: #e040fb;
-  --text-primary: #f5ecff;
-  --text-secondary: #c9b0e8;
-  --text-muted: #7e64a3;
-  --accent: #d935f0;
-  --accent-light: #c084fc;
-  --accent-grad: linear-gradient(135deg, #e040fb 0%, #7c4dff 100%);
-  --accent-glow: rgba(224,64,251,0.2);
+  --bg: #0b0214;
+  --glow-a: rgba(236,72,153,0.16);
+  --glow-b: rgba(34,211,238,0.11);
+  --surface: linear-gradient(135deg, #170b2b 0%, #0f051c 100%);
+  --surface-flat: #170b2b;
+  --surface-light: #1f1138;
+  --surface-lighter: #281949;
+  --border: rgba(236,72,153,0.12);
+  --border-focus: #ec4899;
+  --text-primary: #f6eeff;
+  --text-secondary: #c9b2e6;
+  --text-muted: #7f66a4;
+  --accent: #ec4899;
+  --accent-light: #22d3ee;
+  --accent-grad: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  --accent-glow: rgba(236,72,153,0.2);
   --green: #00e5a0;
-  --red: #ff4081;
-  --amber: #ffb74d;
+  --red: #fb7185;
+  --amber: #fbbf24;
   --btn-text: #ffffff;
-  --toggle-bg: #251743;
+  --toggle-bg: #281949;
   --toggle-dot: #b389dd;
-  --input-bg: #1c1033;
+  --input-bg: #1f1138;
 }
 
-/* Retro — deep emerald + champagne gold, luxury finance */
+/* Retro — luxury finance: warm charcoal, emerald primary, champagne gold, cream text */
 [data-theme="retro"] {
-  --bg: #04130d;
-  --glow-a: rgba(22,101,72,0.22);
-  --glow-b: rgba(201,162,39,0.07);
-  --surface: linear-gradient(135deg, #0a241a 0%, #061a12 100%);
-  --surface-flat: #0a241a;
-  --surface-light: #0e2c20;
-  --surface-lighter: #143828;
-  --border: rgba(201,162,39,0.12);
-  --border-focus: #c9a227;
-  --text-primary: #e6e2cf;
-  --text-secondary: #9bb39a;
-  --text-muted: #56705c;
-  --accent: #156646;
-  --accent-light: #d6b25e;
-  --accent-grad: linear-gradient(135deg, #1d7a55 0%, #0b3d2e 100%);
-  --accent-glow: rgba(201,162,39,0.10);
-  --green: #3aa97c;
-  --red: #c75050;
-  --amber: #c9a227;
-  --btn-text: #f2eedd;
-  --toggle-bg: #143828;
-  --toggle-dot: #8aa388;
-  --input-bg: #0e2c20;
+  --bg: #0a0f0b;
+  --glow-a: rgba(20,120,80,0.16);
+  --glow-b: rgba(212,175,55,0.08);
+  --surface: linear-gradient(135deg, #121a14 0%, #0c130e 100%);
+  --surface-flat: #121a14;
+  --surface-light: #18231a;
+  --surface-lighter: #1e2d22;
+  --border: rgba(212,175,55,0.14);
+  --border-focus: #d4af37;
+  --text-primary: #e9e4d0;
+  --text-secondary: #a3b39a;
+  --text-muted: #5d6f5e;
+  --accent: #177a52;
+  --accent-light: #d4af37;
+  --accent-grad: linear-gradient(135deg, #1e8e60 0%, #0d4f37 100%);
+  --accent-glow: rgba(212,175,55,0.10);
+  --green: #2eb086;
+  --red: #c4564f;
+  --amber: #d4af37;
+  --btn-text: #f3efdf;
+  --toggle-bg: #1e2d22;
+  --toggle-dot: #93a98c;
+  --input-bg: #18231a;
 }
 
 body {
@@ -253,7 +253,7 @@ button, [role="button"], input, select, textarea, label {
 }
 
 [data-theme="fun"] .fun-rainbow {
-  background: linear-gradient(90deg, #e040fb, #7c4dff, #00e5a0, #e040fb);
+  background: linear-gradient(90deg, #ec4899, #8b5cf6, #22d3ee, #ec4899);
   background-size: 200% auto;
   animation: shimmer 5s linear infinite;
   -webkit-background-clip: text;
@@ -263,7 +263,7 @@ button, [role="button"], input, select, textarea, label {
 
 /* Retro: slow green-to-gold shimmer on the title */
 [data-theme="retro"] .fun-rainbow {
-  background: linear-gradient(90deg, #3aa97c, #d6b25e, #3aa97c);
+  background: linear-gradient(90deg, #2eb086, #d4af37, #2eb086);
   background-size: 200% auto;
   animation: shimmer 6s linear infinite;
   -webkit-background-clip: text;

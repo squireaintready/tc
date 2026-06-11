@@ -4,7 +4,7 @@ const ThemeContext = createContext()
 
 const THEMES = ['light', 'dark', 'fun', 'retro']
 const THEME_LABELS = { light: 'Light', dark: 'Dark', fun: 'Fun', retro: 'Retro' }
-const THEME_BG = { light: '#f4f4f5', dark: '#05080f', fun: '#08000f', retro: '#04130d' }
+const THEME_BG = { light: '#f4f4f5', dark: '#060912', fun: '#0b0214', retro: '#0a0f0b' }
 const ThemeIcon = ({ theme }) => {
   const cls = "w-3.5 h-3.5"
   if (theme === 'dark') return (

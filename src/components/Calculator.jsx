@@ -310,6 +310,15 @@ export default function Calculator({ onSaveHistory, history }) {
             {/* Servers */}
             <div>
               <div className="my-1.5 flex items-center gap-2">
+                <button onClick={toggleAllServers}
+                  title="Toggle all servers on or off"
+                  className={`${T.label} font-semibold px-1.5 py-1 rounded transition-all active:scale-95`}
+                  style={{ color: 'var(--accent-light)' }}>
+                  {fullServers.every(s => enabledStaff[s.id]) ? 'None' : 'All'}
+                </button>
+                <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+                <span className={`${T.label} font-semibold uppercase tracking-wider`} style={{ color: 'var(--text-muted)' }}>Servers</span>
+                <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
                 {history && history.length > 0 && (
                   <button
                     onClick={() => setShowLoadSetup(!showLoadSetup)}
@@ -325,15 +334,6 @@ export default function Calculator({ onSaveHistory, history }) {
                     </svg>
                   </button>
                 )}
-                <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-                <span className={`${T.label} font-semibold uppercase tracking-wider`} style={{ color: 'var(--text-muted)' }}>Servers</span>
-                <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-                <button onClick={toggleAllServers}
-                  title="Toggle all servers on or off"
-                  className={`${T.label} font-semibold px-1.5 py-1 rounded transition-all active:scale-95`}
-                  style={{ color: 'var(--accent-light)' }}>
-                  {fullServers.every(s => enabledStaff[s.id]) ? 'None' : 'All'}
-                </button>
               </div>
               {history && history.length > 0 && (
                 <div className={`overflow-hidden transition-all duration-300 ${showLoadSetup ? 'max-h-[250px] opacity-100' : 'max-h-0 opacity-0'}`}>
