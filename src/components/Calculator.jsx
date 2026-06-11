@@ -258,8 +258,7 @@ export default function Calculator({ onSaveHistory, history }) {
             <div>
               <div className="flex items-stretch gap-2">
                 <div className="relative flex-1">
-                  <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${T.input} font-bold z-10`}
-                    style={{ color: 'var(--text-secondary)' }}>$</span>
+                  <span className={`tip-currency absolute left-3 top-1/2 -translate-y-1/2 ${T.input} font-bold z-10`}>$</span>
                   <input
                     ref={tipsInputRef}
                     type="text"
@@ -276,8 +275,7 @@ export default function Calculator({ onSaveHistory, history }) {
                     onKeyDown={e => { if (e.key === 'Enter') calculate() }}
                     placeholder="0"
                     aria-label="Total tips in dollars"
-                    className={`w-full pl-8 pr-3 py-[var(--control-py)] ${T.input} font-bold rounded-lg focus:outline-none`}
-                    style={{ background: 'var(--surface-lighter)', color: 'var(--text-primary)' }}
+                    className={`tip-input w-full pl-8 pr-3 py-[var(--control-py)] ${T.input} font-bold rounded-lg focus:outline-none`}
                   />
                 </div>
                 <button

@@ -61,7 +61,7 @@
 /* ===== THEME VARIABLES ===== */
 /* Light (default) — clean neutral structure, indigo primary, emerald money, amber warnings */
 :root, [data-theme="light"] {
-  --bg: #f4f4f5;
+  --bg: #f2f2f7;
   --glow-a: rgba(99,102,241,0.05);
   --glow-b: rgba(16,185,129,0.04);
   --surface: #ffffff;
@@ -84,18 +84,18 @@
 
 /* Dark — neutral charcoal structure; blue/indigo lives in the accents only */
 [data-theme="dark"] {
-  --bg: #08090c;
-  --glow-a: rgba(56,140,248,0.06);
+  --bg: #090d14;
+  --glow-a: rgba(56,140,248,0.07);
   --glow-b: rgba(139,92,246,0.05);
-  --surface: linear-gradient(135deg, #111318 0%, #0c0e12 100%);
-  --surface-flat: #111318;
-  --surface-light: #181b22;
-  --surface-lighter: #1e222b;
-  --border: rgba(140,160,190,0.12);
+  --surface: linear-gradient(135deg, #10161f 0%, #0b1018 100%);
+  --surface-flat: #10161f;
+  --surface-light: #161e2a;
+  --surface-lighter: #1c2636;
+  --border: rgba(124,158,200,0.14);
   --border-focus: #38bdf8;
-  --text-primary: #e6e9ee;
-  --text-secondary: #9aa3b2;
-  --text-muted: #5b6372;
+  --text-primary: #e2e9f2;
+  --text-secondary: #93a3b8;
+  --text-muted: #56657c;
   --accent: #3d8bfd;
   --accent-light: #6cb0f5;
   --accent-grad: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
@@ -107,18 +107,18 @@
 
 /* Fun — neutral dark base with a violet hint; pink/violet/cyan accents carry the party */
 [data-theme="fun"] {
-  --bg: #0c0a10;
-  --glow-a: rgba(236,72,153,0.09);
-  --glow-b: rgba(34,211,238,0.06);
-  --surface: linear-gradient(135deg, #16131c 0%, #100e15 100%);
-  --surface-flat: #16131c;
-  --surface-light: #1d1926;
-  --surface-lighter: #242031;
-  --border: rgba(200,170,230,0.12);
+  --bg: #0e0a14;
+  --glow-a: rgba(236,72,153,0.10);
+  --glow-b: rgba(34,211,238,0.07);
+  --surface: linear-gradient(135deg, #181222 0%, #110d19 100%);
+  --surface-flat: #181222;
+  --surface-light: #1f1830;
+  --surface-lighter: #271e3c;
+  --border: rgba(216,180,254,0.14);
   --border-focus: #ec4899;
-  --text-primary: #efeaf6;
-  --text-secondary: #b0a6c4;
-  --text-muted: #6d6483;
+  --text-primary: #f2ecfa;
+  --text-secondary: #b6aacb;
+  --text-muted: #6f6488;
   --accent: #ec4899;
   --accent-light: #22d3ee;
   --accent-grad: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
@@ -128,27 +128,27 @@
   --btn-text: #ffffff;
 }
 
-/* Luxe — Rolex: forest green identity with deeper layer contrast, antique gold, white text */
+/* Luxe — Rolex dial: champagne-tan face, deep green controls, antique gold details */
 [data-theme="retro"] {
-  --bg: #0a1f15;
-  --glow-a: rgba(31,125,86,0.20);
-  --glow-b: rgba(200,169,81,0.10);
-  --surface: linear-gradient(135deg, #133024 0%, #0e271b 100%);
-  --surface-flat: #133024;
-  --surface-light: #173a29;
-  --surface-lighter: #1d4531;
-  --border: rgba(200,169,81,0.18);
-  --border-focus: #c8a951;
-  --text-primary: #f6f7f3;
-  --text-secondary: #bcd0c2;
-  --text-muted: #74937f;
-  --accent: #156a47;
-  --accent-light: #c8a951;
-  --accent-grad: linear-gradient(135deg, #1f7d56 0%, #0d4f36 100%);
-  --green: #d2ad55;
-  --red: #b3524c;
-  --amber: #c98a3e;
-  --btn-text: #f7f4e8;
+  --bg: #e8dfc8;
+  --glow-a: rgba(20,89,60,0.07);
+  --glow-b: rgba(176,141,61,0.12);
+  --surface: #f4eedd;
+  --surface-flat: #f4eedd;
+  --surface-light: #ece4cf;
+  --surface-lighter: #f6f1e2;
+  --border: rgba(83,63,16,0.18);
+  --border-focus: #14593c;
+  --text-primary: #233024;
+  --text-secondary: #5b6b58;
+  --text-muted: #a3a18a;
+  --accent: #14593c;
+  --accent-light: #146a47;
+  --accent-grad: linear-gradient(135deg, #1d7a52 0%, #0d4a31 100%);
+  --green: #136b45;
+  --red: #a8433d;
+  --amber: #946410;
+  --btn-text: #f7f3e3;
 }
 
 body {
@@ -188,12 +188,58 @@ input, select {
   appearance: none;
 }
 [data-theme="dark"] input, [data-theme="dark"] select,
-[data-theme="fun"] input, [data-theme="fun"] select,
-[data-theme="retro"] input, [data-theme="retro"] select {
+[data-theme="fun"] input, [data-theme="fun"] select {
   color-scheme: dark;
 }
 input::placeholder {
   color: var(--text-muted);
+}
+
+/* Tips input: the hero control — each theme renders it in its own material
+   while the rest of the canvas stays neutral */
+.tip-input {
+  background: var(--surface-lighter);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+.tip-currency {
+  color: var(--text-secondary);
+}
+
+/* Light: crisp white field with an indigo currency mark */
+[data-theme="light"] .tip-currency {
+  color: var(--accent);
+}
+
+/* Dark: deep blue panel */
+[data-theme="dark"] .tip-input {
+  background: linear-gradient(135deg, #182a4a 0%, #111d33 100%);
+  border-color: rgba(108,176,245,0.25);
+}
+[data-theme="dark"] .tip-currency {
+  color: #6cb0f5;
+}
+
+/* Fun: violet panel with a pink mark */
+[data-theme="fun"] .tip-input {
+  background: linear-gradient(135deg, #2d1644 0%, #200e33 100%);
+  border-color: rgba(236,72,153,0.3);
+}
+[data-theme="fun"] .tip-currency {
+  color: #f0abfc;
+}
+
+/* Luxe: deep green dial element with cream figures */
+[data-theme="retro"] .tip-input {
+  background: linear-gradient(135deg, #1d6243 0%, #11402c 100%);
+  border-color: rgba(176,141,61,0.45);
+  color: #f7f3e3;
+}
+[data-theme="retro"] .tip-input::placeholder {
+  color: rgba(247,243,227,0.55);
+}
+[data-theme="retro"] .tip-currency {
+  color: rgba(247,243,227,0.85);
 }
 
 * {
@@ -246,9 +292,9 @@ button, [role="button"], input, select, textarea, label {
   background-clip: text;
 }
 
-/* Luxe: white-to-gold shimmer on the title, like the white wordmark + gold crown */
+/* Luxe: deep-green-to-gold shimmer on the title (readable on the champagne face) */
 [data-theme="retro"] .fun-rainbow {
-  background: linear-gradient(90deg, #f4f6f1, #c8a951, #f4f6f1);
+  background: linear-gradient(90deg, #14593c, #a8842c, #14593c);
   background-size: 200% auto;
   animation: shimmer 6s linear infinite;
   -webkit-background-clip: text;
