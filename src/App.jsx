@@ -69,7 +69,7 @@ export default function App() {
 }
 
 function TabIcon({ name, active }) {
-  const stroke = active ? 'var(--accent-light)' : 'var(--text-secondary)'
+  const stroke = active ? 'var(--dock-active)' : 'var(--dock-text)'
   const props = { className: 'w-[18px] h-[18px]', fill: 'none', viewBox: '0 0 24 24', stroke, strokeWidth: active ? 2 : 1.6 }
   switch (name) {
     case 'Calculator': return <svg {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -189,18 +189,18 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
       </main>
 
       {/* Bottom tab bar */}
-      <nav aria-label="Main" className="shrink-0 flex" style={{ background: 'var(--surface-flat, var(--surface))', borderTop: '1px solid var(--border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav aria-label="Main" className="shrink-0 flex" style={{ background: 'var(--dock-bg)', borderTop: '1px solid var(--dock-border)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {TABS.map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
             aria-current={tab === t ? 'page' : undefined}
             className="flex-1 py-2.5 text-app-sm font-semibold transition-all duration-200 relative flex flex-col items-center gap-0.5"
-            style={{ color: tab === t ? 'var(--accent-light)' : 'var(--text-secondary)' }}
+            style={{ color: tab === t ? 'var(--dock-active)' : 'var(--dock-text)' }}
           >
             {tab === t && (
               <div className="absolute top-0 left-1/4 right-1/4 h-0.5 rounded-full"
-                style={{ background: 'var(--accent-grad)' }} />
+                style={{ background: 'var(--dock-indicator)' }} />
             )}
             <TabIcon name={t} active={tab === t} />
             {t}

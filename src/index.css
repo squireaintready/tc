@@ -80,6 +80,11 @@
   --red: #dc2626;
   --amber: #d97706;
   --btn-text: #ffffff;
+  --dock-bg: #ffffff;
+  --dock-border: var(--border);
+  --dock-text: var(--text-secondary);
+  --dock-active: var(--accent-light);
+  --dock-indicator: var(--accent-grad);
 }
 
 /* Dark — neutral charcoal structure; blue/indigo lives in the accents only */
@@ -103,6 +108,11 @@
   --red: #f87171;
   --amber: #fbbf24;
   --btn-text: #f6f9ff;
+  --dock-bg: #10161f;
+  --dock-border: var(--border);
+  --dock-text: var(--text-secondary);
+  --dock-active: var(--accent-light);
+  --dock-indicator: var(--accent-grad);
 }
 
 /* Fun — neutral dark base with a violet hint; pink/violet/cyan accents carry the party */
@@ -126,22 +136,27 @@
   --red: #fb7185;
   --amber: #fbbf24;
   --btn-text: #ffffff;
+  --dock-bg: #181222;
+  --dock-border: var(--border);
+  --dock-text: var(--text-secondary);
+  --dock-active: var(--accent-light);
+  --dock-indicator: var(--accent-grad);
 }
 
 /* Luxe — Rolex dial: champagne-tan face, deep green controls, antique gold details */
 [data-theme="retro"] {
-  --bg: #e8dfc8;
-  --glow-a: rgba(20,89,60,0.07);
-  --glow-b: rgba(176,141,61,0.12);
-  --surface: #f4eedd;
-  --surface-flat: #f4eedd;
-  --surface-light: #ece4cf;
-  --surface-lighter: #f6f1e2;
-  --border: rgba(83,63,16,0.18);
+  --bg: #cfbb93;
+  --glow-a: rgba(20,89,60,0.08);
+  --glow-b: rgba(120,86,30,0.14);
+  --surface: #e9dfc2;
+  --surface-flat: #e9dfc2;
+  --surface-light: #ded1ad;
+  --surface-lighter: #f0e8cf;
+  --border: rgba(83,63,16,0.22);
   --border-focus: #14593c;
-  --text-primary: #233024;
-  --text-secondary: #5b6b58;
-  --text-muted: #a3a18a;
+  --text-primary: #243122;
+  --text-secondary: #54624f;
+  --text-muted: #8d8568;
   --accent: #14593c;
   --accent-light: #146a47;
   --accent-grad: linear-gradient(135deg, #1d7a52 0%, #0d4a31 100%);
@@ -149,6 +164,11 @@
   --red: #a8433d;
   --amber: #946410;
   --btn-text: #f7f3e3;
+  --dock-bg: linear-gradient(180deg, #155f40 0%, #0d4530 100%);
+  --dock-border: rgba(233,200,105,0.4);
+  --dock-text: rgba(247,243,227,0.62);
+  --dock-active: #ecd084;
+  --dock-indicator: linear-gradient(90deg, #ecd084, #c8a951);
 }
 
 body {
