@@ -313,3 +313,9 @@ button, [role="button"], input, select, textarea, label {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Hide the floating reCAPTCHA v3 badge (App Check). Google's terms allow this
+   as long as the reCAPTCHA attribution is shown in the flow — it's on the
+   unlock screen (see PasswordGate). visibility:hidden, not display:none, so the
+   token still generates. */
+.grecaptcha-badge { visibility: hidden; }

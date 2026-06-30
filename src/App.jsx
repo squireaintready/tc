@@ -241,7 +241,7 @@ function PasswordGate({ password, onUnlock, title, fullScreen }) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center px-6 max-w-lg mx-auto"
+    <div className="relative flex flex-col items-center justify-center px-6 max-w-lg mx-auto"
       style={{ height: fullScreen ? '100svh' : '100%' }}>
       <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
         style={{ background: 'var(--surface-lighter)' }}>
@@ -277,6 +277,16 @@ function PasswordGate({ password, onUnlock, title, fullScreen }) {
         style={{ color: 'var(--red)', opacity: (error || lockSeconds > 0) ? 1 : 0 }}>
         {lockSeconds > 0 ? `Too many attempts. Try again in ${lockSeconds}s` : 'Wrong password'}
       </div>
+      {fullScreen && (
+        <p className="absolute inset-x-0 bottom-0 px-6 text-app-xs text-center leading-relaxed"
+          style={{ color: 'var(--text-muted)', paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
+          This site is protected by reCAPTCHA and the Google{' '}
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">Privacy Policy</a>
+          {' '}and{' '}
+          <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline">Terms of Service</a>
+          {' '}apply.
+        </p>
+      )}
     </div>
   )
 }
