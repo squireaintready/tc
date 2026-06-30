@@ -16,7 +16,7 @@ A production tips calculator used daily at a high-volume NYC restaurant. Calcula
 - **Frontend:** React, Vite, Tailwind CSS
 - **Backend:** Vercel serverless (weekly email)
 - **Hosting:** Vercel
-- **Database:** Firebase (Firestore with offline persistence)
+- **Database:** Firebase (Firestore with offline persistence), locked to the app with Firebase App Check
 
 ## Getting Started
 
@@ -27,6 +27,11 @@ npm install
 # Start development server
 npm run dev
 ```
+
+Copy `.env.example` to `.env` and fill in the values (Firebase config, App Check
+reCAPTCHA site key, and — for the weekly email — a Firestore service account and
+EmailJS keys). Firestore access is restricted to this app via App Check, so the
+serverless function authenticates with the service account.
 
 ## Why This Exists
 
