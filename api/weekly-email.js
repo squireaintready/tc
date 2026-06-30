@@ -1,8 +1,23 @@
 // Vercel serverless function — sends weekly tip summary email via EmailJS
 // Triggered by Vercel cron every Sunday at 10am EST (15:00 UTC)
 
-const FIREBASE_API_KEY = process.env.VITE_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY
-const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || 'tclife-771b9'
+import admin from 'firebase-admin'
+
+// Privileged Firestore access via a service account. The Admin SDK bypasses
+// App Check, so this keeps working after the database is locked down to the app.
+let dbInstance
+function getDb() {
+  if (!dbInstance) {
+    if (!admin.apps.length) {
+      const raw = process.env.FIREBASE_SERVICE_ACCOUNT
+      if (!raw) throw new Error('FIREBASE_SERVICE_ACCOUNT env var is not set')
+      admin.initializeApp({ credential: admin.credential.cert(JSON.parse(raw)) })
+    }
+    dbInstance = admin.firestore()
+  }
+  return dbInstance
+}
+
 const EMAILJS_SERVICE_ID = process.env.EMAILJS_SERVICE_ID
 const EMAILJS_TEMPLATE_ID = process.env.EMAILJS_TEMPLATE_ID
 const EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY
@@ -25,49 +40,15 @@ const FALLBACK_TARGET = [
   { id: 'paola', name: 'Paola', percentage: 40, role: 'server', modifiers: { altPercentage: 20, altLabel: 'Udon' } },
 ]
 
-async function fetchStaff() {
+async function fetchStaff(db) {
   try {
-    const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/staff?pageSize=100`
-    const res = await fetch(url)
-    if (!res.ok) throw new Error(`Staff fetch failed: ${res.status}`)
-    const data = await res.json()
-    if (!data.documents || data.documents.length === 0) return null
-
-    return data.documents.map(doc => {
-      const fields = doc.fields
-      const entry = {}
-      for (const [k, v] of Object.entries(fields)) {
-        entry[k] = parseFirestoreValue(v)
-      }
-      // Extract id from document path
-      const pathParts = doc.name.split('/')
-      entry.id = entry.id || pathParts[pathParts.length - 1]
-      return entry
-    })
+    const snap = await db.collection('staff').get()
+    if (snap.empty) return null
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
   } catch (err) {
     console.warn('Failed to fetch staff from Firestore:', err.message)
     return null
   }
-}
-
-function parseFirestoreValue(v) {
-  if (!v) return null
-  if ('stringValue' in v) return v.stringValue
-  if ('integerValue' in v) return Number(v.integerValue)
-  if ('doubleValue' in v) return v.doubleValue
-  if ('booleanValue' in v) return v.booleanValue
-  if ('nullValue' in v) return null
-  if ('mapValue' in v) {
-    const obj = {}
-    for (const [k, mv] of Object.entries(v.mapValue.fields || {})) {
-      obj[k] = parseFirestoreValue(mv)
-    }
-    return obj
-  }
-  if ('arrayValue' in v) {
-    return (v.arrayValue.values || []).map(parseFirestoreValue)
-  }
-  return null
 }
 
 function getWeekRange() {
@@ -114,22 +95,10 @@ function getEmployeePay(entry, employeeId, staffRoster) {
   return group ? group.perPerson : null
 }
 
-async function fetchHistory(start, end) {
-  const url = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/history?pageSize=100`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`Firestore fetch failed: ${res.status}`)
-  const data = await res.json()
-  if (!data.documents) return []
-
-  return data.documents
-    .map(doc => {
-      const fields = doc.fields
-      const entry = {}
-      for (const [k, v] of Object.entries(fields)) {
-        entry[k] = parseFirestoreValue(v)
-      }
-      return entry
-    })
+async function fetchHistory(db, start, end) {
+  const snap = await db.collection('history').get()
+  return snap.docs
+    .map(doc => ({ id: doc.id, ...doc.data() }))
     .filter(h => {
       const d = new Date(h.date)
       return d >= start && d <= end
@@ -206,15 +175,13 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'EmailJS not configured. Set EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY env vars.' })
     }
 
+    const db = getDb()
+
     let recipientEmail = RECIPIENT_EMAIL || req.query?.email
     if (!recipientEmail) {
       try {
-        const settingsUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/settings/weekly-email`
-        const settingsRes = await fetch(settingsUrl)
-        if (settingsRes.ok) {
-          const settingsData = await settingsRes.json()
-          recipientEmail = settingsData.fields?.email?.stringValue
-        }
+        const settingsSnap = await db.collection('settings').doc('weekly-email').get()
+        if (settingsSnap.exists) recipientEmail = settingsSnap.data()?.email
       } catch {}
     }
     if (!recipientEmail) {
@@ -222,7 +189,7 @@ export default async function handler(req, res) {
     }
 
     // Fetch dynamic staff roster from Firestore, fall back to hardcoded
-    const firestoreStaff = await fetchStaff()
+    const firestoreStaff = await fetchStaff(db)
     const staffRoster = firestoreStaff || FALLBACK_TARGET
     const target = staffRoster
       .filter(s => s.active !== false && (s.id === 'sam' || s.role === 'busboy' || s.role === 'other' || s.modifiers?.altPercentage))
@@ -233,7 +200,7 @@ export default async function handler(req, res) {
     const opts = { month: 'short', day: 'numeric' }
     const weekLabel = `${start.toLocaleDateString('en-US', opts)} – ${end.toLocaleDateString('en-US', opts)}, ${end.getFullYear()}`
 
-    const history = await fetchHistory(start, end)
+    const history = await fetchHistory(db, start, end)
     const grid = buildGrid(history, target, staffRoster)
     const htmlContent = gridToHtml(grid, weekLabel, target)
     const textContent = gridToText(grid, weekLabel, target)
