@@ -3,6 +3,7 @@ import Calculator from './components/Calculator'
 import History from './components/History'
 import WeeklySummary from './components/WeeklySummary'
 import StaffManager from './components/StaffManager'
+import VersusCard, { VERSUS_DAY_KEY, todayKey } from './components/VersusCard'
 import { db } from './firebase'
 import {
   collection, addDoc, deleteDoc, doc, updateDoc,
@@ -52,6 +53,17 @@ export default function App() {
   const [historyUnlocked, setHistoryUnlocked] = useState(() => {
     try { return localStorage.getItem('tc-history-auth') === 'true' } catch { return false }
   })
+  // The daily "who's more gay?" poll — shows once per day, right after unlock
+  const [versusDone, setVersusDone] = useState(() => {
+    try { return localStorage.getItem(VERSUS_DAY_KEY) === todayKey() } catch { return true }
+  })
+  const finishVersus = () => {
+    setVersusDone(true)
+    try { localStorage.setItem(VERSUS_DAY_KEY, todayKey()) } catch {}
+  }
+
+  // Covers return visits (already unlocked) — including while the poll is up
+  useEffect(() => { if (siteUnlocked) playStartupSound() }, [siteUnlocked])
 
   const unlockSite = () => {
     setSiteUnlocked(true)
@@ -64,6 +76,7 @@ export default function App() {
   }
 
   if (!siteUnlocked) return <SiteLock onUnlock={unlockSite} />
+  if (!versusDone) return <VersusCard onDone={finishVersus} />
 
   return <AppInner historyUnlocked={historyUnlocked} onUnlockHistory={unlockHistory} />
 }

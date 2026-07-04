@@ -18,6 +18,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        // Include images so the daily poll portraits work offline
+        globPatterns: ['**/*.{js,css,html,jpg,png}'],
+      },
       manifest: {
         id: '/',
         name: 'Tips Calculator',
