@@ -163,6 +163,22 @@
   --dock-indicator: linear-gradient(90deg, #ecd084, #c8a951);
 }
 
+/* Versus poll backdrop: the blurred selfie sits behind a theme-tinted scrim —
+   strongest at the top/bottom where the text and button live, lighter in the
+   middle so the photo peeks through around the cards */
+:root, [data-theme="light"] {
+  --versus-scrim: linear-gradient(to bottom, rgba(242,242,247,0.94) 0%, rgba(242,242,247,0.72) 45%, rgba(242,242,247,0.94) 100%);
+}
+[data-theme="dark"] {
+  --versus-scrim: linear-gradient(to bottom, rgba(9,13,20,0.92) 0%, rgba(9,13,20,0.66) 45%, rgba(9,13,20,0.94) 100%);
+}
+[data-theme="fun"] {
+  --versus-scrim: linear-gradient(to bottom, rgba(14,10,20,0.92) 0%, rgba(31,17,46,0.64) 45%, rgba(14,10,20,0.94) 100%);
+}
+[data-theme="retro"] {
+  --versus-scrim: linear-gradient(to bottom, rgba(207,187,147,0.93) 0%, rgba(207,187,147,0.7) 45%, rgba(207,187,147,0.94) 100%);
+}
+
 body {
   -webkit-tap-highlight-color: transparent;
   background: var(--bg);

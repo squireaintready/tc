@@ -71,11 +71,17 @@ export default function VersusCard({ onDone }) {
   const leader = tally.a === tally.b ? null : (tally.a > tally.b ? 'a' : 'b')
 
   return (
-    <div className="flex flex-col max-w-lg mx-auto px-5 animate-[fadeIn_0.35s_ease]"
+    <div className="relative overflow-hidden flex flex-col max-w-lg mx-auto px-5 animate-[fadeIn_0.35s_ease]"
       style={{ height: '100svh', paddingTop: 'calc(env(safe-area-inset-top) + 12px)', paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
 
+      {/* Backdrop: pre-blurred selfie (blur baked into the 15KB asset — no
+          runtime filter cost) under a theme-tinted scrim */}
+      <img src="/versus-bg.jpg" alt="" aria-hidden="true" width="540" height="720" decoding="async"
+        className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none" draggable="false" />
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ background: 'var(--versus-scrim)' }} />
+
       {/* Header: eyebrow + skip */}
-      <div className="shrink-0 flex items-center justify-between">
+      <div className="relative shrink-0 flex items-center justify-between">
         <span className="text-app-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
           Question of the day
         </span>
@@ -87,7 +93,7 @@ export default function VersusCard({ onDone }) {
       </div>
 
       {/* Centered content */}
-      <div className="flex-1 min-h-0 flex flex-col justify-center gap-5">
+      <div className="relative flex-1 min-h-0 flex flex-col justify-center gap-5">
         <h2 className="text-center font-bold tracking-tight" style={{ color: 'var(--text-primary)', fontSize: '26px', lineHeight: 1.15 }}>
           Who&rsquo;s more gay?
         </h2>
@@ -150,7 +156,7 @@ export default function VersusCard({ onDone }) {
       </div>
 
       {/* Continue — appears after the vote */}
-      <div className="shrink-0 pt-2" style={{ minHeight: 64 }}>
+      <div className="relative shrink-0 pt-2" style={{ minHeight: 64 }}>
         {picked && (
           <button onClick={onDone}
             className="w-full py-[var(--btn-py)] rounded-xl font-semibold text-app-lg active:scale-[0.98] transition-transform animate-[popIn_0.35s_ease_both]"
