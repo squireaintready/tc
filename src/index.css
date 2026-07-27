@@ -163,20 +163,32 @@
   --dock-indicator: linear-gradient(90deg, #ecd084, #c8a951);
 }
 
-/* Versus poll backdrop: the blurred selfie sits behind a theme-tinted scrim —
-   strongest at the top/bottom where the text and button live, lighter in the
-   middle so the photo peeks through around the cards */
-:root, [data-theme="light"] {
-  --versus-scrim: linear-gradient(to bottom, rgba(242,242,247,0.94) 0%, rgba(242,242,247,0.72) 45%, rgba(242,242,247,0.94) 100%);
+/* App shell / device frame.
+   Phones (default): the app fills the viewport — mobile-first, unchanged.
+   Wider screens: center the app and cap its height so it reads as an
+   intentional app window instead of a tall column stretched edge-to-edge. */
+.app-shell {
+  height: 100svh;
+  width: 100%;
 }
-[data-theme="dark"] {
-  --versus-scrim: linear-gradient(to bottom, rgba(9,13,20,0.92) 0%, rgba(9,13,20,0.66) 45%, rgba(9,13,20,0.94) 100%);
+.app-frame {
+  height: 100svh;
 }
-[data-theme="fun"] {
-  --versus-scrim: linear-gradient(to bottom, rgba(14,10,20,0.92) 0%, rgba(31,17,46,0.64) 45%, rgba(14,10,20,0.94) 100%);
-}
-[data-theme="retro"] {
-  --versus-scrim: linear-gradient(to bottom, rgba(207,187,147,0.93) 0%, rgba(207,187,147,0.7) 45%, rgba(207,187,147,0.94) 100%);
+@media (min-width: 700px) {
+  .app-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+  }
+  .app-frame {
+    height: min(calc(100svh - 56px), 900px);
+    border: 1px solid var(--border);
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: 0 30px 70px -28px rgba(0, 0, 0, 0.32),
+                0 8px 24px -16px rgba(0, 0, 0, 0.20);
+  }
 }
 
 body {
@@ -303,16 +315,6 @@ button, [role="button"], input, select, textarea, label {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes crownDrop {
-  from { opacity: 0; transform: translateY(-16px) rotate(-30deg) scale(0.5); }
-  to { opacity: 1; transform: translateY(0) rotate(-12deg) scale(1); }
-}
-
-@keyframes popIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
 }
 
 /* ===== THEME EXTRAS ===== */

@@ -3,7 +3,6 @@ import Calculator from './components/Calculator'
 import History from './components/History'
 import WeeklySummary from './components/WeeklySummary'
 import StaffManager from './components/StaffManager'
-import VersusCard, { VERSUS_DAY_KEY, todayKey } from './components/VersusCard'
 import { db } from './firebase'
 import {
   collection, addDoc, deleteDoc, doc, updateDoc,
@@ -53,16 +52,8 @@ export default function App() {
   const [historyUnlocked, setHistoryUnlocked] = useState(() => {
     try { return localStorage.getItem('tc-history-auth') === 'true' } catch { return false }
   })
-  // The daily "who's more gay?" poll — shows once per day, right after unlock
-  const [versusDone, setVersusDone] = useState(() => {
-    try { return localStorage.getItem(VERSUS_DAY_KEY) === todayKey() } catch { return true }
-  })
-  const finishVersus = () => {
-    setVersusDone(true)
-    try { localStorage.setItem(VERSUS_DAY_KEY, todayKey()) } catch {}
-  }
 
-  // Covers return visits (already unlocked) — including while the poll is up
+  // Covers return visits (already unlocked)
   useEffect(() => { if (siteUnlocked) playStartupSound() }, [siteUnlocked])
 
   const unlockSite = () => {
@@ -75,10 +66,26 @@ export default function App() {
     localStorage.setItem('tc-history-auth', 'true')
   }
 
-  if (!siteUnlocked) return <SiteLock onUnlock={unlockSite} />
-  if (!versusDone) return <VersusCard onDone={finishVersus} />
+  if (!siteUnlocked) return <Shell><SiteLock onUnlock={unlockSite} /></Shell>
 
-  return <AppInner historyUnlocked={historyUnlocked} onUnlockHistory={unlockHistory} />
+  return (
+    <Shell>
+      <AppInner historyUnlocked={historyUnlocked} onUnlockHistory={unlockHistory} />
+    </Shell>
+  )
+}
+
+// App shell: full-bleed on phones (mobile-first); on wider screens the app sits
+// in a centered, capped device frame so desktop doesn't stretch into a tall,
+// empty strip.
+function Shell({ children }) {
+  return (
+    <div className="app-shell">
+      <div className="app-frame flex flex-col w-full max-w-lg mx-auto">
+        {children}
+      </div>
+    </div>
+  )
 }
 
 function TabIcon({ name, active }) {
@@ -162,7 +169,7 @@ function AppInner({ historyUnlocked, onUnlockHistory }) {
   }
 
   return (
-    <div className="flex flex-col max-w-lg mx-auto" style={{ height: '100svh' }}>
+    <div className="flex flex-col h-full">
       {/* Minimal header */}
       <header className="shrink-0 px-4 pb-2 flex items-center justify-between"
         style={{ paddingTop: 'calc(env(safe-area-inset-top) + 8px)' }}>
@@ -255,7 +262,7 @@ function PasswordGate({ password, onUnlock, title, fullScreen }) {
 
   return (
     <div className="relative flex flex-col items-center justify-center px-6 max-w-lg mx-auto"
-      style={{ height: fullScreen ? '100svh' : '100%' }}>
+      style={{ height: '100%' }}>
       <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
         style={{ background: 'var(--surface-lighter)' }}>
         <svg className="w-5 h-5" style={{ color: 'var(--text-muted)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -305,7 +312,7 @@ function PasswordGate({ password, onUnlock, title, fullScreen }) {
 }
 
 function SiteLock({ onUnlock }) {
-  return <PasswordGate password={import.meta.env.VITE_SITE_PASSWORD} onUnlock={onUnlock} title="Enter Password" fullScreen />
+  return <PasswordGate password="choad" onUnlock={onUnlock} title="Enter Password" fullScreen />
 }
 
 function HistoryLock({ onUnlock, title = 'Password' }) {
